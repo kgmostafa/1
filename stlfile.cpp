@@ -1,5 +1,5 @@
 #include "stlfile.h"
-#include <iostream>
+
 STLFile::STLFile(const QString &name) :
     _min(), _max() {
     _name = name;
@@ -25,21 +25,17 @@ std::vector<Triangle> STLFile::decode(qint32 &n) {
 
     std::vector<Triangle> t;
 
-
-    // TODO: Check if QDataStream is more fast than QFile
+//    TODO: Check if QDataStream is more fast than QFile
     char first[80];
 //    QDataStream in(&_file);
 //    in.setVersion(QDataStream::Qt_4_5);
     _file->read(first, 80);
 //    in.readRawData(first, 80);
 //    in.readRawData(nTriangles, 4);
-    std::cout << first << std::endl;
     _header = QString(first);
     _file->read(reinterpret_cast<char *>(&n), sizeof(n));
-    std::cout << n;
-    std::cout << "Number of triangles: " << QString::number(n).toStdString() << std::endl;
 
-    for(quint32 i = 0; i < n; i++) {
+    for(int i = 0; i < n; i++) {
         Vertex v[4];
         for(int j = 0; j < 4; j++) {
             float x,y,z;
@@ -69,8 +65,6 @@ std::vector<Triangle> STLFile::decode(qint32 &n) {
         t.push_back(Triangle(v[0], v[1], v[2], v[3]));
         quint16 att;
         _file->read(reinterpret_cast<char *>(&att), sizeof(att));
-        std::cout << t.back().toString().toStdString();
-        std::cout << std::endl;
     }
     return t;
 }
@@ -89,7 +83,6 @@ bool STLFile::encode(QString h, std::vector<Triangle> &t) {
     }
 
     quint32 nTriangles = t.size();
-    std::cout << nTriangles << std::endl;
     _file->write(reinterpret_cast<char *>(&nTriangles), sizeof(nTriangles));
 
     // Iterate through all triangles
@@ -106,25 +99,25 @@ bool STLFile::encode(QString h, std::vector<Triangle> &t) {
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 1
-        x = aux.getV1().getX();
-        y = aux.getV1().getY();
-        z = aux.getV1().getZ();
+        x = aux.getV1().x;//.getX();
+        y = aux.getV1().y;//.getY();
+        z = aux.getV1().z;//.getZ();
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 2
-        x = aux.getV2().getX();
-        y = aux.getV2().getY();
-        z = aux.getV2().getZ();
+        x = aux.getV2().x;//.getX();
+        y = aux.getV2().y;//getY();
+        z = aux.getV2().z;//getZ();
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 3
-        x = aux.getV3().getX();
-        y = aux.getV3().getY();
-        z = aux.getV3().getZ();
+        x = aux.getV3().x;//getX();
+        y = aux.getV3().y;//getY();
+        z = aux.getV3().z;//getZ();
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));

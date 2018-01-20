@@ -34,6 +34,7 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *pushButton;
+    QPushButton *pushButton_test;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_size;
@@ -67,6 +68,11 @@ public:
         pushButton->setObjectName(QStringLiteral("pushButton"));
 
         verticalLayout->addWidget(pushButton);
+
+        pushButton_test = new QPushButton(centralWidget);
+        pushButton_test->setObjectName(QStringLiteral("pushButton_test"));
+
+        verticalLayout->addWidget(pushButton_test);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(6);
@@ -155,6 +161,7 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Reader", nullptr));
         pushButton->setText(QApplication::translate("MainWindow", "Open", nullptr));
+        pushButton_test->setText(QApplication::translate("MainWindow", "Load a cube", nullptr));
         label->setText(QApplication::translate("MainWindow", "Quads size:", nullptr));
         lineEdit_size->setText(QApplication::translate("MainWindow", "10", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));

@@ -1,4 +1,5 @@
 #include "vertex.h"
+#include <iostream>
 
 Vertex::Vertex() {
     this->set(0.0, 0.0, 0.0);
@@ -12,6 +13,13 @@ void Vertex::set(float x, float y, float z) {
     this->_x = x;
     this->_y = y;
     this->_z = z;
+}
+
+void Vertex::translate(float x, float y, float z) {
+    _x += x;
+    _y += y;
+    _z += z;
+    std::cout << "new Z = " << _z << std::endl;
 }
 
 float Vertex::getX() {

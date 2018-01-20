@@ -39,13 +39,15 @@ private slots:
 
     void on_pushButtonSave_clicked();
 
+    void on_pushButton_test_clicked();
+
 private:
     Ui::MainWindow *ui;
 
     void processOld();
     void processNew();
 
-    bool insideTriangle(Vertex p, Triangle t);
+    bool insideTriangle(glm::vec3 p, Triangle t);
 
     float _minZ;
     float _maxZ;

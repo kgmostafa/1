@@ -31,7 +31,9 @@ SOURCES += \
     vertex.cpp \
     stlpreview.cpp \
     utils.cpp \
-    stlfile.cpp
+    stlfile.cpp \
+    cell.cpp \
+    cube.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,7 +41,9 @@ HEADERS += \
     vertex.h \
     stlpreview.h \
     utils.h \
-    stlfile.h
+    stlfile.h \
+    cell.h \
+    cube.h
 
 FORMS += \
         mainwindow.ui

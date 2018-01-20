@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "cube.h"
 #include "triangle.h"
 #include "stlfile.h"
 #include "utils.h"
@@ -86,9 +87,6 @@ void MainWindow::processOld() {
     for (std::vector<Triangle>::iterator it = _triangs.begin() ; it != _triangs.end(); ++it) {
         Triangle t = *it;
         std::cout << "Processing...\n";
-//        float l1 = Utils::distance(t->getV1(), t->getV2());
-//        float l2 = Utils::distance(t->getV2(), t->getV3());
-//        float l3 = Utils::distance(t->getV3(), t->getV1());
 
         float minX = t.getMinX();
         float maxX = t.getMaxX();
@@ -124,9 +122,7 @@ void MainWindow::processOld() {
                 Vertex v1b(minX+(j+1+(i%2))*size, minY+(i)*size, minZ);
                 Vertex v2b(minX+(j+1+(i%2))*size, minY+(i+1)*size, minZ);
                 Vertex v3b(minX+(j+(i%2))*size, minY+(i+1)*size, minZ);
-//                Vertex v1b(minX+(j+(i%2))*size, minY+(i+1)*size, minZ);
-//                Vertex v2b(minX+(j+1+(i%2))*size, minY+(i+1)*size, minZ);
-//                Vertex v3b(minX+(j+1+(i%2))*size, minY+(i)*size, minZ);
+
                 // Square 2nd triangle
                 Triangle tnewb(v1b, v2b, v3b);
                 processed.push_back(tnewb);
@@ -150,7 +146,7 @@ void MainWindow::processNew() {
         std::cout << "Invalid input. Using size = 10mm\n";
         thickness = 10.0;
     }
-//    float thickness = 5.0; // mm
+
     int n = (_maxZ - _minZ) / thickness + 1;
     std::cout << "n slices: " << n << std::endl;
 
@@ -162,6 +158,7 @@ void MainWindow::processNew() {
 
         for (std::vector<Triangle>::iterator it = _triangs.begin() ; it != _triangs.end(); ++it) {
             Triangle t = *it;
+            // TEST:
 //            Vertex p1a(0.0, 50.0, 40.0);
 //            Vertex p2a(0.0, 60.0, 40.0);
 //            Vertex p3a(0.0, 50.0, 50.0);
@@ -176,10 +173,10 @@ void MainWindow::processNew() {
                     if((i+j)%2 == 0)
                         continue;
                     float y = _minY + (j *thickness);
-                    Vertex p1(x, y, z);
-                    Vertex p2(x, y+thickness, z);
-                    Vertex p3(x, y, z+thickness);
-                    Vertex p4(x, y+thickness, z+thickness);
+                    glm::vec3 p1(x, y, z);
+                    glm::vec3 p2(x, y+thickness, z);
+                    glm::vec3 p3(x, y, z+thickness);
+                    glm::vec3 p4(x, y+thickness, z+thickness);
                     if(insideTriangle(p1, t) && insideTriangle(p2, t) && insideTriangle(p3, t) && insideTriangle(p4, t)) {
                         // T1
                         Vertex v1a(x, y, z);
@@ -236,10 +233,10 @@ void MainWindow::processNew() {
                     if((i+j)%2 == 0)
                         continue;
                     float y = _minY + (j *thickness);
-                    Vertex p1(x, y, z);
-                    Vertex p2(x, y+thickness, z);
-                    Vertex p3(x, y, z+thickness);
-                    Vertex p4(x, y+thickness, z+thickness);
+                    glm::vec3 p1(x, y, z);
+                    glm::vec3 p2(x, y+thickness, z);
+                    glm::vec3 p3(x, y, z+thickness);
+                    glm::vec3 p4(x, y+thickness, z+thickness);
                     if(insideTriangle(p1, t) && insideTriangle(p2, t) && insideTriangle(p3, t) && insideTriangle(p4, t)) {
                         // T1
                         Vertex v1a(x, y, z);
@@ -299,15 +296,16 @@ void MainWindow::processNew() {
     ui->labelNTriangles->setText("Number of triangles: " + QString::number(_triangs.size()));
 }
 
-bool MainWindow::insideTriangle(Vertex p, Triangle t) {
-    Vertex A = t.getV1();
-    Vertex B = t.getV2();
-    Vertex C = t.getV3();
+// TODO: add reference to website that gives this pseudocode
+bool MainWindow::insideTriangle(glm::vec3 p, Triangle t) {
+    glm::vec3 A = t.getV1();
+    glm::vec3 B = t.getV2();
+    glm::vec3 C = t.getV3();
 
     // Compute vectors
-    glm::vec3 v0 = glm::vec3(C.getX(), C.getY(), C.getZ()) - glm::vec3(A.getX(), A.getY(), A.getZ());
-    glm::vec3 v1 = glm::vec3(B.getX(), B.getY(), B.getZ()) - glm::vec3(A.getX(), A.getY(), A.getZ());
-    glm::vec3 v2 = glm::vec3(p.getX(), p.getY(), p.getZ()) - glm::vec3(A.getX(), A.getY(), A.getZ());
+    glm::vec3 v0 = C - A;
+    glm::vec3 v1 = B - A;
+    glm::vec3 v2 = p - A;
 
     // Compute dot products
 
@@ -324,7 +322,6 @@ bool MainWindow::insideTriangle(Vertex p, Triangle t) {
 
     // Check if point is in triangle
     return (u >= 0) && (v >= 0) && (u + v < 1);
-
 }
 
 void MainWindow::on_checkBoxWireFrame_stateChanged(int arg1) {
@@ -341,4 +338,24 @@ void MainWindow::on_pushButtonSave_clicked() {
     STLFile stl(fileName);
     std::vector<Triangle> vec(_triangs.begin() + _nTriangles, _triangs.end());
     stl.encode(_stlHeader, vec);
+}
+
+void MainWindow::on_pushButton_test_clicked() {
+    Cube c(50.0);
+    c.scale(0.5, 1.0, 2.0);
+    // Rotation order(Z -> X -> Y)
+    c.rotateZ(15.0);
+    c.rotateX(45.0);
+    c.rotateY(60.0);
+    c.translate(25.0, 0.0, 0.0);
+    _triangs = c.getFacets();
+    _nProcessed = _triangs.size();
+    _maxXLength = 50.0;
+    _maxYLength = 50.0;
+    _maxZLength = 50.0;
+
+    ui->labelNTriangles->setText("Number of triangles: " + QString::number(_nTriangles));
+
+    // Enable save button
+    ui->pushButtonSave->setEnabled(true);
 }
