@@ -1,6 +1,8 @@
 #include "utils.h"
 #include "math.h"
 
+#include "cell.h"
+
 Utils::Utils() {
 
 }
@@ -25,6 +27,13 @@ void Utils::rotateZ(std::vector<Triangle> &t, float angle) {
 
 void Utils::translate(std::vector<Triangle> &t, float x, float y, float z) {
     for (std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
+        it->translate(x, y, z);
+    }
+}
+
+void Utils::place(Cell &c, float x, float y, float z) {
+    // TODO: translate cell to origin first
+    for (std::vector<Triangle>::iterator it = c.getFacets().begin() ; it != c.getFacets().end(); ++it) {
         it->translate(x, y, z);
     }
 }

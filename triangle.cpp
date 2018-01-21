@@ -6,18 +6,19 @@
 
 #include "triangle.h"
 
-
-
 Triangle::Triangle() {
 }
 
 
-Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3) {
+Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) {
     // TODO: add v1, v2 and v3 verifications
     // TODO: calculate normal vector
-//    this->_v[0] = v1;
-//    this->_v[1] = v2;
-//    this->_v[2] = v3;
+    this->_vec[0] = v1;
+    this->_vec[1] = v2;
+    this->_vec[2] = v3;
+}
+
+Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3) {
     this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
     this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
     this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
@@ -28,9 +29,6 @@ Triangle::Triangle(Vertex normal, Vertex v1, Vertex v2, Vertex v3) {
     // TODO: add v1, v2 and v3 verifications
     // TODO: check if this normal is correct
     this->_normal = normal;
-//    this->_v[0] = v1;
-//    this->_v[1] = v2;
-//    this->_v[2] = v3;
     this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
     this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
     this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
@@ -91,17 +89,14 @@ void Triangle::rotate(float angle, glm::vec3 normal) {
     rotMatrix = glm::rotate(rotMatrix, angle, normal);
 
     for(int i = 0; i < 3; i++) {
-    glm::vec4 vec(_vec[i], 1.0);
+        glm::vec4 vec(_vec[i], 1.0);
 
-//    std::cout << glm::to_string(vec) << std::endl;
-    vec = rotMatrix * vec;
+        vec = rotMatrix * vec;
 
-//    std::cout << glm::to_string(vec) << std::endl;
-    _vec[i].x = vec.x;
-    _vec[i].y = vec.y;
-    _vec[i].z = vec.z;
+        _vec[i].x = vec.x;
+        _vec[i].y = vec.y;
+        _vec[i].z = vec.z;
     }
-//    std::cout << "vec.w: " << vec.w << std::endl;
 
     // translate back to position?
 }
@@ -118,9 +113,6 @@ QString Triangle::toString() {
 }
 
 void Triangle::set(Vertex v1, Vertex v2, Vertex v3) {
-//    this->_v[0].set(v1.getX(), v1.getY(), v1.getZ());
-//    this->_v[1].set(v2.getX(), v2.getY(), v2.getZ());
-//    this->_v[2].set(v3.getX(), v3.getY(), v3.getZ());
     this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
     this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
     this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());

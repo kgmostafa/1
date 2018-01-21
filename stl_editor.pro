@@ -33,7 +33,8 @@ SOURCES += \
     utils.cpp \
     stlfile.cpp \
     cell.cpp \
-    cube.cpp
+    cube.cpp \
+    pyramid.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,7 +44,8 @@ HEADERS += \
     utils.h \
     stlfile.h \
     cell.h \
-    cube.h
+    cube.h \
+    pyramid.h
 
 FORMS += \
         mainwindow.ui

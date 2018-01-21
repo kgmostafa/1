@@ -11,6 +11,7 @@ class Triangle
 {
 public:
     Triangle();
+    Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3);
     Triangle(Vertex v1, Vertex v2, Vertex v3);
     Triangle(Vertex normal, Vertex v1, Vertex v2, Vertex v3);
 

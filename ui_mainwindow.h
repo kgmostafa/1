@@ -34,12 +34,25 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *pushButton;
+    QPushButton *pushButton_Process;
     QPushButton *pushButton_test;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_size;
     QLabel *label_2;
-    QPushButton *pushButton_Process;
+    QHBoxLayout *horizontalLayout_3;
+    QLabel *label_3;
+    QLineEdit *lineEdit_posX;
+    QLabel *label_6;
+    QHBoxLayout *horizontalLayout_6;
+    QLabel *label_4;
+    QLineEdit *lineEdit_posY;
+    QLabel *label_7;
+    QHBoxLayout *horizontalLayout_7;
+    QLabel *label_5;
+    QLineEdit *lineEdit_posZ;
+    QLabel *label_8;
+    QPushButton *pushButton_Place;
     QLabel *labelNTriangles;
     QLabel *labelWidthX;
     QLabel *labelWidthY;
@@ -68,6 +81,11 @@ public:
         pushButton->setObjectName(QStringLiteral("pushButton"));
 
         verticalLayout->addWidget(pushButton);
+
+        pushButton_Process = new QPushButton(centralWidget);
+        pushButton_Process->setObjectName(QStringLiteral("pushButton_Process"));
+
+        verticalLayout->addWidget(pushButton_Process);
 
         pushButton_test = new QPushButton(centralWidget);
         pushButton_test->setObjectName(QStringLiteral("pushButton_test"));
@@ -100,10 +118,79 @@ public:
 
         verticalLayout->addLayout(horizontalLayout);
 
-        pushButton_Process = new QPushButton(centralWidget);
-        pushButton_Process->setObjectName(QStringLiteral("pushButton_Process"));
+        horizontalLayout_3 = new QHBoxLayout();
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        label_3 = new QLabel(centralWidget);
+        label_3->setObjectName(QStringLiteral("label_3"));
 
-        verticalLayout->addWidget(pushButton_Process);
+        horizontalLayout_3->addWidget(label_3);
+
+        lineEdit_posX = new QLineEdit(centralWidget);
+        lineEdit_posX->setObjectName(QStringLiteral("lineEdit_posX"));
+        sizePolicy.setHeightForWidth(lineEdit_posX->sizePolicy().hasHeightForWidth());
+        lineEdit_posX->setSizePolicy(sizePolicy);
+
+        horizontalLayout_3->addWidget(lineEdit_posX);
+
+        label_6 = new QLabel(centralWidget);
+        label_6->setObjectName(QStringLiteral("label_6"));
+
+        horizontalLayout_3->addWidget(label_6);
+
+
+        verticalLayout->addLayout(horizontalLayout_3);
+
+        horizontalLayout_6 = new QHBoxLayout();
+        horizontalLayout_6->setSpacing(6);
+        horizontalLayout_6->setObjectName(QStringLiteral("horizontalLayout_6"));
+        label_4 = new QLabel(centralWidget);
+        label_4->setObjectName(QStringLiteral("label_4"));
+
+        horizontalLayout_6->addWidget(label_4);
+
+        lineEdit_posY = new QLineEdit(centralWidget);
+        lineEdit_posY->setObjectName(QStringLiteral("lineEdit_posY"));
+        sizePolicy.setHeightForWidth(lineEdit_posY->sizePolicy().hasHeightForWidth());
+        lineEdit_posY->setSizePolicy(sizePolicy);
+
+        horizontalLayout_6->addWidget(lineEdit_posY);
+
+        label_7 = new QLabel(centralWidget);
+        label_7->setObjectName(QStringLiteral("label_7"));
+
+        horizontalLayout_6->addWidget(label_7);
+
+
+        verticalLayout->addLayout(horizontalLayout_6);
+
+        horizontalLayout_7 = new QHBoxLayout();
+        horizontalLayout_7->setSpacing(6);
+        horizontalLayout_7->setObjectName(QStringLiteral("horizontalLayout_7"));
+        label_5 = new QLabel(centralWidget);
+        label_5->setObjectName(QStringLiteral("label_5"));
+
+        horizontalLayout_7->addWidget(label_5);
+
+        lineEdit_posZ = new QLineEdit(centralWidget);
+        lineEdit_posZ->setObjectName(QStringLiteral("lineEdit_posZ"));
+        sizePolicy.setHeightForWidth(lineEdit_posZ->sizePolicy().hasHeightForWidth());
+        lineEdit_posZ->setSizePolicy(sizePolicy);
+
+        horizontalLayout_7->addWidget(lineEdit_posZ);
+
+        label_8 = new QLabel(centralWidget);
+        label_8->setObjectName(QStringLiteral("label_8"));
+
+        horizontalLayout_7->addWidget(label_8);
+
+
+        verticalLayout->addLayout(horizontalLayout_7);
+
+        pushButton_Place = new QPushButton(centralWidget);
+        pushButton_Place->setObjectName(QStringLiteral("pushButton_Place"));
+
+        verticalLayout->addWidget(pushButton_Place);
 
         labelNTriangles = new QLabel(centralWidget);
         labelNTriangles->setObjectName(QStringLiteral("labelNTriangles"));
@@ -161,11 +248,18 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Reader", nullptr));
         pushButton->setText(QApplication::translate("MainWindow", "Open", nullptr));
-        pushButton_test->setText(QApplication::translate("MainWindow", "Load a cube", nullptr));
+        pushButton_Process->setText(QApplication::translate("MainWindow", "Process", nullptr));
+        pushButton_test->setText(QApplication::translate("MainWindow", "Load a test cube", nullptr));
         label->setText(QApplication::translate("MainWindow", "Quads size:", nullptr));
         lineEdit_size->setText(QApplication::translate("MainWindow", "10", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        pushButton_Process->setText(QApplication::translate("MainWindow", "Process", nullptr));
+        label_3->setText(QApplication::translate("MainWindow", "pos X:", nullptr));
+        label_6->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        label_4->setText(QApplication::translate("MainWindow", "pos Y:", nullptr));
+        label_7->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        label_5->setText(QApplication::translate("MainWindow", "pos Z:", nullptr));
+        label_8->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        pushButton_Place->setText(QApplication::translate("MainWindow", "Place a cube", nullptr));
         labelNTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
         labelWidthX->setText(QApplication::translate("MainWindow", "Width in X: -", nullptr));
         labelWidthY->setText(QApplication::translate("MainWindow", "Width in Y: -", nullptr));

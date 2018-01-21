@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cube.h"
+#include "pyramid.h"
 #include "triangle.h"
 #include "stlfile.h"
 #include "utils.h"
@@ -358,4 +359,36 @@ void MainWindow::on_pushButton_test_clicked() {
 
     // Enable save button
     ui->pushButtonSave->setEnabled(true);
+}
+
+void MainWindow::on_pushButton_Place_clicked() {
+    bool valid = false;
+    float size = ui->lineEdit_size->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using size = 10mm\n";
+        size = 10.0;
+    }
+
+    float posX = ui->lineEdit_posX->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using size = 10mm\n";
+        posX = 10.0;
+    }
+
+    float posY = ui->lineEdit_posY->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using size = 10mm\n";
+        posY = 10.0;
+    }
+
+    float posZ = ui->lineEdit_posZ->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using size = 10mm\n";
+        posZ = 10.0;
+    }
+
+    Pyramid c(size);
+    c.place(posX, posY, posZ);
+    std::vector<Triangle> t = c.getFacets();
+    _triangs.insert(_triangs.end(), t.begin(), t.end());
 }

@@ -39,6 +39,13 @@ void Cell::translate(float x, float y, float z) {
     }
 }
 
+void Cell::place(float x, float y, float z) {
+    // TODO: translate cell to origin first
+    for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
+        it->translate(x, y, z);
+    }
+}
+
 bool Cell::isInitialized() {
     return _initialized;
 }

@@ -17,6 +17,8 @@ public:
     void rotateZ(float angle);
     void translate(float x, float y, float z);
 
+    void place(float x, float y, float z);
+
     bool isInitialized();
 
 protected:
