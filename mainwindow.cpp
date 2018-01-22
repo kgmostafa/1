@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "cube.h"
+#include "icosphere.h"
 #include "pyramid.h"
 #include "triangle.h"
 #include "stlfile.h"
@@ -404,12 +405,14 @@ void MainWindow::on_pushButton_Place_clicked() {
         cellType = 1; // Pyramid
     else if(ui->radioButton_cellType_cube->isChecked())
         cellType = 2; // Cube
+    else if(ui->radioButton_cellType_icosphere->isChecked())
+        cellType = 3; // Icosphere
 
     for(int i = 0; i < fillZ; i++) {
         for(int j = 0; j < fillY; j++) {
             for(int k = 0; k < fillX; k++) {
-                if((k+j)%2 == 1)
-                    continue;
+//                if((k+j)%2 == 1)
+//                    continue;
                 float maxLength = _maxXLength;
                 if(_maxYLength > maxLength)
                     maxLength = _maxYLength;
@@ -429,7 +432,15 @@ void MainWindow::on_pushButton_Place_clicked() {
 
                     std::vector<Triangle> t = c.getFacets();
                     _triangs.insert(_triangs.end(), t.begin(), t.end());
+                } else if(cellType == 3) {
+                    Icosphere s(maxLength);
+                    s.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
+                    s.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
+
+                    std::vector<Triangle> t = s.getFacets();
+                    _triangs.insert(_triangs.end(), t.begin(), t.end());
                 }
+
             }
         }
     }

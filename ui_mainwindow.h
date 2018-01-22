@@ -40,6 +40,7 @@ public:
     QLabel *label_9;
     QRadioButton *radioButton_cellType_pyramid;
     QRadioButton *radioButton_cellType_cube;
+    QRadioButton *radioButton_cellType_icosphere;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_size;
@@ -110,6 +111,11 @@ public:
         radioButton_cellType_cube->setObjectName(QStringLiteral("radioButton_cellType_cube"));
 
         horizontalLayout_8->addWidget(radioButton_cellType_cube);
+
+        radioButton_cellType_icosphere = new QRadioButton(centralWidget);
+        radioButton_cellType_icosphere->setObjectName(QStringLiteral("radioButton_cellType_icosphere"));
+
+        horizontalLayout_8->addWidget(radioButton_cellType_icosphere);
 
 
         verticalLayout->addLayout(horizontalLayout_8);
@@ -283,6 +289,7 @@ public:
         label_9->setText(QApplication::translate("MainWindow", "Cell type:", nullptr));
         radioButton_cellType_pyramid->setText(QApplication::translate("MainWindow", "Pyramid", nullptr));
         radioButton_cellType_cube->setText(QApplication::translate("MainWindow", "Cube", nullptr));
+        radioButton_cellType_icosphere->setText(QApplication::translate("MainWindow", "Icosphere", nullptr));
         label->setText(QApplication::translate("MainWindow", "Cell size:", nullptr));
         lineEdit_size->setText(QApplication::translate("MainWindow", "10", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));

@@ -63,6 +63,13 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_cellType_icosphere">
+          <property name="text">
+           <string>Icosphere</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
       <item>
