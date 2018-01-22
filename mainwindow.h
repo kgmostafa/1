@@ -26,14 +26,14 @@ public:
     float _maxXLength;
     float _maxYLength;
     float _maxZLength;
+    float _maxLength;
 
     bool _wireframe;
+    bool _baseCube;
 
 
 private slots:
     void on_pushButton_clicked();
-
-    void on_pushButton_Process_clicked();
 
     void on_checkBoxWireFrame_stateChanged(int arg1);
 
@@ -42,6 +42,8 @@ private slots:
     void on_pushButton_test_clicked();
 
     void on_pushButton_Place_clicked();
+
+    void on_checkBox_baseCube_stateChanged(int arg1);
 
 private:
     Ui::MainWindow *ui;

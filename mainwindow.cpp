@@ -18,10 +18,12 @@ MainWindow::MainWindow(QWidget *parent) :
     _maxXLength = 0.0;
     _maxYLength = 0.0;
     _maxZLength = 0.0;
+    _maxLength = 0.0;
     _minZ = 0.0;
     _maxZ = 0.0;
 
     _wireframe = true;
+    _baseCube = true;
 
     _stlHeader = "";
 }
@@ -51,6 +53,11 @@ void MainWindow::on_pushButton_clicked()
     _maxXLength = stl.getMaxXLength();
     _maxYLength = stl.getMaxYLength();
     _maxZLength = stl.getMaxZLength();
+    _maxLength = _maxXLength;
+    if(_maxYLength > _maxLength)
+        _maxLength = _maxYLength;
+    if(_maxZLength > _maxLength)
+        _maxLength = _maxZLength;
     ui->labelNTriangles->setText("Number of triangles: " + QString::number(_nProcessed));
     ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " mm");
     ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " mm");
@@ -62,12 +69,12 @@ void MainWindow::on_pushButton_clicked()
     _stlHeader = stl.getHeader();
 }
 
-void MainWindow::on_pushButton_Process_clicked() {
-    processNew();
+//void MainWindow::on_pushButton_Process_clicked() {
+//    processNew();
 
-    // Enable save button
-    ui->pushButtonSave->setEnabled(true);
-}
+//    // Enable save button
+//    ui->pushButtonSave->setEnabled(true);
+//}
 
 void MainWindow::processOld() {
     bool valid = false;
@@ -327,6 +334,7 @@ bool MainWindow::insideTriangle(glm::vec3 p, Triangle t) {
 
 void MainWindow::on_checkBoxWireFrame_stateChanged(int arg1) {
     _wireframe = (arg1==Qt::Unchecked)?false:true;
+    update();
 }
 
 void MainWindow::on_pushButtonSave_clicked() {
@@ -343,52 +351,97 @@ void MainWindow::on_pushButtonSave_clicked() {
 
 void MainWindow::on_pushButton_test_clicked() {
     Cube c(50.0);
-    c.scale(0.5, 1.0, 2.0);
-    // Rotation order(Z -> X -> Y)
-    c.rotateZ(15.0);
-    c.rotateX(45.0);
-    c.rotateY(60.0);
-    c.translate(25.0, 0.0, 0.0);
+    float scaleX = 1.0;
+    float scaleY = 1.0;
+    float scaleZ = 1.0;
+    c.scale(scaleX, scaleY, scaleZ);
+//    // Rotation order(Z -> X -> Y)
+//    c.rotateZ(15.0);
+//    c.rotateX(45.0);
+//    c.rotateY(60.0);
+//    c.translate(25.0, 0.0, 0.0);
     _triangs = c.getFacets();
+    _nTriangles = _triangs.size();
     _nProcessed = _triangs.size();
-    _maxXLength = 50.0;
-    _maxYLength = 50.0;
-    _maxZLength = 50.0;
+    _maxXLength = scaleX*50.0;
+    _maxYLength = scaleY*50.0;
+    _maxZLength = scaleZ*50.0;
+    _maxLength = _maxXLength;
+    if(_maxYLength > _maxLength)
+        _maxLength = _maxYLength;
+    if(_maxZLength > _maxLength)
+        _maxLength = _maxZLength;
 
     ui->labelNTriangles->setText("Number of triangles: " + QString::number(_nTriangles));
+    ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " mm");
+    ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " mm");
+    ui->labelHeightZ->setText("Height in Z: " + QString::number(_maxZLength) + " mm");
+}
+
+void MainWindow::on_pushButton_Place_clicked() {
+    bool valid = false;
+
+    float fillX = ui->lineEdit_posX->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using fillX = 1 cell\n";
+        fillX = 1.0;
+    }
+
+    float fillY = ui->lineEdit_posY->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using fillY = 1 cell\n";
+        fillY = 1.0;
+    }
+
+    float fillZ = ui->lineEdit_posZ->text().toFloat(&valid);
+    if(!valid) {
+        std::cout << "Invalid input. Using fillZ = 1 cell\n";
+        fillZ = 1.0;
+    }
+
+    int cellType = 0; // None
+    if(ui->radioButton_cellType_pyramid->isChecked())
+        cellType = 1; // Pyramid
+    else if(ui->radioButton_cellType_cube->isChecked())
+        cellType = 2; // Cube
+
+    for(int i = 0; i < fillZ; i++) {
+        for(int j = 0; j < fillY; j++) {
+            for(int k = 0; k < fillX; k++) {
+                if((k+j)%2 == 1)
+                    continue;
+                float maxLength = _maxXLength;
+                if(_maxYLength > maxLength)
+                    maxLength = _maxYLength;
+                if(_maxZLength > maxLength)
+                    maxLength = _maxZLength;
+                if(cellType == 1) {
+                    Pyramid p(maxLength);
+                    p.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
+                    p.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
+
+                    std::vector<Triangle> t = p.getFacets();
+                    _triangs.insert(_triangs.end(), t.begin(), t.end());
+                } else if(cellType == 2) {
+                    Cube c(maxLength);
+                    c.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
+                    c.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
+
+                    std::vector<Triangle> t = c.getFacets();
+                    _triangs.insert(_triangs.end(), t.begin(), t.end());
+                }
+            }
+        }
+    }
+
+    // Updates the UI texts
+    ui->labelNTriangles->setText("Number of triangles: " + QString::number(_triangs.size()));
 
     // Enable save button
     ui->pushButtonSave->setEnabled(true);
 }
 
-void MainWindow::on_pushButton_Place_clicked() {
-    bool valid = false;
-    float size = ui->lineEdit_size->text().toFloat(&valid);
-    if(!valid) {
-        std::cout << "Invalid input. Using size = 10mm\n";
-        size = 10.0;
-    }
-
-    float posX = ui->lineEdit_posX->text().toFloat(&valid);
-    if(!valid) {
-        std::cout << "Invalid input. Using size = 10mm\n";
-        posX = 10.0;
-    }
-
-    float posY = ui->lineEdit_posY->text().toFloat(&valid);
-    if(!valid) {
-        std::cout << "Invalid input. Using size = 10mm\n";
-        posY = 10.0;
-    }
-
-    float posZ = ui->lineEdit_posZ->text().toFloat(&valid);
-    if(!valid) {
-        std::cout << "Invalid input. Using size = 10mm\n";
-        posZ = 10.0;
-    }
-
-    Pyramid c(size);
-    c.place(posX, posY, posZ);
-    std::vector<Triangle> t = c.getFacets();
-    _triangs.insert(_triangs.end(), t.begin(), t.end());
+void MainWindow::on_checkBox_baseCube_stateChanged(int arg1) {
+    _baseCube = (arg1==Qt::Unchecked)?false:true;
+    update();
 }

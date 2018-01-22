@@ -64,7 +64,6 @@ void Triangle::translate(float x, float y, float z) {
         _vec[i].x += x;
         _vec[i].y += y;
         _vec[i].z += z;
-
     }
 }
 

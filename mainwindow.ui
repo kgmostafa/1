@@ -31,13 +31,6 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="pushButton_Process">
-        <property name="text">
-         <string>Process</string>
-        </property>
-       </widget>
-      </item>
-      <item>
        <widget class="QPushButton" name="pushButton_test">
         <property name="text">
          <string>Load a test cube</string>
@@ -45,16 +38,50 @@
        </widget>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_8">
+        <item>
+         <widget class="QLabel" name="label_9">
+          <property name="text">
+           <string>Cell type:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_cellType_pyramid">
+          <property name="text">
+           <string>Pyramid</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="radioButton_cellType_cube">
+          <property name="text">
+           <string>Cube</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QLabel" name="label">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
-           <string>Quads size:</string>
+           <string>Cell size:</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QLineEdit" name="lineEdit_size">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -68,6 +95,9 @@
         </item>
         <item>
          <widget class="QLabel" name="label_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>mm</string>
           </property>
@@ -80,7 +110,7 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>pos X:</string>
+           <string>Fill X with:</string>
           </property>
          </widget>
         </item>
@@ -92,12 +122,15 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="text">
+           <string>1</string>
+          </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>mm</string>
+           <string>cells</string>
           </property>
          </widget>
         </item>
@@ -108,7 +141,7 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>pos Y:</string>
+           <string>Fill Y with:</string>
           </property>
          </widget>
         </item>
@@ -120,12 +153,15 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="text">
+           <string>1</string>
+          </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>mm</string>
+           <string>cells</string>
           </property>
          </widget>
         </item>
@@ -136,7 +172,7 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>pos Z:</string>
+           <string>Fill Z with:</string>
           </property>
          </widget>
         </item>
@@ -148,12 +184,15 @@
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
+          <property name="text">
+           <string>1</string>
+          </property>
          </widget>
         </item>
         <item>
          <widget class="QLabel" name="label_8">
           <property name="text">
-           <string>mm</string>
+           <string>cells</string>
           </property>
          </widget>
         </item>
@@ -162,7 +201,7 @@
       <item>
        <widget class="QPushButton" name="pushButton_Place">
         <property name="text">
-         <string>Place a cube</string>
+         <string>Place cells</string>
         </property>
        </widget>
       </item>
@@ -204,6 +243,16 @@
        <widget class="QCheckBox" name="checkBoxWireFrame">
         <property name="text">
          <string>Wireframe</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="checkBox_baseCube">
+        <property name="text">
+         <string>Show base cube</string>
         </property>
         <property name="checked">
          <bool>true</bool>

@@ -21,6 +21,7 @@
 #include <QtWidgets/QLineEdit>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
 #include "stlpreview.h"
@@ -34,8 +35,11 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *pushButton;
-    QPushButton *pushButton_Process;
     QPushButton *pushButton_test;
+    QHBoxLayout *horizontalLayout_8;
+    QLabel *label_9;
+    QRadioButton *radioButton_cellType_pyramid;
+    QRadioButton *radioButton_cellType_cube;
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_size;
@@ -58,6 +62,7 @@ public:
     QLabel *labelWidthY;
     QLabel *labelHeightZ;
     QCheckBox *checkBoxWireFrame;
+    QCheckBox *checkBox_baseCube;
     QPushButton *pushButtonSave;
     STLPreview *openGLWidget;
 
@@ -82,26 +87,45 @@ public:
 
         verticalLayout->addWidget(pushButton);
 
-        pushButton_Process = new QPushButton(centralWidget);
-        pushButton_Process->setObjectName(QStringLiteral("pushButton_Process"));
-
-        verticalLayout->addWidget(pushButton_Process);
-
         pushButton_test = new QPushButton(centralWidget);
         pushButton_test->setObjectName(QStringLiteral("pushButton_test"));
 
         verticalLayout->addWidget(pushButton_test);
+
+        horizontalLayout_8 = new QHBoxLayout();
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
+        label_9 = new QLabel(centralWidget);
+        label_9->setObjectName(QStringLiteral("label_9"));
+
+        horizontalLayout_8->addWidget(label_9);
+
+        radioButton_cellType_pyramid = new QRadioButton(centralWidget);
+        radioButton_cellType_pyramid->setObjectName(QStringLiteral("radioButton_cellType_pyramid"));
+        radioButton_cellType_pyramid->setChecked(true);
+
+        horizontalLayout_8->addWidget(radioButton_cellType_pyramid);
+
+        radioButton_cellType_cube = new QRadioButton(centralWidget);
+        radioButton_cellType_cube->setObjectName(QStringLiteral("radioButton_cellType_cube"));
+
+        horizontalLayout_8->addWidget(radioButton_cellType_cube);
+
+
+        verticalLayout->addLayout(horizontalLayout_8);
 
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(6);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         label = new QLabel(centralWidget);
         label->setObjectName(QStringLiteral("label"));
+        label->setEnabled(false);
 
         horizontalLayout->addWidget(label);
 
         lineEdit_size = new QLineEdit(centralWidget);
         lineEdit_size->setObjectName(QStringLiteral("lineEdit_size"));
+        lineEdit_size->setEnabled(false);
         QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
@@ -112,6 +136,7 @@ public:
 
         label_2 = new QLabel(centralWidget);
         label_2->setObjectName(QStringLiteral("label_2"));
+        label_2->setEnabled(false);
 
         horizontalLayout->addWidget(label_2);
 
@@ -223,6 +248,12 @@ public:
 
         verticalLayout->addWidget(checkBoxWireFrame);
 
+        checkBox_baseCube = new QCheckBox(centralWidget);
+        checkBox_baseCube->setObjectName(QStringLiteral("checkBox_baseCube"));
+        checkBox_baseCube->setChecked(true);
+
+        verticalLayout->addWidget(checkBox_baseCube);
+
         pushButtonSave = new QPushButton(centralWidget);
         pushButtonSave->setObjectName(QStringLiteral("pushButtonSave"));
         pushButtonSave->setEnabled(false);
@@ -248,23 +279,29 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Reader", nullptr));
         pushButton->setText(QApplication::translate("MainWindow", "Open", nullptr));
-        pushButton_Process->setText(QApplication::translate("MainWindow", "Process", nullptr));
         pushButton_test->setText(QApplication::translate("MainWindow", "Load a test cube", nullptr));
-        label->setText(QApplication::translate("MainWindow", "Quads size:", nullptr));
+        label_9->setText(QApplication::translate("MainWindow", "Cell type:", nullptr));
+        radioButton_cellType_pyramid->setText(QApplication::translate("MainWindow", "Pyramid", nullptr));
+        radioButton_cellType_cube->setText(QApplication::translate("MainWindow", "Cube", nullptr));
+        label->setText(QApplication::translate("MainWindow", "Cell size:", nullptr));
         lineEdit_size->setText(QApplication::translate("MainWindow", "10", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        label_3->setText(QApplication::translate("MainWindow", "pos X:", nullptr));
-        label_6->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        label_4->setText(QApplication::translate("MainWindow", "pos Y:", nullptr));
-        label_7->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        label_5->setText(QApplication::translate("MainWindow", "pos Z:", nullptr));
-        label_8->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        pushButton_Place->setText(QApplication::translate("MainWindow", "Place a cube", nullptr));
+        label_3->setText(QApplication::translate("MainWindow", "Fill X with:", nullptr));
+        lineEdit_posX->setText(QApplication::translate("MainWindow", "1", nullptr));
+        label_6->setText(QApplication::translate("MainWindow", "cells", nullptr));
+        label_4->setText(QApplication::translate("MainWindow", "Fill Y with:", nullptr));
+        lineEdit_posY->setText(QApplication::translate("MainWindow", "1", nullptr));
+        label_7->setText(QApplication::translate("MainWindow", "cells", nullptr));
+        label_5->setText(QApplication::translate("MainWindow", "Fill Z with:", nullptr));
+        lineEdit_posZ->setText(QApplication::translate("MainWindow", "1", nullptr));
+        label_8->setText(QApplication::translate("MainWindow", "cells", nullptr));
+        pushButton_Place->setText(QApplication::translate("MainWindow", "Place cells", nullptr));
         labelNTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
         labelWidthX->setText(QApplication::translate("MainWindow", "Width in X: -", nullptr));
         labelWidthY->setText(QApplication::translate("MainWindow", "Width in Y: -", nullptr));
         labelHeightZ->setText(QApplication::translate("MainWindow", "Height in Z: -", nullptr));
         checkBoxWireFrame->setText(QApplication::translate("MainWindow", "Wireframe", nullptr));
+        checkBox_baseCube->setText(QApplication::translate("MainWindow", "Show base cube", nullptr));
         pushButtonSave->setText(QApplication::translate("MainWindow", "Save", nullptr));
     } // retranslateUi
 
