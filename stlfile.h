@@ -25,6 +25,7 @@ public:
     float getMaxXLength();
     float getMaxYLength();
     float getMaxZLength();
+    float getMaxLength();
 
 private:
     bool open(bool read);

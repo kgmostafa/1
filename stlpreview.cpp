@@ -379,7 +379,7 @@ glm::vec3 STLPreview::get_arcball_vector(int x, int y) {
 
 void STLPreview::draw() {
     bool wireframe = ((MainWindow*)(this->parentWidget()->parent()))->_wireframe;
-    bool baseCube = ((MainWindow*)(this->parentWidget()->parent()))->_baseCube;
+    bool baseCube = ((MainWindow*)(this->parentWidget()->parent()))->_basePart;
     std::vector<Triangle> t = ((MainWindow*)(this->parentWidget()->parent()))->_triangs;
 
     int i = 0;

@@ -163,3 +163,12 @@ float STLFile::getMaxYLength() {
 float STLFile::getMaxZLength() {
     return _max[2] - _min[2];
 }
+
+float STLFile::getMaxLength() {
+    float maxLength = getMaxXLength();
+    if(getMaxYLength() > maxLength)
+        maxLength = getMaxYLength();
+    if(getMaxZLength() > maxLength)
+        maxLength = getMaxZLength();
+    return maxLength;
+}

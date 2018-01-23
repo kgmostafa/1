@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#include <array>
 #include <vector>
 
 #include "cell.h"
@@ -19,9 +20,15 @@ public:
 
     static void place(Cell &c, float x, float y, float z);
 
+    static void shrink(Cell &c, float thickness);
+
     static float distance(Vertex v1, Vertex v2);
 
     static std::vector<Triangle> createSquare(float el);
+
+    static bool insideTriangle(glm::vec3 p, Triangle t);
+
+    static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z);
 };
 
 #endif // UTILS_H

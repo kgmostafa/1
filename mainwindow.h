@@ -19,39 +19,44 @@ public:
     ~MainWindow();
 
     std::vector<Triangle> _triangs;
+    std::vector<Triangle> _cell;
 
-    quint32 _nTriangles;
-    quint32 _nProcessed;
+    quint32 _nTrianglesBase;
+    quint32 _nTrianglesProcessed;
 
     float _maxXLength;
     float _maxYLength;
     float _maxZLength;
     float _maxLength;
 
+    float _cellMaxXLength;
+    float _cellMaxYLength;
+    float _cellMaxZLength;
+    float _cellMaxLength;
+
     bool _wireframe;
-    bool _baseCube;
+    bool _basePart;
+
+    bool _cellLoaded;
 
 
 private slots:
-    void on_pushButton_clicked();
+    void on_pushButton_process_clicked();
 
-    void on_checkBoxWireFrame_stateChanged(int arg1);
+    void on_radioButton_cellType_custom_toggled(bool checked);
 
-    void on_pushButtonSave_clicked();
+    void on_pushButton_open_clicked();
 
-    void on_pushButton_test_clicked();
+    void on_checkBox_basePart_stateChanged(int arg1);
 
-    void on_pushButton_Place_clicked();
+    void on_checkBox_wireframe_stateChanged(int arg1);
 
-    void on_checkBox_baseCube_stateChanged(int arg1);
+    void on_pushButton_loadCell_clicked();
+
+    void on_pushButton_save_clicked();
 
 private:
     Ui::MainWindow *ui;
-
-    void processOld();
-    void processNew();
-
-    bool insideTriangle(glm::vec3 p, Triangle t);
 
     float _minZ;
     float _maxZ;
