@@ -21,14 +21,16 @@ public:
 
     bool isInitialized();
 
+    float _maxXLength;
+    float _maxYLength;
+    float _maxZLength;
+    float _maxLength;
+
 protected:
     virtual bool init() = 0;
 
     bool _initialized;
     std::vector<Triangle> _facets;
-
-private:
-
 };
 
 #endif // CELL_H

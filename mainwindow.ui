@@ -86,7 +86,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_infillDensity">
         <property name="enabled">
-         <bool>true</bool>
+         <bool>false</bool>
         </property>
         <property name="title">
          <string>Infill density</string>

@@ -3,6 +3,7 @@
 #include "cube.h"
 #include "icosphere.h"
 #include "pyramid.h"
+#include "customcell.h"
 #include "triangle.h"
 #include "stlfile.h"
 #include "utils.h"
@@ -74,20 +75,9 @@ void MainWindow::on_pushButton_loadCell_clicked() {
     if (fileName.isEmpty())
         return;
 
-    // Decode the STL file
-    STLFile stl(fileName);
-    qint32 n = 0;
-    _cell = stl.decode(n);
-    if(n < 0)
-        return; // Return if input file is invalid
-
-    // Load variables
-    _cellMaxXLength = stl.getMaxXLength();
-    _cellMaxYLength = stl.getMaxYLength();
-    _cellMaxZLength = stl.getMaxZLength();
-    _cellMaxLength = stl.getMaxLength();
-
-    _cellLoaded = true;
+    // Create to CustomCell object
+    _cell = new CustomCell(fileName);
+    _cellLoaded = _cell->isInitialized();
 }
 
 void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
@@ -99,6 +89,9 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
 }
 
 void MainWindow::on_pushButton_process_clicked() {
+//    std::cout << "minX: " << bounds.first[0] << "; maxX: " << bounds.second[0] << std::endl;
+//    std::cout << "minY: " << bounds.first[1] << "; maxY: " << bounds.second[1] << std::endl;
+//    return;
     int cellType = 0; // None
     if(ui->radioButton_cellType_pyramid->isChecked())
         cellType = 1; // Pyramid
@@ -124,25 +117,28 @@ void MainWindow::on_pushButton_process_clicked() {
 
     int zSteps = (int)(_maxZLength/layerThickness);
     for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
-        float z = zSteps*layerThickness;
-        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_triangs, z));
+        float z = _minZ + i*layerThickness;
+        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_triangs, z, layerThickness));
 
-//        int ySteps = (int)((boundaries.second[1]-boundaries.first[1])/layerThickness);
-//        int xSteps = (int)((boundaries.second[0]-boundaries.first[0])/layerThickness);
-//        for(int j = 0; j < ySteps; j++) {
-//            for(int k = 0; k < xSteps; k++) {
-//                float maxLength = _maxXLength;
-//                if(_maxYLength > maxLength)
-//                    maxLength = _maxYLength;
-//                if(_maxZLength > maxLength)
-//                    maxLength = _maxZLength;
+        float xLength = boundaries.second[0]-boundaries.first[0];
+        float yLength = boundaries.second[1]-boundaries.first[1];
+        int xSteps = (int)(xLength/layerThickness);
+        int ySteps = (int)(yLength/layerThickness);
+
+        std::cout << "steps: (" << xSteps << ", " << ySteps << ") on z = " << z << "\n";
+        for(int j = 0; j < ySteps; j++) {
+            for(int k = 0; k < xSteps; k++) {
+                    // TODO: start from the middle and cut the cell on the boundaries
 //                if(cellType == 1) {
-//                    Pyramid p(maxLength);
-//                    p.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
-//                    p.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
+                    Cube p(layerThickness);
+                    float posX = boundaries.first[0] + k*layerThickness;
+                    float posY = boundaries.first[1] + j*layerThickness;
+                    p.place(posX, posY, z);
 
-//                    std::vector<Triangle> t = p.getFacets();
-//                    _triangs.insert(_triangs.end(), t.begin(), t.end());
+                    std::vector<Triangle> t = p.getFacets();
+                    _triangs.insert(_triangs.end(), t.begin(), t.end());
+            }
+        }
 //                } else if(cellType == 2) {
 //                    Cube c(maxLength);
 //                    c.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);

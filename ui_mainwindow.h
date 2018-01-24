@@ -122,7 +122,7 @@ public:
 
         groupBox_infillDensity = new QGroupBox(centralWidget);
         groupBox_infillDensity->setObjectName(QStringLiteral("groupBox_infillDensity"));
-        groupBox_infillDensity->setEnabled(true);
+        groupBox_infillDensity->setEnabled(false);
         horizontalLayout_3 = new QHBoxLayout(groupBox_infillDensity);
         horizontalLayout_3->setSpacing(6);
         horizontalLayout_3->setContentsMargins(11, 11, 11, 11);

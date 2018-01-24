@@ -35,7 +35,8 @@ SOURCES += \
     cell.cpp \
     cube.cpp \
     pyramid.cpp \
-    icosphere.cpp
+    icosphere.cpp \
+    customcell.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     cell.h \
     cube.h \
     pyramid.h \
-    icosphere.h
+    icosphere.h \
+    customcell.h
 
 FORMS += \
         mainwindow.ui

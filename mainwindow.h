@@ -5,6 +5,7 @@
 #include <QMainWindow>
 #include <QFileDialog>
 #include "triangle.h"
+#include "cell.h"
 
 namespace Ui {
 class MainWindow;
@@ -19,7 +20,7 @@ public:
     ~MainWindow();
 
     std::vector<Triangle> _triangs;
-    std::vector<Triangle> _cell;
+    Cell *_cell;
 
     quint32 _nTrianglesBase;
     quint32 _nTrianglesProcessed;

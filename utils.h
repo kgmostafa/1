@@ -28,7 +28,8 @@ public:
 
     static bool insideTriangle(glm::vec3 p, Triangle t);
 
-    static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z);
+    static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z, float thickness);
+    static int intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::vec3 pNormal, glm::vec3 &intersect);
 };
 
 #endif // UTILS_H
