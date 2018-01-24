@@ -379,60 +379,63 @@ glm::vec3 STLPreview::get_arcball_vector(int x, int y) {
 
 void STLPreview::draw() {
     bool wireframe = ((MainWindow*)(this->parentWidget()->parent()))->_wireframe;
-    bool baseCube = ((MainWindow*)(this->parentWidget()->parent()))->_basePart;
-    std::vector<Triangle> t = ((MainWindow*)(this->parentWidget()->parent()))->_triangs;
+    bool basePart = ((MainWindow*)(this->parentWidget()->parent()))->_basePart;
+    std::vector<Triangle> base = ((MainWindow*)(this->parentWidget()->parent()))->_base;
+    std::vector<Triangle> t = ((MainWindow*)(this->parentWidget()->parent()))->_processed;
 
-    int i = 0;
+    if(basePart) {
+        for (std::vector<Triangle>::iterator it = base.begin() ; it != base.end(); ++it) {
+            Triangle aux = *it;
+            glm::vec3 v1 = aux.getV1();
+            glm::vec3 v2 = aux.getV2();
+            glm::vec3 v3 = aux.getV3();
+            glBegin(GL_LINES);
+            glColor3f(1.0,1.0,0.0);
+            glVertex3fv(glm::value_ptr(v1));
+            glVertex3fv(glm::value_ptr(v2));
+            glEnd();
+            glBegin(GL_LINES);
+            glColor3f(1.0,1.0,0.0);
+            glVertex3fv(glm::value_ptr(v2));
+            glVertex3fv(glm::value_ptr(v3));
+            glEnd();
+            glBegin(GL_LINES);
+            glColor3f(1.0,1.0,0.0);
+            glVertex3fv(glm::value_ptr(v3));
+            glVertex3fv(glm::value_ptr(v1));
+            glEnd();
+        }
+    }
+
     for (std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
         Triangle aux = *it;
         glm::vec3 v1 = aux.getV1();
         glm::vec3 v2 = aux.getV2();
-        glm::vec3 v3 = aux.getV3();
-        if(i < 12) {
-            if(baseCube) {
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v1));
-                glVertex3fv(glm::value_ptr(v2));
-                glEnd();
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v2));
-                glVertex3fv(glm::value_ptr(v3));
-                glEnd();
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v3));
-                glVertex3fv(glm::value_ptr(v1));
-                glEnd();
-            }
+        glm::vec3 v3 = aux.getV3();    
+        if(wireframe) {
+            glBegin(GL_LINES);
+            glColor3f(1.0,0.0,0.0);
+            glVertex3fv(glm::value_ptr(v1));
+            glVertex3fv(glm::value_ptr(v2));
+            glEnd();
+            glBegin(GL_LINES);
+            glColor3f(1.0,0.0,0.0);
+            glVertex3fv(glm::value_ptr(v2));
+            glVertex3fv(glm::value_ptr(v3));
+            glEnd();
+            glBegin(GL_LINES);
+            glColor3f(1.0,0.0,0.0);
+            glVertex3fv(glm::value_ptr(v3));
+            glVertex3fv(glm::value_ptr(v1));
+            glEnd();
         } else {
-            if(wireframe) {
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v1));
-                glVertex3fv(glm::value_ptr(v2));
-                glEnd();
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v2));
-                glVertex3fv(glm::value_ptr(v3));
-                glEnd();
-                glBegin(GL_LINES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v3));
-                glVertex3fv(glm::value_ptr(v1));
-                glEnd();
-            } else {
-                glBegin(GL_TRIANGLES);
-                glColor3f(1.0,i<12?1.0:0.0,0.0);
-                glVertex3fv(glm::value_ptr(v1));
-                glVertex3fv(glm::value_ptr(v2));
-                glVertex3fv(glm::value_ptr(v3));
-                glEnd();
-            }
+            glBegin(GL_TRIANGLES);
+            glColor3f(1.0,0.0,0.0);
+            glVertex3fv(glm::value_ptr(v1));
+            glVertex3fv(glm::value_ptr(v2));
+            glVertex3fv(glm::value_ptr(v3));
+            glEnd();
         }
-        i++;
     }
 }
 

@@ -101,6 +101,7 @@ bool Utils::insideTriangle(glm::vec3 p, Triangle t) {
 }
 
 std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::vector<Triangle> &t, float z, float thickness) {
+    std::cout << "getBoundaries t.size() = " << t.size() << std::endl;
     std::array<float, 2> minimum = {FLT_MAX, FLT_MAX};
     std::array<float, 2> maximum = {FLT_MIN, FLT_MIN};
     float pZ;

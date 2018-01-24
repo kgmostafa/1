@@ -44,7 +44,7 @@ void MainWindow::on_pushButton_open_clicked() {
     // Decode the STL file
     STLFile stl(fileName);
     qint32 n = 0;
-    _triangs = stl.decode(n);
+    _base = stl.decode(n);
     if(n < 0)
         return; // Return if input file is invalid
 
@@ -118,7 +118,7 @@ void MainWindow::on_pushButton_process_clicked() {
     int zSteps = (int)(_maxZLength/layerThickness);
     for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
         float z = _minZ + i*layerThickness;
-        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_triangs, z, layerThickness));
+        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
 
         float xLength = boundaries.second[0]-boundaries.first[0];
         float yLength = boundaries.second[1]-boundaries.first[1];
@@ -136,7 +136,7 @@ void MainWindow::on_pushButton_process_clicked() {
                     p.place(posX, posY, z);
 
                     std::vector<Triangle> t = p.getFacets();
-                    _triangs.insert(_triangs.end(), t.begin(), t.end());
+                    _processed.insert(_processed.end(), t.begin(), t.end());
             }
         }
 //                } else if(cellType == 2) {
@@ -174,7 +174,7 @@ void MainWindow::on_pushButton_save_clicked() {
         return;
 
     STLFile stl(fileName);
-    std::vector<Triangle> vec(_triangs.begin() + _nTrianglesBase, _triangs.end());
+    std::vector<Triangle> vec(_processed.begin(), _processed.end());
     stl.encode(_stlHeader, vec);
 }
 

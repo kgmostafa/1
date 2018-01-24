@@ -19,7 +19,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    std::vector<Triangle> _triangs;
+    std::vector<Triangle> _base;
+    std::vector<Triangle> _processed;
     Cell *_cell;
 
     quint32 _nTrianglesBase;
