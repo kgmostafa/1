@@ -8,6 +8,7 @@
 #include "glm/ext.hpp"
 
 #include "cell.h"
+#include "triangle.h"
 
 Utils::Utils() {
 
@@ -199,4 +200,59 @@ int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::
 
     intersect = v1 + s*u;
     return 0; // Segment intersect the plane
+}
+
+bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
+//    bool RayIntersectsTriangle(Vector3D rayOrigin,
+//                               Vector3D rayVector,
+//                               Triangle* inTriangle,
+//                               Vector3D& outIntersectionPoint)
+//    {
+    const float EPSILON = 0.0000001;
+    glm::vec3 vertex0 = t.getV1();
+    glm::vec3 vertex1 = t.getV2();
+    glm::vec3 vertex2 = t.getV3();
+    glm::vec3 edge1, edge2, h, s, q;
+    float a,f,u,v;
+    edge1 = vertex1 - vertex0;
+    edge2 = vertex2 - vertex0;
+    h = glm::cross((v2-v1), edge2);
+    a = glm::dot(edge1, h);
+    if (a > -EPSILON && a < EPSILON)
+        return false;
+    f = 1/a;
+    s = v1 - vertex0;
+    u = f * (glm::dot(s, h));
+    if (u < 0.0 || u > 1.0)
+        return false;
+    q = glm::cross(s, edge1);
+    v = f * glm::dot((v2-v1), q);
+    if (v < 0.0 || u + v > 1.0)
+        return false;
+    // At this stage we can compute t to find out where the intersection point is on the line.
+    float k = f * glm::dot(edge2, q);
+    if (k > EPSILON) // ray intersection
+    {
+//        outIntersectionPoint = rayOrigin + rayVector * t;
+        return true;
+    }
+    else // This means that there is a line intersection but not a ray intersection.
+        return false;
+
+}
+
+// Return a list of Triangles that intersects the plane on z or z+thickness
+std::vector<Triangle> Utils::slice(std::vector<Triangle> t, float z, float thickness) {
+    std::cout << "slice" << std::endl;
+
+    t.erase(std::remove_if(t.begin(),
+                           t.end(),
+                           [z, thickness](Triangle aux) {
+                               return !((aux.getMinZ() <= z &&
+                                         aux.getMaxZ() >= z) ||
+                                        (aux.getMinZ() <= z+thickness &&
+                                         aux.getMaxZ() >= z+thickness));
+                           }),
+            t.end());
+    return t;
 }
