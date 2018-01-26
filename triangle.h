@@ -29,6 +29,8 @@ public:
     glm::vec3 getV2();
     glm::vec3 getV3();
 
+    glm::vec3 getMin();
+    glm::vec3 getMax();
     float getMinX();
     float getMaxX();
     float getMinY();
@@ -36,11 +38,15 @@ public:
     float getMinZ();
     float getMaxZ();
 
-
     QString toString();
 private:
+    void calculateMinMax();
+
     glm::vec3 _normal;
     glm::vec3 _vec[3];
+
+    glm::vec3 _min;
+    glm::vec3 _max;
 
     bool _normalSet;
 };
