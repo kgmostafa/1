@@ -241,17 +241,183 @@ bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
 
 }
 
+bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
+    /*    use separating axis theorem to test overlap between triangle and box */
+    /*    need to test for overlap in these directions: */
+    /*    1) the {x,y,z}-directions (actually, since we use the AABB of the triangle */
+    /*       we do not even need to test these) */
+    /*    2) normal of the triangle */
+    /*    3) crossproduct(edge from tri, {x,y,z}-directin) */
+    /*       this gives 3x3=9 more tests */
+
+    //float v0[3],v1[3],v2[3];
+    glm::vec3 v0, v1, v2;
+
+    float min,max,p0,p1,p2,rad,fex,fey,fez;		// -NJMP- "d" local variable removed
+
+    glm::vec3 normal, e0, e1, e2;
+
+
+
+    /* This is the fastest branch on Sun */
+
+    /* move everything so that the boxcenter is in (0,0,0) */
+    glm::vec3 boxcenter = (b2 + b1) / 2.0;
+    glm::vec3 boxhalfsize = (b2 - b1) / 2.0;
+
+    //    SUB(v0,triverts[0],boxcenter);
+    //    SUB(v1,triverts[1],boxcenter);
+    //    SUB(v2,triverts[2],boxcenter);
+    v0 = t.getV1() - boxcenter;
+    v1 = t.getV2() - boxcenter;
+    v2 = t.getV3() - boxcenter;
+
+    /* compute triangle edges */
+    e0 = v1 - v0;
+    e1 = v2 - v1;
+    e2 = v0 - v2;
+//    SUB(e0,v1,v0);      /* tri edge 0 */
+//    SUB(e1,v2,v1);      /* tri edge 1 */
+//    SUB(e2,v0,v2);      /* tri edge 2 */
+
+    /* Bullet 3:  */
+    /*  test the 9 tests first (this was faster) */
+    fex = fabsf(e0.x);
+    fey = fabsf(e0.y);
+    fez = fabsf(e0.z);
+
+//    AXISTEST_X01(e0[Z], e0[Y], fez, fey);
+//    #define AXISTEST_X01(a, b, fa, fb)
+    p0 = e0.z*v0.y - e0.y*v0.z;
+    p2 = e0.z*v2.y - e0.y*v2.z;
+    if(p0<p2) {
+        min=p0;
+        max=p2;
+    } else {
+        min=p2;
+        max=p0;
+    }
+    rad = fez * boxhalfsize.y + fey * boxhalfsize.z;
+    if(min>rad || max<-rad) return false;
+
+//    AXISTEST_Y02(e0[Z], e0[X], fez, fex);
+//#define AXISTEST_Y02(a, b, fa, fb)
+    p0 = -e0.z*v0.x + e0.x*v0.z;
+    p2 = -e0.z*v2.x + e0.x*v2.z;
+    if(p0<p2) {min=p0; max=p2;} else {min=p2; max=p0;}
+    rad = fez * boxhalfsize.x + fex * boxhalfsize.z;
+    if(min>rad || max<-rad) return false;
+
+//    AXISTEST_Z12(e0[Y], e0[X], fey, fex);
+//#define AXISTEST_Z12(a, b, fa, fb)
+
+    p1 = e0.y*v1.x - e0.x*v1.y;
+    p2 = e0.y*v2.x - e0.x*v2.x;
+    if(p2<p1) {min=p2; max=p1;} else {min=p1; max=p2;}
+    rad = fey * boxhalfsize.x + fex * boxhalfsize.y;
+    if(min>rad || max<-rad) return false;
+
+    fex = fabsf(e1.x);
+    fey = fabsf(e1.y);
+    fez = fabsf(e1.z);
+    AXISTEST_X01(e1.z, e1.y, fez, fey);
+    AXISTEST_Y02(e1.z, e1.x, fez, fex);
+    AXISTEST_Z0(e1.y, e1.x, fey, fex);
+
+    fex = fabsf(e2.x);
+    fey = fabsf(e2.y);
+    fez = fabsf(e2.z);
+    AXISTEST_X2(e2.z, e2.y, fez, fey);
+    AXISTEST_Y1(e2.z, e2.x, fez, fex);
+    AXISTEST_Z12(e2.y, e2.x, fey, fex);
+
+    /* Bullet 1: */
+    /*  first test overlap in the {x,y,z}-directions */
+    /*  find min, max of the triangle each direction, and test for overlap in */
+    /*  that direction -- this is equivalent to testing a minimal AABB around */
+    /*  the triangle against the AABB */
+
+    /* test in X-direction */
+//    FINDMINMAX(v0[X],v1[X],v2[X],min,max);
+//#define FINDMINMAX(x0,x1,x2,min,max)
+    min = max = v0.x;
+    if(v1.x<min) min=v1.x;
+    if(v1.x>max) max=v1.x;
+    if(v2.x<min) min=v2.x;
+    if(v2.x>max) max=v2.x;
+    if(min>boxhalfsize.x || max<-boxhalfsize.x) return false;
+
+    /* test in Y-direction */
+    min = max = v0.y;
+    if(v1.y<min) min=v1.y;
+    if(v1.y>max) max=v1.y;
+    if(v2.y<min) min=v2.y;
+    if(v2.y>max) max=v2.y;
+    if(min>boxhalfsize.y || max<-boxhalfsize.y) return false;
+
+    /* test in Z-direction */
+    min = max = v0.z;
+    if(v1.z<min) min=v1.z;
+    if(v1.z>max) max=v1.z;
+    if(v2.z<min) min=v2.z;
+    if(v2.z>max) max=v2.z;
+    if(min>boxhalfsize.z || max<-boxhalfsize.z) return false;
+
+    /* Bullet 2: */
+    /*  test if the box intersects the plane of the triangle */
+    /*  compute plane equation of triangle: normal*x+d=0 */
+//    CROSS(normal,e0,e1);
+    normal = glm::cross(e0, e1);
+
+    // -NJMP- (line removed here)
+    if(!planeBoxOverlap(normal,v0,boxhalfsize)) return false;	// -NJMP-
+
+    return true;   /* box and triangle overlaps */
+
+}
+
+bool Utils::planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox)	// -NJMP-
+{
+    int q;
+    glm::vec3 vmin,vmax;
+    float v;
+    for(q=0;q<=2;q++) {
+    v=vert[q];					// -NJMP-
+    if(normal[q]>0.0f) {
+      vmin[q]=-maxbox[q] - v;	// -NJMP-
+      vmax[q]= maxbox[q] - v;	// -NJMP-
+    } else {
+      vmin[q]= maxbox[q] - v;	// -NJMP-
+      vmax[q]=-maxbox[q] - v;	// -NJMP-
+    }
+    }
+    if(glm::dot(normal,vmin)>0.0f) return false;	// -NJMP-
+    if(glm::dot(normal,vmax)>=0.0f) return true;	// -NJMP-
+    return false;
+}
+
+
 // Return a list of Triangles that intersects the plane on z or z+thickness
 std::vector<Triangle> Utils::slice(std::vector<Triangle> t, float z, float thickness) {
-    std::cout << "slice" << std::endl;
-
     t.erase(std::remove_if(t.begin(),
                            t.end(),
                            [z, thickness](Triangle aux) {
                                return !((aux.getMinZ() <= z &&
                                          aux.getMaxZ() >= z) ||
+                                        (aux.getMinZ() >= z &&
+                                         aux.getMaxZ() <= z+thickness) ||
                                         (aux.getMinZ() <= z+thickness &&
                                          aux.getMaxZ() >= z+thickness));
+                           }),
+            t.end());
+    return t;
+}
+
+std::vector<Triangle> Utils::getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness) {
+    t.erase(std::remove_if(t.begin(),
+                           t.end(),
+                           [x, y, z, thickness](Triangle aux) {
+                               return !(checkTriangleBoxOverlap(aux, glm::vec3(x, y, z), glm::vec3(x+thickness, y+thickness, z+thickness)));
                            }),
             t.end());
     return t;

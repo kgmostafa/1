@@ -10,6 +10,7 @@
 #include <iostream>
 #include <QMessageBox>
 
+#include "glm/ext.hpp"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -89,19 +90,19 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
 }
 
 void MainWindow::on_pushButton_process_clicked() {
-    std::cout << "slice size: " << _base.size();
+//    std::cout << "slice size: " << _base.size();
 
-    float z = 20.0;
-    _base = Utils::slice(_base, z, 10);
+//    float z = 20.0;
+//    _base = Utils::slice(_base, z, 10);
 
-    std::cout << "after slice size: " << _base.size();
-    for(std::vector<Triangle>::iterator it = _base.begin() ; it != _base.end(); ++it) {
-        if(Utils::intersectRayTriangle(glm::vec3(1.0, -1.0, z), glm::vec3(1.0, 51.0, z), *it)) {
-            std::cout << "intersect!\n";
-            std::cout << it->toString().toStdString() << std::endl;
-        }
-    }
-    return;
+//    std::cout << "after slice size: " << _base.size();
+//    _base = Utils::getTrianglesFromBox(_base, -1, -1, 10);
+//    std::cout << "after getTrianglesFromBox size: " << _base.size();
+
+//    for(std::vector<Triangle>::iterator it = _base.begin() ; it != _base.end(); ++it) {
+//        std::cout << "normal: " << glm::to_string(it->getNormal()) << std::endl;
+//    }
+//    return;
     int cellType = 0; // None
     if(ui->radioButton_cellType_pyramid->isChecked())
         cellType = 1; // Pyramid
@@ -128,6 +129,7 @@ void MainWindow::on_pushButton_process_clicked() {
     int zSteps = (int)(_maxZLength/layerThickness);
     for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
         float z = _minZ + i*layerThickness;
+        std::vector<Triangle> slice = Utils::slice(_base, z, layerThickness);
         std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
 
         float xLength = boundaries.second[0]-boundaries.first[0];
@@ -136,17 +138,37 @@ void MainWindow::on_pushButton_process_clicked() {
         int ySteps = (int)(yLength/layerThickness);
 
         std::cout << "steps: (" << xSteps << ", " << ySteps << ") on z = " << z << "\n";
+
+
         for(int j = 0; j < ySteps; j++) {
+            bool inside = false;
             for(int k = 0; k < xSteps; k++) {
+                bool sw = false;
                     // TODO: start from the middle and cut the cell on the boundaries
 //                if(cellType == 1) {
-                    Pyramid p(layerThickness);
-                    float posX = boundaries.first[0] + k*layerThickness;
-                    float posY = boundaries.first[1] + j*layerThickness;
+                float posX = boundaries.first[0] + k*layerThickness;
+                float posY = boundaries.first[1] + j*layerThickness;
+                std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, layerThickness);
+
+                for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
+                    if(it->getNormal().x < 0) {
+                        inside = true;
+                    } else if(it->getNormal().x > 0) {
+                        if(inside)
+                            sw = true;
+                    }
+                    std::cout << "normal: " << glm::to_string(it->getNormal()) << std::endl;
+                }
+                if(inside) {
+                    Icosphere p(layerThickness);
+
                     p.place(posX, posY, z);
 
                     std::vector<Triangle> t = p.getFacets();
                     _processed.insert(_processed.end(), t.begin(), t.end());
+                }
+                if(sw)
+                    inside = !inside;
             }
         }
 //                } else if(cellType == 2) {

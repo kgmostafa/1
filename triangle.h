@@ -24,7 +24,7 @@ public:
 
     void set(Vertex v1, Vertex v2, Vertex v3);
 
-    Vertex getNormal();
+    glm::vec3 getNormal();
     glm::vec3 getV1();
     glm::vec3 getV2();
     glm::vec3 getV3();
@@ -39,9 +39,10 @@ public:
 
     QString toString();
 private:
-    Vertex _normal;
-//    Vertex _v[3];
+    glm::vec3 _normal;
     glm::vec3 _vec[3];
+
+    bool _normalSet;
 };
 
 #endif // TRIANGLE_H

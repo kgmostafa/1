@@ -6,7 +6,8 @@
 
 #include "triangle.h"
 
-Triangle::Triangle() {
+Triangle::Triangle() :
+    _normalSet(false) {
 }
 
 
@@ -28,7 +29,7 @@ Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3) {
 Triangle::Triangle(Vertex normal, Vertex v1, Vertex v2, Vertex v3) {
     // TODO: add v1, v2 and v3 verifications
     // TODO: check if this normal is correct
-    this->_normal = normal;
+    this->_normal = glm::vec3(normal.getX(), normal.getY(), normal.getZ());;
     this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
     this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
     this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
@@ -117,7 +118,11 @@ void Triangle::set(Vertex v1, Vertex v2, Vertex v3) {
     this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
 }
 
-Vertex Triangle::getNormal() {
+glm::vec3 Triangle::getNormal() {
+    if(_normalSet == false) {
+        _normal = glm::normalize(glm::cross(_vec[1]-_vec[0], _vec[2]-_vec[0]));
+        _normalSet = true;
+    }
     return this->_normal;
 }
 

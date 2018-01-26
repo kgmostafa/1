@@ -91,33 +91,33 @@ bool STLFile::encode(QString h, std::vector<Triangle> &t) {
         float x, y, z;
 
         // Normal
-        x = aux.getNormal().getX();
-        y = aux.getNormal().getY();
-        z = aux.getNormal().getZ();
+        x = aux.getNormal().x;
+        y = aux.getNormal().y;
+        z = aux.getNormal().z;
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 1
-        x = aux.getV1().x;//.getX();
-        y = aux.getV1().y;//.getY();
-        z = aux.getV1().z;//.getZ();
+        x = aux.getV1().x;
+        y = aux.getV1().y;
+        z = aux.getV1().z;
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 2
-        x = aux.getV2().x;//.getX();
-        y = aux.getV2().y;//getY();
-        z = aux.getV2().z;//getZ();
+        x = aux.getV2().x;
+        y = aux.getV2().y;
+        z = aux.getV2().z;
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
 
         // Vertex 3
-        x = aux.getV3().x;//getX();
-        y = aux.getV3().y;//getY();
-        z = aux.getV3().z;//getZ();
+        x = aux.getV3().x;
+        y = aux.getV3().y;
+        z = aux.getV3().z;
         _file->write(reinterpret_cast<char *>(&x), sizeof(x));
         _file->write(reinterpret_cast<char *>(&y), sizeof(y));
         _file->write(reinterpret_cast<char *>(&z), sizeof(z));
