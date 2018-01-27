@@ -90,19 +90,6 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
 }
 
 void MainWindow::on_pushButton_process_clicked() {
-//    std::cout << "slice size: " << _base.size();
-
-//    float z = 20.0;
-//    _base = Utils::slice(_base, z, 10);
-
-//    std::cout << "after slice size: " << _base.size();
-//    _base = Utils::getTrianglesFromBox(_base, -1, -1, 10);
-//    std::cout << "after getTrianglesFromBox size: " << _base.size();
-
-//    for(std::vector<Triangle>::iterator it = _base.begin() ; it != _base.end(); ++it) {
-//        std::cout << "normal: " << glm::to_string(it->getNormal()) << std::endl;
-//    }
-//    return;
     int cellType = 0; // None
     if(ui->radioButton_cellType_pyramid->isChecked())
         cellType = 1; // Pyramid
@@ -119,11 +106,23 @@ void MainWindow::on_pushButton_process_clicked() {
     }
 
     bool valid = false;
-
     float layerThickness = ui->lineEdit_layerThickness->text().toFloat(&valid);
     if(!valid) {
         std::cout << "Invalid input. Using layerThickness = 1 mm\n";
         layerThickness = 1.0;
+    }
+
+    Cell *c = NULL;
+    if(cellType == 1) {
+        c = new Pyramid(layerThickness);
+    } else if(cellType == 2) {
+        c = new Cube(layerThickness);
+    } else if(cellType == 3) {
+        c = new Icosphere(layerThickness);
+    } else if(cellType == 4) {
+        c = _cell;
+    } else {    // Default: Pyramid
+        c = new Pyramid(layerThickness);
     }
 
     int zSteps = (int)(_maxZLength/layerThickness);
@@ -145,50 +144,27 @@ void MainWindow::on_pushButton_process_clicked() {
             for(int k = 0; k < xSteps; k++) {
                 bool sw = false;
                     // TODO: start from the middle and cut the cell on the boundaries
-//                if(cellType == 1) {
                 float posX = boundaries.first[0] + k*layerThickness;
                 float posY = boundaries.first[1] + j*layerThickness;
                 std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, layerThickness);
-
                 for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
-                    if(it->getNormal().x < 0) {
+                    if(it->getNormal().x < -std::numeric_limits<float>::epsilon()) {
                         inside = true;
-                    } else if(it->getNormal().x > 0) {
-                        if(inside)
+                    } else if(it->getNormal().x > std::numeric_limits<float>::epsilon()) {
+                        if(inside) {
                             sw = true;
+                        }
                     }
-                    std::cout << "normal: " << glm::to_string(it->getNormal()) << std::endl;
                 }
                 if(inside) {
-                    Icosphere p(layerThickness);
-
-                    p.place(posX, posY, z);
-
-                    std::vector<Triangle> t = p.getFacets();
+                    c->place(posX, posY, z);
+                    std::vector<Triangle> t = c->getFacets();
                     _processed.insert(_processed.end(), t.begin(), t.end());
                 }
                 if(sw)
-                    inside = !inside;
+                    inside = false;
             }
         }
-//                } else if(cellType == 2) {
-//                    Cube c(maxLength);
-//                    c.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
-//                    c.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
-
-//                    std::vector<Triangle> t = c.getFacets();
-//                    _triangs.insert(_triangs.end(), t.begin(), t.end());
-//                } else if(cellType == 3) {
-//                    Icosphere s(maxLength);
-//                    s.scale((_maxXLength/maxLength)/fillX, (_maxYLength/maxLength)/fillY, (_maxZLength/maxLength)/fillZ);
-//                    s.place(k*(_maxXLength/fillX), j*(_maxYLength/fillY), i*(_maxZLength/fillZ));
-
-//                    std::vector<Triangle> t = s.getFacets();
-//                    _triangs.insert(_triangs.end(), t.begin(), t.end());
-//                }
-
-//            }
-//        }
     }
 
     // Updates the UI
