@@ -43,5 +43,8 @@ bool Pyramid::init() {
     Triangle face4(glm::vec3(_baseLength,0.0,0.0), glm::vec3(_baseLength, _baseLength, 0.0), glm::vec3(_baseLength/2.0, _baseLength/2.0, _baseLength));
     _facets.push_back(face4);
 
+    // Calculate the boundaries
+    calculateBounds();
+
     return true;
 }

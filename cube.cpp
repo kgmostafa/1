@@ -53,5 +53,8 @@ bool Cube::init() {
     Utils::translate(square[5], 0.0, _edgeLength, 0.0);
     _facets.insert(_facets.end(), square[5].begin(), square[5].end());
 
+    // Calculate the boundaries
+    calculateBounds();
+
     return true;
 }

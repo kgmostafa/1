@@ -91,6 +91,9 @@ bool Icosphere::init() {
     translate(1.0, 1.0, 1.0);
     scale(_radius/2.0,_radius/2.0,_radius/2.0);
 
+    // Calculate the boundaries
+    calculateBounds();
+
     return true;
 }
 

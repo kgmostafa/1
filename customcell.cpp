@@ -18,5 +18,8 @@ bool CustomCell::init() {
     _maxZLength = _stl.getMaxZLength();
     _maxLength = _stl.getMaxLength();
 
+    // Calculate the boundaries
+    calculateBounds();
+
     return true;
 }

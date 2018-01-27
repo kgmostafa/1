@@ -18,8 +18,10 @@ public:
     void translate(float x, float y, float z);
 
     void place(float x, float y, float z);
+    void moveToOrigin();
 
     bool isInitialized();
+
 
     float _maxXLength;
     float _maxYLength;
@@ -28,9 +30,13 @@ public:
 
 protected:
     virtual bool init() = 0;
+    void calculateBounds();
 
     bool _initialized;
     std::vector<Triangle> _facets;
+
+    glm::vec3 _min;
+    glm::vec3 _max;
 };
 
 #endif // CELL_H
