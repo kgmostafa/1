@@ -185,8 +185,7 @@ void MainWindow::on_pushButton_save_clicked() {
         return;
 
     STLFile stl(fileName);
-    std::vector<Triangle> vec(_processed.begin(), _processed.end());
-    stl.encode(_stlHeader, vec);
+    stl.encode(_stlHeader, _processed);
 }
 
 void MainWindow::on_checkBox_basePart_stateChanged(int arg1){

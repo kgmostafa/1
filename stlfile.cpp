@@ -1,7 +1,7 @@
 #include "stlfile.h"
 
 STLFile::STLFile(const QString &name) :
-    _min(), _max() {
+    _header(), _min(), _max() {
     _name = name;
     _file = new QFile(name);
 }
@@ -26,15 +26,15 @@ std::vector<Triangle> STLFile::decode(qint32 &n) {
     std::vector<Triangle> t;
 
 //    TODO: Check if QDataStream is more fast than QFile
-    char first[80];
-//    QDataStream in(&_file);
-//    in.setVersion(QDataStream::Qt_4_5);
-    _file->read(first, 80);
-//    in.readRawData(first, 80);
-//    in.readRawData(nTriangles, 4);
-    _header = QString(first);
+    // Read the header
+    QByteArray header;
+    header = _file->read(80);
+    _header = QString(header);
+
+    // Get the number of triangles
     _file->read(reinterpret_cast<char *>(&n), sizeof(n));
 
+    // Read each triangle
     for(int i = 0; i < n; i++) {
         Vertex v[4];
         for(int j = 0; j < 4; j++) {
@@ -66,6 +66,7 @@ std::vector<Triangle> STLFile::decode(qint32 &n) {
         quint16 att;
         _file->read(reinterpret_cast<char *>(&att), sizeof(att));
     }
+
     return t;
 }
 

@@ -33,16 +33,13 @@ private:
     bool open(bool read);
     bool save();
 
-    QString _name;
-
     QFile *_file;
 
+    QString _name;
     QString _header;
 
     float _min[3];
     float _max[3];
-
-
 };
 
 #endif // STLFILE_H

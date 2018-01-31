@@ -30,7 +30,6 @@ STLPreview::STLPreview(QWidget *parent)
 
 }
 
-
 STLPreview::~STLPreview()
 {
     cleanup();
