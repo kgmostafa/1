@@ -127,7 +127,6 @@ void Triangle::set(Vertex v1, Vertex v2, Vertex v3) {
 
 glm::vec3 Triangle::getNormal() {
     if(_normalSet == false) {
-        std::cout << "normalSet == false\n";
         _normal = glm::normalize(glm::cross(_vec[1]-_vec[0], _vec[2]-_vec[0]));
         _normalSet = true;
     }

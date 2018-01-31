@@ -101,8 +101,8 @@ bool Utils::insideTriangle(glm::vec3 p, Triangle t) {
     return (u >= 0) && (v >= 0) && (u + v < 1);
 }
 
+// WARNING: this function must be tested before being used again
 std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::vector<Triangle> &t, float z, float thickness) {
-    std::cout << "getBoundaries t.size() = " << t.size() << std::endl;
     std::array<float, 2> minimum = {FLT_MAX, FLT_MAX};
     std::array<float, 2> maximum = {FLT_MIN, FLT_MIN};
     float pZ;
@@ -203,11 +203,6 @@ int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::
 }
 
 bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
-//    bool RayIntersectsTriangle(Vector3D rayOrigin,
-//                               Vector3D rayVector,
-//                               Triangle* inTriangle,
-//                               Vector3D& outIntersectionPoint)
-//    {
     const float EPSILON = 0.0000001;
     glm::vec3 vertex0 = t.getV1();
     glm::vec3 vertex1 = t.getV2();
@@ -218,27 +213,28 @@ bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
     edge2 = vertex2 - vertex0;
     h = glm::cross((v2-v1), edge2);
     a = glm::dot(edge1, h);
-    if (a > -EPSILON && a < EPSILON)
+    if (a > -EPSILON && a < EPSILON) {
         return false;
+    }
     f = 1/a;
     s = v1 - vertex0;
     u = f * (glm::dot(s, h));
-    if (u < 0.0 || u > 1.0)
+    if (u < 0.0 || u > 1.0) {
         return false;
+    }
     q = glm::cross(s, edge1);
     v = f * glm::dot((v2-v1), q);
-    if (v < 0.0 || u + v > 1.0)
+    if (v < 0.0 || u + v > 1.0) {
         return false;
+    }
+
     // At this stage we can compute t to find out where the intersection point is on the line.
     float k = f * glm::dot(edge2, q);
-    if (k > EPSILON) // ray intersection
-    {
-//        outIntersectionPoint = rayOrigin + rayVector * t;
+    if (k > EPSILON) { // ray intersection
         return true;
-    }
-    else // This means that there is a line intersection but not a ray intersection.
+    } else { // This means that there is a line intersection but not a ray intersection.
         return false;
-
+    }
 }
 
 bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
@@ -249,25 +245,18 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     /*    2) normal of the triangle */
     /*    3) crossproduct(edge from tri, {x,y,z}-directin) */
     /*       this gives 3x3=9 more tests */
-
-    //float v0[3],v1[3],v2[3];
     glm::vec3 v0, v1, v2;
 
-    float min,max,p0,p1,p2,rad,fex,fey,fez;		// -NJMP- "d" local variable removed
+    float min,max,p0,p1,p2,rad,fex,fey,fez;
 
     glm::vec3 normal, e0, e1, e2;
-
-
 
     /* This is the fastest branch on Sun */
 
     /* move everything so that the boxcenter is in (0,0,0) */
-    glm::vec3 boxcenter = (b2 + b1) / 2.0;
-    glm::vec3 boxhalfsize = (b2 - b1) / 2.0;
+    glm::vec3 boxcenter = (b2 + b1) * 0.5;
+    glm::vec3 boxhalfsize = (b2 - b1) * 0.5;
 
-    //    SUB(v0,triverts[0],boxcenter);
-    //    SUB(v1,triverts[1],boxcenter);
-    //    SUB(v2,triverts[2],boxcenter);
     v0 = t.getV1() - boxcenter;
     v1 = t.getV2() - boxcenter;
     v2 = t.getV3() - boxcenter;
@@ -276,46 +265,15 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     e0 = v1 - v0;
     e1 = v2 - v1;
     e2 = v0 - v2;
-//    SUB(e0,v1,v0);      /* tri edge 0 */
-//    SUB(e1,v2,v1);      /* tri edge 1 */
-//    SUB(e2,v0,v2);      /* tri edge 2 */
 
     /* Bullet 3:  */
     /*  test the 9 tests first (this was faster) */
     fex = fabsf(e0.x);
     fey = fabsf(e0.y);
     fez = fabsf(e0.z);
-
-//    AXISTEST_X01(e0[Z], e0[Y], fez, fey);
-//    #define AXISTEST_X01(a, b, fa, fb)
-    p0 = e0.z*v0.y - e0.y*v0.z;
-    p2 = e0.z*v2.y - e0.y*v2.z;
-    if(p0<p2) {
-        min=p0;
-        max=p2;
-    } else {
-        min=p2;
-        max=p0;
-    }
-    rad = fez * boxhalfsize.y + fey * boxhalfsize.z;
-    if(min>rad || max<-rad) return false;
-
-//    AXISTEST_Y02(e0[Z], e0[X], fez, fex);
-//#define AXISTEST_Y02(a, b, fa, fb)
-    p0 = -e0.z*v0.x + e0.x*v0.z;
-    p2 = -e0.z*v2.x + e0.x*v2.z;
-    if(p0<p2) {min=p0; max=p2;} else {min=p2; max=p0;}
-    rad = fez * boxhalfsize.x + fex * boxhalfsize.z;
-    if(min>rad || max<-rad) return false;
-
-//    AXISTEST_Z12(e0[Y], e0[X], fey, fex);
-//#define AXISTEST_Z12(a, b, fa, fb)
-
-    p1 = e0.y*v1.x - e0.x*v1.y;
-    p2 = e0.y*v2.x - e0.x*v2.x;
-    if(p2<p1) {min=p2; max=p1;} else {min=p1; max=p2;}
-    rad = fey * boxhalfsize.x + fex * boxhalfsize.y;
-    if(min>rad || max<-rad) return false;
+    AXISTEST_X01(e0.z, e0.y, fez, fey);
+    AXISTEST_Y02(e0.z, e0.x, fez, fex);
+    AXISTEST_Z12(e0.y, e0.x, fey, fex);
 
     fex = fabsf(e1.x);
     fey = fabsf(e1.y);
@@ -338,8 +296,6 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     /*  the triangle against the AABB */
 
     /* test in X-direction */
-//    FINDMINMAX(v0[X],v1[X],v2[X],min,max);
-//#define FINDMINMAX(x0,x1,x2,min,max)
     min = max = v0.x;
     if(v1.x<min) min=v1.x;
     if(v1.x>max) max=v1.x;
@@ -366,30 +322,27 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     /* Bullet 2: */
     /*  test if the box intersects the plane of the triangle */
     /*  compute plane equation of triangle: normal*x+d=0 */
-//    CROSS(normal,e0,e1);
     normal = glm::cross(e0, e1);
 
     // -NJMP- (line removed here)
     if(!planeBoxOverlap(normal,v0,boxhalfsize)) return false;	// -NJMP-
 
     return true;   /* box and triangle overlaps */
-
 }
 
-bool Utils::planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox)	// -NJMP-
-{
+bool Utils::planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox) { // -NJMP-
     int q;
     glm::vec3 vmin,vmax;
     float v;
     for(q=0;q<=2;q++) {
-    v=vert[q];					// -NJMP-
-    if(normal[q]>0.0f) {
-      vmin[q]=-maxbox[q] - v;	// -NJMP-
-      vmax[q]= maxbox[q] - v;	// -NJMP-
-    } else {
-      vmin[q]= maxbox[q] - v;	// -NJMP-
-      vmax[q]=-maxbox[q] - v;	// -NJMP-
-    }
+        v=vert[q];					// -NJMP-
+        if(normal[q]>0.0f) {
+            vmin[q]=-maxbox[q] - v;	// -NJMP-
+            vmax[q]= maxbox[q] - v;	// -NJMP-
+        } else {
+            vmin[q]= maxbox[q] - v;	// -NJMP-
+            vmax[q]=-maxbox[q] - v;	// -NJMP-
+        }
     }
     if(glm::dot(normal,vmin)>0.0f) return false;	// -NJMP-
     if(glm::dot(normal,vmax)>=0.0f) return true;	// -NJMP-

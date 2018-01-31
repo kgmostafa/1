@@ -17,6 +17,8 @@ public:
 
     QString getHeader();
 
+    float getMinX();
+    float getMaxX();
     float getMinY();
     float getMaxY();
     float getMinZ();

@@ -60,11 +60,12 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    float _minZ;
-    float _maxZ;
-
+    float _minX;
+    float _maxX;
     float _minY;
     float _maxY;
+    float _minZ;
+    float _maxZ;
 
     QString _stlHeader;
 };

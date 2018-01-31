@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _maxYLength = 0.0;
     _maxZLength = 0.0;
     _maxLength = 0.0;
+    _minX = 0.0;
+    _maxX = 0.0;
+    _minY = 0.0;
+    _maxY = 0.0;
     _minZ = 0.0;
     _maxZ = 0.0;
 
@@ -56,6 +60,8 @@ void MainWindow::on_pushButton_open_clicked() {
     _maxYLength = stl.getMaxYLength();
     _maxZLength = stl.getMaxZLength();
     _maxLength = stl.getMaxLength();
+    _minX = stl.getMinX();
+    _maxX = stl.getMaxX();
     _minY = stl.getMinY();
     _maxY = stl.getMaxY();
     _minZ = stl.getMinZ();
@@ -125,35 +131,31 @@ void MainWindow::on_pushButton_process_clicked() {
         c = new Pyramid(layerThickness);
     }
 
-    int zSteps = (int)(_maxZLength/layerThickness);
+    int zSteps = (int)ceil(_maxZLength/layerThickness);
     for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
         float z = _minZ + i*layerThickness;
         std::vector<Triangle> slice = Utils::slice(_base, z, layerThickness);
-        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
 
-        float xLength = boundaries.second[0]-boundaries.first[0];
-        float yLength = boundaries.second[1]-boundaries.first[1];
-        int xSteps = (int)(xLength/layerThickness);
-        int ySteps = (int)(yLength/layerThickness);
+//        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
+//        float xLength = boundaries.second[0]-boundaries.first[0];
+//        float yLength = boundaries.second[1]-boundaries.first[1];
 
-        std::cout << "steps: (" << xSteps << ", " << ySteps << ") on z = " << z << "\n";
+        int xSteps = (int)ceil(_maxXLength/layerThickness);
+        int ySteps = (int)ceil(_maxYLength/layerThickness);
 
-
+        // TODO: optimize by using boundaries
         for(int j = 0; j < ySteps; j++) {
             bool inside = false;
             for(int k = 0; k < xSteps; k++) {
                 bool sw = false;
-                    // TODO: start from the middle and cut the cell on the boundaries
-                float posX = boundaries.first[0] + k*layerThickness;
-                float posY = boundaries.first[1] + j*layerThickness;
+                // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
+                float posX = _minX + k*layerThickness;
+                float posY = _minY + j*layerThickness;
                 std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, layerThickness);
                 for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
-                    if(it->getNormal().x < -std::numeric_limits<float>::epsilon()) {
-                        inside = true;
-                    } else if(it->getNormal().x > std::numeric_limits<float>::epsilon()) {
-                        if(inside) {
-                            sw = true;
-                        }
+                    inside = true;
+                    if(it->getNormal().x > 0) {
+                        sw = true;
                     }
                 }
                 if(inside) {
@@ -161,8 +163,9 @@ void MainWindow::on_pushButton_process_clicked() {
                     std::vector<Triangle> t = c->getFacets();
                     _processed.insert(_processed.end(), t.begin(), t.end());
                 }
-                if(sw)
+                if(sw) {
                     inside = false;
+                }
             }
         }
     }

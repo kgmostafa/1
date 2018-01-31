@@ -136,6 +136,14 @@ QString STLFile::getHeader() {
     return _header;
 }
 
+float STLFile::getMinX() {
+    return _min[0];
+}
+
+float STLFile::getMaxX() {
+    return _max[0];
+}
+
 float STLFile::getMinY() {
     return _min[1];
 }
