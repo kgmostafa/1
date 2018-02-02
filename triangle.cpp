@@ -89,6 +89,13 @@ void Triangle::rotate(float angle, glm::vec3 normal) {
     calculateMinMax();
 }
 
+void Triangle::switchNormal() {
+    _normal = -_normal;
+    glm::vec3 tmp = _vec[1];
+    _vec[1] = _vec[2];
+    _vec[2] = tmp;
+}
+
 void Triangle::calculateMinMax() {
     glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
     glm::vec3 max(FLT_MIN, FLT_MIN, FLT_MIN);

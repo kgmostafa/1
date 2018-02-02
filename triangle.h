@@ -21,6 +21,7 @@ public:
     void rotateY(float angle);
     void rotateZ(float angle);
     void rotate(float angle, glm::vec3 normal);
+    void switchNormal();
 
     void set(Vertex v1, Vertex v2, Vertex v3);
 

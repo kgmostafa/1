@@ -451,3 +451,20 @@ void Utils::offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float 
         v.at(i) += d * normal;
     }
 }
+
+std::vector<Triangle> Utils::getTriangleList(std::vector<Vertex> &v, std::vector<Facet> &f) {
+    std::vector<Triangle> t;
+
+    for(std::vector<Facet>::iterator it = f.begin() ; it != f.end(); ++it) {
+        t.push_back(Triangle(it->normal, v.at(it->vertex[0]), v.at(it->vertex[1]), v.at(it->vertex[2])));
+    }
+
+    return t;
+}
+
+Utils::switchNormal(std::vector<Triangle> &t) {
+    for(std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
+        it->switchNormal();
+        it->translate(20.0, 0.0, 0.0);
+    }
+}
