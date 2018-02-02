@@ -8,6 +8,11 @@
 #include "triangle.h"
 #include "vertex.h"
 
+struct Facet {
+    Vertex normal;
+    int vertex[3];
+};
+
 class Utils
 {
 public:
@@ -35,6 +40,8 @@ public:
 
     static std::vector<Triangle> slice(std::vector<Triangle> t, float z, float thickness);
     static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);
+
+    static std::vector<Vertex> getVertexList(std::vector<Triangle> &t, std::vector<Facet> &f);
 private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);
 };

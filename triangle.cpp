@@ -23,9 +23,9 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3) :
 
 Triangle::Triangle(Vertex v1, Vertex v2, Vertex v3) :
     _normalSet(false) {
-    this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
-    this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
-    this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
+    this->_vec[0] = glm::vec3(v1.x, v1.y, v1.z);
+    this->_vec[1] = glm::vec3(v2.x, v2.y, v2.z);
+    this->_vec[2] = glm::vec3(v3.x, v3.y, v3.z);
     calculateMinMax();
 }
 
@@ -33,10 +33,10 @@ Triangle::Triangle(Vertex normal, Vertex v1, Vertex v2, Vertex v3) :
     _normalSet(true) {
     // TODO: add v1, v2 and v3 verifications
     // TODO: check if this normal is correct
-    this->_normal = glm::vec3(normal.getX(), normal.getY(), normal.getZ());;
-    this->_vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
-    this->_vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
-    this->_vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
+    this->_normal = glm::vec3(normal.x, normal.y, normal.z);;
+    this->_vec[0] = glm::vec3(v1.x, v1.y, v1.z);
+    this->_vec[1] = glm::vec3(v2.x, v2.y, v2.z);
+    this->_vec[2] = glm::vec3(v3.x, v3.y, v3.z);
     calculateMinMax();
 }
 
@@ -119,9 +119,9 @@ void Triangle::calculateMinMax() {
 }
 
 void Triangle::set(Vertex v1, Vertex v2, Vertex v3) {
-    _vec[0] = glm::vec3(v1.getX(), v1.getY(), v1.getZ());
-    _vec[1] = glm::vec3(v2.getX(), v2.getY(), v2.getZ());
-    _vec[2] = glm::vec3(v3.getX(), v3.getY(), v3.getZ());
+    _vec[0] = glm::vec3(v1.x, v1.y, v1.z);
+    _vec[1] = glm::vec3(v2.x, v2.y, v2.z);
+    _vec[2] = glm::vec3(v3.x, v3.y, v3.z);
     calculateMinMax();
 }
 

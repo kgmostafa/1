@@ -47,9 +47,9 @@ void Utils::place(Cell &c, float x, float y, float z) {
 }
 
 float Utils::distance(Vertex v1, Vertex v2) {
-    float dx = v1.getX() - v2.getX();
-    float dy = v1.getY() - v2.getY();
-    float dz = v1.getZ() - v2.getZ();
+    float dx = v1.x - v2.x;
+    float dy = v1.y - v2.y;
+    float dz = v1.z - v2.z;
 
     float dist = sqrt(pow(dx, 2.0) + pow(dy, 2.0) + pow(dz, 2.0));
 
@@ -375,3 +375,44 @@ std::vector<Triangle> Utils::getTrianglesFromBox(std::vector<Triangle> t, float 
             t.end());
     return t;
 }
+
+std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<Facet> &f) {
+    std::vector<Vertex> v;
+    Facet f_aux;
+
+    for(std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
+        f_aux.normal = it->getNormal();
+
+        std::vector<Vertex>::iterator v_it =  std::find(v.begin(), v.end(), it->getV1());
+        if(v_it  == v.end()) {
+            v.push_back(it->getV1());
+            f_aux.vertex[0] = v.size() - 1;
+        } else {
+            f_aux.vertex[0] = v_it - v.begin();
+        }
+        std::cout << "f_aux.vertex[0] = " << f_aux.vertex[0] << std::endl;
+
+        v_it =  std::find(v.begin(), v.end(), it->getV2());
+        if(v_it  == v.end()) {
+            v.push_back(it->getV2());
+            f_aux.vertex[1] = v.size() - 1;
+        } else {
+            f_aux.vertex[1] = v_it - v.begin();
+        }
+        std::cout << "f_aux.vertex[1] = " << f_aux.vertex[1] << std::endl;
+
+        v_it =  std::find(v.begin(), v.end(), it->getV3());
+        if(v_it  == v.end()) {
+            v.push_back(it->getV3());
+            f_aux.vertex[2] = v.size() - 1;
+        } else {
+            f_aux.vertex[2] = v_it - v.begin();
+        }
+        std::cout << "f_aux.vertex[2] = " << f_aux.vertex[2] << std::endl;
+
+        f.push_back(f_aux);
+    }
+    return v;
+}
+
+

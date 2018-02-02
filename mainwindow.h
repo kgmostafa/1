@@ -6,6 +6,7 @@
 #include <QFileDialog>
 #include "triangle.h"
 #include "cell.h"
+#include "utils.h"
 
 namespace Ui {
 class MainWindow;
@@ -66,6 +67,9 @@ private:
     float _maxY;
     float _minZ;
     float _maxZ;
+
+    std::vector<Vertex> _vertex;
+    std::vector<Facet> _facets;
 
     QString _stlHeader;
 };

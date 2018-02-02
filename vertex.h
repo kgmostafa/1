@@ -4,10 +4,10 @@
 #include <glm/glm.hpp>
 #include <QString>
 
-class Vertex
-{
+class Vertex : public glm::vec3 {
 public:
     Vertex();
+    Vertex(glm::vec3 v);
     Vertex(float x, float y, float z);
 
 
@@ -20,21 +20,24 @@ public:
 
     QString toString();
 
-    Vertex(glm::vec3& v){
-              _x = v.x;
-              _y = v.y;
-              _z = v.z;
-     }
-
-     Vertex& operator= (glm::vec3& v){
-              _x = v.x;
-              _y = v.y;
-              _z = v.z;
-              return *this;
-     }
+    bool operator==(const Vertex &v) const;
 
 private:
-    float _x, _y, _z;
 };
+
+// http://en.cppreference.com/w/cpp/utility/hash
+// https://stackoverflow.com/questions/17016175/c-unordered-map-using-a-custom-class-type-as-the-key/17017281#17017281
+namespace std {
+    template<> struct hash<Vertex> {
+        typedef Vertex argument_type;
+        typedef std::size_t result_type;
+
+        result_type operator()(argument_type const &v) const {
+            return ((hash<int>()(floorf(v.x*1000.0)) ^
+                     (hash<int>()(floorf(v.y*1000.0)) << 1)) >> 1) ^
+                    (hash<int>()(floorf(v.z*1000.0)) << 1);
+        }
+    };
+}
 
 #endif // VERTEX_H

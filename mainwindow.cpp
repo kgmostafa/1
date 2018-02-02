@@ -7,10 +7,10 @@
 #include "triangle.h"
 #include "stlfile.h"
 #include "utils.h"
+#include "glm/ext.hpp"
 #include <iostream>
 #include <QMessageBox>
 
-#include "glm/ext.hpp"
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow) {
@@ -96,6 +96,15 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
 }
 
 void MainWindow::on_pushButton_process_clicked() {
+    std::vector<Vertex> v_aux;
+    std::vector<Facet> f_aux;
+    v_aux = Utils::getVertexList(_base, f_aux);
+
+    std::cout << "v_aux.size(): " << v_aux.size() << std::endl;
+
+    std::cout << "f_aux.size(): " << f_aux.size() << std::endl;
+return;
+
     int cellType = 0; // None
     if(ui->radioButton_cellType_pyramid->isChecked())
         cellType = 1; // Pyramid
