@@ -9,7 +9,7 @@
 #include "vertex.h"
 
 struct Facet {
-    Vertex normal;
+    glm::vec3 normal;
     int vertex[3];
 };
 
@@ -42,6 +42,9 @@ public:
     static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);
 
     static std::vector<Vertex> getVertexList(std::vector<Triangle> &t, std::vector<Facet> &f);
+
+
+    static void offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d);
 private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);
 };

@@ -103,6 +103,12 @@ void MainWindow::on_pushButton_process_clicked() {
     std::cout << "v_aux.size(): " << v_aux.size() << std::endl;
 
     std::cout << "f_aux.size(): " << f_aux.size() << std::endl;
+    Utils::offsetVertices(v_aux, f_aux, 10.0);
+
+    for(std::vector<Vertex>::iterator it = v_aux.begin() ; it != v_aux.end(); ++it) {
+        std::cout << it->toString().toStdString() << std::endl;
+    }
+
 return;
 
     int cellType = 0; // None

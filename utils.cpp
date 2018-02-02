@@ -415,4 +415,39 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
     return v;
 }
 
+// Bahattin  Koc, Yuan-Shin Lee (2001): Non-uniform offsettting and hollowing objects by using biarcs fitting for rapid protoyping processes
+void Utils::offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d) {
 
+
+    for(int i = 0; i < v.size(); i++) {
+        glm::vec3 normal;
+        bool facet_check = false;
+        for(int j = 0; j < f.size(); j++) {
+            if(f.at(j).vertex[0] == i ||
+               f.at(j).vertex[1] == i ||
+               f.at(j).vertex[2] == i) {
+                if(facet_check == false) {
+                    facet_check = true;
+                    normal = f.at(j).normal;
+                    continue;
+                }
+                bool normal_check = false;
+                for(int k = j-1; k >= 0; k--) {
+                    if(f.at(k).vertex[0] == i ||
+                       f.at(k).vertex[1] == i ||
+                       f.at(k).vertex[2] == i) {
+                        if(fabsf(glm::dot(f.at(j).normal, f.at(k).normal) - 1.0) < std::numeric_limits<float>::epsilon()) {
+                            normal_check = true;
+                            break;
+                        }
+                    }
+                }
+                if(normal_check == false) {
+                    normal += f.at(j).normal;
+                }
+            }
+        }
+        normal =  glm::normalize(normal);
+        v.at(i) += d * normal;
+    }
+}
