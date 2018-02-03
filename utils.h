@@ -44,7 +44,7 @@ public:
     static std::vector<Vertex> getVertexList(std::vector<Triangle> &t, std::vector<Facet> &f);
     static void offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d);
     static std::vector<Triangle> getTriangleList(std::vector<Vertex> &v, std::vector<Facet> &f);
-    static switchNormal(std::vector<Triangle> &t);
+    static void switchNormal(std::vector<Triangle> &t);
 private:
 
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);

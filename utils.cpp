@@ -462,9 +462,8 @@ std::vector<Triangle> Utils::getTriangleList(std::vector<Vertex> &v, std::vector
     return t;
 }
 
-Utils::switchNormal(std::vector<Triangle> &t) {
+void Utils::switchNormal(std::vector<Triangle> &t) {
     for(std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
         it->switchNormal();
-        it->translate(20.0, 0.0, 0.0);
     }
 }

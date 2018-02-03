@@ -21,6 +21,7 @@ public:
     ~MainWindow();
 
     std::vector<Triangle> _base;
+    std::vector<Triangle> _offset;
     std::vector<Triangle> _processed;
     Cell *_cell;
 

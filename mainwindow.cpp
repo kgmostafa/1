@@ -96,90 +96,102 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked) {
 }
 
 void MainWindow::on_pushButton_process_clicked() {
-    std::vector<Vertex> v_aux;
-    std::vector<Facet> f_aux;
-    v_aux = Utils::getVertexList(_base, f_aux);
+    bool skipHollow = ui->checkBox_skipHollowing->isChecked();
+    bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
-    std::cout << "v_aux.size(): " << v_aux.size() << std::endl;
+    if(skipHollow == false) {
+        std::vector<Vertex> v_aux;
+        std::vector<Facet> f_aux;
+        std::vector<Triangle> t_aux;
 
-    std::cout << "f_aux.size(): " << f_aux.size() << std::endl;
-    Utils::offsetVertices(v_aux, f_aux, 10.0);
-
-    for(std::vector<Vertex>::iterator it = v_aux.begin() ; it != v_aux.end(); ++it) {
-        std::cout << it->toString().toStdString() << std::endl;
-    }
-
-return;
-
-    int cellType = 0; // None
-    if(ui->radioButton_cellType_pyramid->isChecked())
-        cellType = 1; // Pyramid
-    else if(ui->radioButton_cellType_cube->isChecked())
-        cellType = 2; // Cube
-    else if(ui->radioButton_cellType_icosphere->isChecked())
-        cellType = 3; // Icosphere
-    else if(ui->radioButton_cellType_custom->isChecked()) {
-        if(_cellLoaded == false) {
-            QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
-            return;
+        bool valid = false;
+        float offset = ui->lineEdit_hollowingOffset->text().toFloat(&valid);
+        if(!valid) {
+            std::cout << "Invalid input. Using default offset = 5 mm\n";
+            offset = 5.0;
         }
-        cellType = 4; // Custom
+
+        _processed.insert(_processed.end(), _base.begin(), _base.end());
+        v_aux = Utils::getVertexList(_base, f_aux);
+        Utils::offsetVertices(v_aux, f_aux, offset);
+        t_aux = Utils::getTriangleList(v_aux, f_aux);
+        _base = t_aux;
+        Utils::switchNormal(t_aux);
+        _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
     }
 
-    bool valid = false;
-    float layerThickness = ui->lineEdit_layerThickness->text().toFloat(&valid);
-    if(!valid) {
-        std::cout << "Invalid input. Using layerThickness = 1 mm\n";
-        layerThickness = 1.0;
-    }
 
-    Cell *c = NULL;
-    if(cellType == 1) {
-        c = new Pyramid(layerThickness);
-    } else if(cellType == 2) {
-        c = new Cube(layerThickness);
-    } else if(cellType == 3) {
-        c = new Icosphere(layerThickness);
-    } else if(cellType == 4) {
-        c = _cell;
-    } else {    // Default: Pyramid
-        c = new Pyramid(layerThickness);
-    }
+    if(skipInfill == false) {
+        int cellType = 0; // None
+        if(ui->radioButton_cellType_pyramid->isChecked())
+            cellType = 1; // Pyramid
+        else if(ui->radioButton_cellType_cube->isChecked())
+            cellType = 2; // Cube
+        else if(ui->radioButton_cellType_icosphere->isChecked())
+            cellType = 3; // Icosphere
+        else if(ui->radioButton_cellType_custom->isChecked()) {
+            if(_cellLoaded == false) {
+                QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
+                return;
+            }
+            cellType = 4; // Custom
+        }
 
-    int zSteps = (int)ceil(_maxZLength/layerThickness);
-    for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
-        float z = _minZ + i*layerThickness;
-        std::vector<Triangle> slice = Utils::slice(_base, z, layerThickness);
+        bool valid = false;
+        float cellThickness = ui->lineEdit_cellThickness->text().toFloat(&valid);
+        if(!valid) {
+            std::cout << "Invalid input. Using layerThickness = 1 mm\n";
+            cellThickness = 1.0;
+        }
 
-//        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
-//        float xLength = boundaries.second[0]-boundaries.first[0];
-//        float yLength = boundaries.second[1]-boundaries.first[1];
+        Cell *c = NULL;
+        if(cellType == 1) {
+            c = new Pyramid(cellThickness);
+        } else if(cellType == 2) {
+            c = new Cube(cellThickness);
+        } else if(cellType == 3) {
+            c = new Icosphere(cellThickness);
+        } else if(cellType == 4) {
+            c = _cell;
+        } else {    // Default: Pyramid
+            c = new Pyramid(cellThickness);
+        }
 
-        int xSteps = (int)ceil(_maxXLength/layerThickness);
-        int ySteps = (int)ceil(_maxYLength/layerThickness);
+        int zSteps = (int)ceil(_maxZLength/cellThickness);
+        for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
+            float z = _minZ + i*cellThickness;
+            std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
 
-        // TODO: optimize by using boundaries
-        for(int j = 0; j < ySteps; j++) {
-            bool inside = false;
-            for(int k = 0; k < xSteps; k++) {
-                bool sw = false;
-                // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
-                float posX = _minX + k*layerThickness;
-                float posY = _minY + j*layerThickness;
-                std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, layerThickness);
-                for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
-                    inside = true;
-                    if(it->getNormal().x > 0) {
-                        sw = true;
+    //        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
+    //        float xLength = boundaries.second[0]-boundaries.first[0];
+    //        float yLength = boundaries.second[1]-boundaries.first[1];
+
+            int xSteps = (int)ceil(_maxXLength/cellThickness);
+            int ySteps = (int)ceil(_maxYLength/cellThickness);
+
+            // TODO: optimize by using boundaries
+            for(int j = 0; j < ySteps; j++) {
+                bool inside = false;
+                for(int k = 0; k < xSteps; k++) {
+                    bool sw = false;
+                    // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
+                    float posX = _minX + k*cellThickness;
+                    float posY = _minY + j*cellThickness;
+                    std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness);
+                    for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
+                        inside = true;
+                        if(it->getNormal().x > 0) {
+                            sw = true;
+                        }
                     }
-                }
-                if(inside) {
-                    c->place(posX, posY, z);
-                    std::vector<Triangle> t = c->getFacets();
-                    _processed.insert(_processed.end(), t.begin(), t.end());
-                }
-                if(sw) {
-                    inside = false;
+                    if(inside) {
+                        c->place(posX, posY, z);
+                        std::vector<Triangle> t = c->getFacets();
+                        _processed.insert(_processed.end(), t.begin(), t.end());
+                    }
+                    if(sw) {
+                        inside = false;
+                    }
                 }
             }
         }
