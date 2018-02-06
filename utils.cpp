@@ -237,6 +237,29 @@ bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
     }
 }
 
+// NOTE: This function don't check if the triangle isn't intersecting the plane (it just return the segment).
+// The result must be a pair of points that defines a segment, if both points are the same, it's just a point.
+std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN) {
+    glm::vec3 intersectionPoint;
+    std::pair<glm::vec3, glm::vec3> segment;
+    bool second = false;
+    if(Utils::intersectRayPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersectionPoint) == 0) {
+        segment.first = intersectionPoint;
+        second = true;
+    }
+    if(Utils::intersectRayPlane(triangle.getV2(), triangle.getV3(), planeP, planeN, intersectionPoint) == 0) {
+        if(second) {
+            segment.second = intersectionPoint;
+        } else {
+            segment.first = intersectionPoint;
+        }
+    }
+    if(Utils::intersectRayPlane(triangle.getV3(), triangle.getV1(), planeP, planeN, intersectionPoint) == 0) {
+        segment.second = intersectionPoint;
+    }
+    return segment;
+}
+
 bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     /*    use separating axis theorem to test overlap between triangle and box */
     /*    need to test for overlap in these directions: */
@@ -330,6 +353,109 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     return true;   /* box and triangle overlaps */
 }
 
+// inSegment(): determine if a point is inside a segment
+//    Input:  a point P, and a collinear segment S
+//    Return: 1 = P is inside S
+//            0 = P is  not inside S
+bool Utils::inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s) {
+    if (s.first.x != s.second.x) {    // S is not  vertical
+        if (s.first.x <= p.x && p.x <= s.second.x)
+            return true;
+        if (s.first.x >= p.x && p.x >= s.second.x)
+            return true;
+    }
+    else {    // S is vertical, so test y  coordinate
+        if (s.first.y <= p.y && p.y <= s.second.y)
+            return true;
+        if (s.first.y >= p.y && p.y >= s.second.y)
+            return true;
+    }
+    return false;
+}
+//===================================================================
+// http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
+// TODO: add intersect point and endpoint
+int Utils::intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2) {
+    // intersect2D_2Segments(): find the 2D intersection of 2 finite segments
+    //    Input:  two finite segments S1 and S2
+    //    Output: *I0 = intersect point (when it exists)
+    //            *I1 =  endpoint of intersect segment [I0,I1] (when it exists)
+    //    Return: 0=disjoint (no intersect)
+    //            1=intersect  in unique point I0
+    //            2=overlap  in segment from I0 to I1
+    glm::vec3 u = s1.second - s1.first;
+    glm::vec3 v = s2.second - s2.first;
+    glm::vec3 w = s1.first - s2.first;
+    float D = PERP(u,v);
+
+    // test if  they are parallel (includes either being a point)
+    if (fabs(D) < std::numeric_limits<float>::epsilon()) {           // S1 and S2 are parallel
+        if (PERP(u,w) != 0 || PERP(v,w) != 0)  {
+            return 0;                    // they are NOT collinear
+        }
+        // they are collinear or degenerate
+        // check if they are degenerate  points
+        float du = glm::dot(u,u);
+        float dv = glm::dot(v,v);
+        if (du==0 && dv==0) {            // both segments are points
+            if (s1.first !=  s2.first)         // they are distinct  points
+                 return 0;
+            return 1;
+        }
+        if (du==0) {                     // S1 is a single point
+            if (inSegment(s1.first, s2) == 0)  // but is not in S2
+                 return 0;
+            return 1;
+        }
+        if (dv==0) {                     // S2 a single point
+            if  (inSegment(s2.first, s1) == 0)  // but is not in S1
+                 return 0;
+            return 1;
+        }
+        // they are collinear segments - get  overlap (or not)
+        float t0, t1;                    // endpoints of S1 in eqn for S2
+        glm::vec3 w2 = s1.second - s2.first;
+        if (v.x != 0) {
+                 t0 = w.x / v.x;
+                 t1 = w2.x / v.x;
+        }
+        else {
+                 t0 = w.y / v.y;
+                 t1 = w2.y / v.y;
+        }
+        if (t0 > t1) {                   // must have t0 smaller than t1
+                 float t=t0; t0=t1; t1=t;    // swap if not
+        }
+        if (t0 > 1 || t1 < 0) {
+            return 0;      // NO overlap
+        }
+        t0 = t0<0? 0 : t0;               // clip to min 0
+        t1 = t1>1? 1 : t1;               // clip to max 1
+        if (t0 == t1) {                  // intersect is a point
+//            *I0 = s2.first +  t0 * v;
+            return 1;
+        }
+
+        // they overlap in a valid subsegment
+//        *I0 = s2.first + t0 * v;
+//        *I1 = s2.first + t1 * v;
+        return 2;
+    }
+    // the segments are skew and may intersect in a point
+    // get the intersect parameter for S1
+    float     sI = PERP(v,w) / D;
+    if (sI < 0 || sI > 1)                // no intersect with S1
+        return 0;
+
+    // get the intersect parameter for S2
+    float     tI = PERP(u,w) / D;
+    if (tI < 0 || tI > 1)                // no intersect with S2
+        return 0;
+
+//    *I0 = s1.first + sI * u;                // compute S1 intersect point
+    return 1;
+}
+
 bool Utils::planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox) { // -NJMP-
     int q;
     glm::vec3 vmin,vmax;
@@ -417,8 +543,6 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
 
 // Bahattin  Koc, Yuan-Shin Lee (2001): Non-uniform offsettting and hollowing objects by using biarcs fitting for rapid protoyping processes
 void Utils::offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d) {
-
-
     for(int i = 0; i < v.size(); i++) {
         glm::vec3 normal;
         bool facet_check = false;
@@ -466,4 +590,76 @@ void Utils::switchNormal(std::vector<Triangle> &t) {
     for(std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
         it->switchNormal();
     }
+}
+
+float Utils::getMinimumZ(std::vector<Vertex> &v) {
+    float min = std::numeric_limits<float>::max();
+    for(std::vector<Vertex>::iterator it = v.begin() ; it != v.end(); ++it) {
+        if(it->z < min) {
+            min = it->z;
+        }
+    }
+    return min;
+}
+
+float Utils::getMaximumZ(std::vector<Vertex> &v) {
+    float max = std::numeric_limits<float>::min();
+    for(std::vector<Vertex>::iterator it = v.begin() ; it != v.end(); ++it) {
+        if(it->z > max) {
+            max = it->z;
+        }
+    }
+    return max;
+}
+
+std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getContours(std::vector<Triangle> &t, float z) {
+    std::vector<std::pair<glm::vec3, glm::vec3>> result;
+    for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
+        if(it->getMinZ() <= z && it->getMaxZ() > z) {
+            std::pair<glm::vec3, glm::vec3> tmp;
+            tmp = intersectTrianglePlane(*it, glm::vec3(0.0, 0.0, z), glm::vec3(0.0, 0.0, 1.0));
+            result.push_back(tmp);
+        }
+    }
+    // TODO: remove duplicates
+    return result;
+}
+
+std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<glm::vec3> &v) {
+    std::vector<std::vector<glm::vec3>> result;
+    for(int i = 0; i < v.size(); i += 2) {
+        bool found = false;
+        std::vector<std::vector<glm::vec3>>::iterator it;
+        for(it = result.begin(); it != result.end(); ++it) {
+            std::vector<glm::vec3>::iterator itfind;
+            itfind = std::find(it->begin(), it->end(), v.at(i));
+            if(itfind != it->end()){
+                found = true;
+                it->push_back(v.at(i+1));
+                break;
+            }
+        }
+        if(!found) {
+            std::vector<glm::vec3> tmp;
+            tmp.push_back(v.at(i));
+            tmp.push_back(v.at(i+1));
+            result.push_back(tmp);
+        }
+    }
+    return result;
+}
+
+void Utils::getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet> &f, float thickness) {
+}
+
+bool Utils::checkLoops(std::vector<std::pair<glm::vec3, glm::vec3> > &s)
+{
+    for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it1 = s.begin(); it1 != s.end(); ++it1) {
+        for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it2 = it1; it2 != s.end(); ++it2) {
+            if(Utils::intersectSegments(*it1, *it2) == 2) {
+                return true;
+            }
+        }
+    }
+    return false;
 }

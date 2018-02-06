@@ -14,10 +14,6 @@ public:
     void set(float x, float y, float z);
     void translate(float x, float y, float z);
 
-    float getX();
-    float getY();
-    float getZ();
-
     QString toString();
 
     bool operator==(const Vertex &v) const;

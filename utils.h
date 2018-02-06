@@ -36,7 +36,10 @@ public:
     static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z, float thickness);
     static int intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::vec3 pNormal, glm::vec3 &intersect);
     static bool intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t);
+    static std::pair<glm::vec3, glm::vec3> intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN);
     static bool checkTriangleBoxOverlap(Triangle t, glm::vec3 v1, glm::vec3 v2);
+    static int intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2);
+    static bool inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s);
 
     static std::vector<Triangle> slice(std::vector<Triangle> t, float z, float thickness);
     static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);
@@ -45,10 +48,22 @@ public:
     static void offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d);
     static std::vector<Triangle> getTriangleList(std::vector<Vertex> &v, std::vector<Facet> &f);
     static void switchNormal(std::vector<Triangle> &t);
+
+    static float getMinimumZ(std::vector<Vertex> &v);
+    static float getMaximumZ(std::vector<Vertex> &v);
+    static std::vector<std::pair<glm::vec3, glm::vec3>> getContours(std::vector<Triangle> &t, float z);
+    static std::vector<std::vector<glm::vec3>> connect(std::vector<glm::vec3> &v);
+    static void getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet> &f, float thickness);
+
+    static bool checkLoops(std::vector<std::pair<glm::vec3, glm::vec3>> &s);
+
 private:
 
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);
 };
+
+
+#define PERP(u,v) u.x*v.y - u.y*v.x  // perp product  (2D)
 
 /*======================== X-tests ========================*/
 

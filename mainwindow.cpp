@@ -118,7 +118,16 @@ void MainWindow::on_pushButton_process_clicked() {
         _base = t_aux;
         Utils::switchNormal(t_aux);
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
+        std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 10.0);
+        bool loops = Utils::checkLoops(cont);
+        if(loops) {
+            std::cout << "Loops detected!\n";
+        } else {
+            std::cout << "Loops not detected\n";
+        }
+        return;
     }
+
 
 
     if(skipInfill == false) {
