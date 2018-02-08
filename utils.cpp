@@ -160,7 +160,6 @@ std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::
                     maximum[1] = std::max(maximum[1], intersect2.y);
                 }
                 if(res1 == 1 || res2 == 1) {
-                    std::cout << "pararelo ao plano!\n";
                     minimum[0] = std::min(minimum[0], v1.x);
                     minimum[1] = std::min(minimum[1], v1.y);
                     maximum[0] = std::max(maximum[0], v1.x);
@@ -403,12 +402,12 @@ int Utils::intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::
             return 1;
         }
         if (du==0) {                     // S1 is a single point
-            if (inSegment(s1.first, s2) == 0)  // but is not in S2
+            if (inSegment(s1.first, s2) == false)  // but is not in S2
                  return 0;
             return 1;
         }
         if (dv==0) {                     // S2 a single point
-            if  (inSegment(s2.first, s1) == 0)  // but is not in S1
+            if  (inSegment(s2.first, s1) == false)  // but is not in S1
                  return 0;
             return 1;
         }
@@ -516,7 +515,6 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         } else {
             f_aux.vertex[0] = v_it - v.begin();
         }
-        std::cout << "f_aux.vertex[0] = " << f_aux.vertex[0] << std::endl;
 
         v_it =  std::find(v.begin(), v.end(), it->getV2());
         if(v_it  == v.end()) {
@@ -525,7 +523,6 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         } else {
             f_aux.vertex[1] = v_it - v.begin();
         }
-        std::cout << "f_aux.vertex[1] = " << f_aux.vertex[1] << std::endl;
 
         v_it =  std::find(v.begin(), v.end(), it->getV3());
         if(v_it  == v.end()) {
@@ -534,7 +531,6 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         } else {
             f_aux.vertex[2] = v_it - v.begin();
         }
-        std::cout << "f_aux.vertex[2] = " << f_aux.vertex[2] << std::endl;
 
         f.push_back(f_aux);
     }
@@ -625,32 +621,81 @@ std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getContours(std::vector<Tria
     return result;
 }
 
-std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<glm::vec3> &v) {
+std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::vec3, glm::vec3>> &v) {
     std::vector<std::vector<glm::vec3>> result;
-    for(int i = 0; i < v.size(); i += 2) {
-        bool found = false;
-        std::vector<std::vector<glm::vec3>>::iterator it;
-        for(it = result.begin(); it != result.end(); ++it) {
-            std::vector<glm::vec3>::iterator itfind;
-            itfind = std::find(it->begin(), it->end(), v.at(i));
-            if(itfind != it->end()){
-                found = true;
-                it->push_back(v.at(i+1));
+
+    std::vector<std::pair<glm::vec3, glm::vec3>> aux = v;
+
+    int i = 0;
+    bool exist = false;
+    glm::vec3 dir;
+    while(i < aux.size()) {
+        // Check if point is alright on countours result vector
+        for(std::vector<std::vector<glm::vec3>>::iterator it2 = result.begin(); it2 != result.end(); ++it2) {
+            if(glm::distance(it2->back(), aux[i].first) < 0.00001) {  // Exists
+                if(glm::length(glm::cross(dir, aux[i].second - it2->back())) < 0.00001) {
+                    it2->pop_back();
+                }
+                dir = aux[i].second - it2->back();
+                it2->push_back(aux[i].second);
+                exist = true;
+                break;
+            } else if(glm::distance(it2->back(), aux[i].second) < 0.00001) {  // Exists
+                if(glm::length(glm::cross(dir, aux[i].first - it2->back())) < 0.00001) {
+                    it2->pop_back();
+                }
+                dir = aux[i].first - it2->back();
+                it2->push_back(aux[i].first);
+                exist = true;
                 break;
             }
         }
-        if(!found) {
-            std::vector<glm::vec3> tmp;
-            tmp.push_back(v.at(i));
-            tmp.push_back(v.at(i+1));
-            result.push_back(tmp);
+        if(exist) {
+            aux.erase(aux.begin() + i);
+            i = 0;
+            exist = false;
+        } else {
+            i++;
+            if(i == aux.size() && aux.size() != 1) {
+                std::vector<glm::vec3> tmp;
+                tmp.push_back(aux[0].first);
+                dir = aux[0].second - aux[0].first;
+                result.push_back(tmp);
+                aux.erase(aux.begin());
+                i = 0;
+            }
         }
     }
+
+    // Remove remaining duplicates
+    // TODO: improve the legibility of this piece of code
+    for(std::vector<std::vector<glm::vec3>>::iterator it1 = result.begin(); it1 != result.end(); ++it1) {
+        glm::vec3 v0 = it1->at(0);
+        glm::vec3 v1 = it1->at(1);
+        glm::vec3 vb0 = it1->back();
+        glm::vec3 vb1 = *(it1->end()-2);
+        if(glm::length(glm::cross(v1-v0, v0-vb0)) < 0.00001) {
+            it1->erase(it1->begin());
+        } else if(glm::length(glm::cross(v0-vb0, vb0-vb1)) < 0.00001) {
+            it1->erase(it1->end());
+        }
+    }
+
     return result;
 }
 
 void Utils::getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet> &f, float thickness) {
 }
+
+//void Utils::processContour(std::vector<std::pair<glm::vec3, glm::vec3> > &contour) {
+//    for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it1 = s.begin(); it1 != s.end(); ++it1) {
+//        for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it2 = it1; it2 != s.end(); ++it2) {
+//            if(Utils::intersectSegments(*it1, *it2) == 2) {
+//                return true;
+//            }
+//        }
+//    }
+//}
 
 bool Utils::checkLoops(std::vector<std::pair<glm::vec3, glm::vec3> > &s)
 {

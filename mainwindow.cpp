@@ -119,12 +119,20 @@ void MainWindow::on_pushButton_process_clicked() {
         Utils::switchNormal(t_aux);
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
         std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 10.0);
-        bool loops = Utils::checkLoops(cont);
-        if(loops) {
-            std::cout << "Loops detected!\n";
-        } else {
-            std::cout << "Loops not detected\n";
-        }
+        std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
+        std::cout << "conn size: " << conn.size() << std::endl;
+//        for(int i = 0; i < conn.size(); i++) {
+//            std::cout << "conn[" << i << "] size: " << conn[i].size() << std::endl;
+//            for(int j = 0; j < conn[i].size(); j++) {
+//                std::cout << "conn[" << i << "][" << j << "]: " << glm::to_string(conn[i].at(j)) << std::endl;
+//            }
+//        }
+//        bool loops = Utils::checkLoops(cont);
+//        if(loops) {
+//            std::cout << "Loops detected!\n";
+//        } else {
+//            std::cout << "Loops not detected\n";
+//        }
         return;
     }
 
