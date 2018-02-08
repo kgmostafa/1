@@ -77,6 +77,13 @@
           </layout>
          </item>
          <item>
+          <widget class="QCheckBox" name="checkBox_shell">
+           <property name="text">
+            <string>External offset (shell)</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="checkBox_skipHollowing">
            <property name="text">
             <string>Skip hollowing</string>

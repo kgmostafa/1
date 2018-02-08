@@ -110,6 +110,9 @@ void MainWindow::on_pushButton_process_clicked() {
             std::cout << "Invalid input. Using default offset = 5 mm\n";
             offset = 5.0;
         }
+        if(ui->checkBox_shell->isChecked() == false) {
+            offset *= -1.0;
+        }
 
         _processed.insert(_processed.end(), _base.begin(), _base.end());
         v_aux = Utils::getVertexList(_base, f_aux);

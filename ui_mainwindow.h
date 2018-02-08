@@ -42,6 +42,7 @@ public:
     QLabel *label_4;
     QLineEdit *lineEdit_hollowingOffset;
     QLabel *label_3;
+    QCheckBox *checkBox_shell;
     QCheckBox *checkBox_skipHollowing;
     QGroupBox *groupBox_infill;
     QVBoxLayout *verticalLayout_3;
@@ -136,6 +137,11 @@ public:
 
 
         verticalLayout_2->addLayout(horizontalLayout_5);
+
+        checkBox_shell = new QCheckBox(groupBox_hollowing);
+        checkBox_shell->setObjectName(QStringLiteral("checkBox_shell"));
+
+        verticalLayout_2->addWidget(checkBox_shell);
 
         checkBox_skipHollowing = new QCheckBox(groupBox_hollowing);
         checkBox_skipHollowing->setObjectName(QStringLiteral("checkBox_skipHollowing"));
@@ -353,6 +359,7 @@ public:
         label_4->setText(QApplication::translate("MainWindow", "Offset:", nullptr));
         lineEdit_hollowingOffset->setText(QApplication::translate("MainWindow", "5.0", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        checkBox_shell->setText(QApplication::translate("MainWindow", "External offset (shell)", nullptr));
         checkBox_skipHollowing->setText(QApplication::translate("MainWindow", "Skip hollowing", nullptr));
         groupBox_infill->setTitle(QApplication::translate("MainWindow", "Infill", nullptr));
         groupBox_cellType->setTitle(QApplication::translate("MainWindow", "Cell type", nullptr));
