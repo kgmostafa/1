@@ -36,6 +36,9 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *pushButton_open;
+    QGroupBox *groupBox;
+    QHBoxLayout *horizontalLayout_3;
+    QPushButton *pushButton_rotate;
     QGroupBox *groupBox_hollowing;
     QVBoxLayout *verticalLayout_2;
     QHBoxLayout *horizontalLayout_5;
@@ -99,6 +102,20 @@ public:
         pushButton_open->setObjectName(QStringLiteral("pushButton_open"));
 
         verticalLayout->addWidget(pushButton_open);
+
+        groupBox = new QGroupBox(centralWidget);
+        groupBox->setObjectName(QStringLiteral("groupBox"));
+        horizontalLayout_3 = new QHBoxLayout(groupBox);
+        horizontalLayout_3->setSpacing(6);
+        horizontalLayout_3->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
+        pushButton_rotate = new QPushButton(groupBox);
+        pushButton_rotate->setObjectName(QStringLiteral("pushButton_rotate"));
+
+        horizontalLayout_3->addWidget(pushButton_rotate);
+
+
+        verticalLayout->addWidget(groupBox);
 
         groupBox_hollowing = new QGroupBox(centralWidget);
         groupBox_hollowing->setObjectName(QStringLiteral("groupBox_hollowing"));
@@ -355,6 +372,8 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Editor", nullptr));
         pushButton_open->setText(QApplication::translate("MainWindow", "Open base part", nullptr));
+        groupBox->setTitle(QApplication::translate("MainWindow", "Pre-processing", nullptr));
+        pushButton_rotate->setText(QApplication::translate("MainWindow", "Rotate", nullptr));
         groupBox_hollowing->setTitle(QApplication::translate("MainWindow", "Hollowing", nullptr));
         label_4->setText(QApplication::translate("MainWindow", "Offset:", nullptr));
         lineEdit_hollowingOffset->setText(QApplication::translate("MainWindow", "5.0", nullptr));

@@ -57,7 +57,11 @@ public:
 
     static void processContour(std::vector<std::pair<glm::vec3, glm::vec3>> &contour);
 
-    static bool checkLoops(std::vector<std::pair<glm::vec3, glm::vec3>> &s);
+    static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
+
+    // Cutting/splitting methods
+    // Split one mesh on the surface of another mesh
+    static void split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface);
 
 private:
 

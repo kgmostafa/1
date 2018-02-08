@@ -630,8 +630,10 @@ std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::ve
     bool exist = false;
     glm::vec3 dir;
     while(i < aux.size()) {
+        std::cout << i << std::endl;
         // Check if point is alright on countours result vector
         for(std::vector<std::vector<glm::vec3>>::iterator it2 = result.begin(); it2 != result.end(); ++it2) {
+            std::cout << "it2\n";
             if(glm::distance(it2->back(), aux[i].first) < 0.00001) {  // Exists
                 if(glm::length(glm::cross(dir, aux[i].second - it2->back())) < 0.00001) {
                     it2->pop_back();
@@ -697,14 +699,48 @@ void Utils::getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet>
 //    }
 //}
 
-bool Utils::checkLoops(std::vector<std::pair<glm::vec3, glm::vec3> > &s)
-{
-    for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it1 = s.begin(); it1 != s.end(); ++it1) {
-        for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it2 = it1; it2 != s.end(); ++it2) {
-            if(Utils::intersectSegments(*it1, *it2) == 2) {
-                return true;
+// NOTE: This function just check for loops on the same contour
+bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {
+    for(std::vector<std::vector<glm::vec3>>::iterator itContour = contour.begin(); itContour != contour.end(); ++itContour) {
+        int i = 0;
+        while(i < itContour->size()-1) {
+            for(int j = i+2; j < itContour->size()-1; j++) {
+                std::pair<glm::vec3, glm::vec3> s1(itContour->at(i), itContour->at(i+1));
+                std::pair<glm::vec3, glm::vec3> s2(itContour->at(j), itContour->at(j+1));
+                if(Utils::intersectSegments(s1, s2) == 1) {
+                    return true;
+                }
             }
+            i++;
         }
     }
     return false;
+}
+
+// Author: Momesso
+void Utils::split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface) {
+    // Get intersection points
+    std::vector<glm::vec3> intersectionPoints;
+    for(std::vector<Triangle>::iterator itCut = cuttingSurface.begin(); itCut != cuttingSurface.end(); ++itCut) {
+        for(std::vector<Triangle>::iterator itMesh = mesh.begin(); itMesh != mesh.end(); ++itMesh) {
+            bool intersect = false;
+            // TODO: must be intersect segment triangle
+            if(Utils::intersectRayTriangle(itMesh->getV1(), itMesh->getV2(), *itCut)) {
+                std::cout << std::endl << "intersect:" << glm::to_string(itMesh->getV1()) << std::endl << glm::to_string(itMesh->getV2()) << std::endl << itCut->toString().toStdString() << std::endl;
+                intersect = true;
+            }
+            if(Utils::intersectRayTriangle(itMesh->getV2(), itMesh->getV3(), *itCut)) {
+                intersect = true;
+            }
+            if(Utils::intersectRayTriangle(itMesh->getV3(), itMesh->getV1(), *itCut)) {
+                intersect = true;
+            }
+            if(intersect)
+                std::cout << "intersect\n";
+        }
+    }
+
+    // Discard outside triangles
+
+    // Reconstruct surface
 }

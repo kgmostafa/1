@@ -114,29 +114,46 @@ void MainWindow::on_pushButton_process_clicked() {
             offset *= -1.0;
         }
 
+        std::cout << "1\n";
         _processed.insert(_processed.end(), _base.begin(), _base.end());
         v_aux = Utils::getVertexList(_base, f_aux);
+        std::cout << "2\n";
         Utils::offsetVertices(v_aux, f_aux, offset);
+        std::cout << "3\n";
         t_aux = Utils::getTriangleList(v_aux, f_aux);
+        std::cout << "4\n";
+//        Utils::split(t_aux, _base);
+
         _base = t_aux;
         Utils::switchNormal(t_aux);
+        std::cout << "5\n";
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
-        std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 10.0);
-        std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
-        std::cout << "conn size: " << conn.size() << std::endl;
-//        for(int i = 0; i < conn.size(); i++) {
-//            std::cout << "conn[" << i << "] size: " << conn[i].size() << std::endl;
-//            for(int j = 0; j < conn[i].size(); j++) {
-//                std::cout << "conn[" << i << "][" << j << "]: " << glm::to_string(conn[i].at(j)) << std::endl;
-//            }
-//        }
-//        bool loops = Utils::checkLoops(cont);
-//        if(loops) {
-//            std::cout << "Loops detected!\n";
-//        } else {
-//            std::cout << "Loops not detected\n";
-//        }
+        std::cout << "6\n";
+        for(int i = 0; i <= 5; i++) {
+            std::cout << i << "\n";
+            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 10.0*i);
+            std::cout << "contours gete\n";
+            std::cout << cont.size() << std::endl;
+            std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
+            std::cout << "connected\n";
+            std::cout << "conn size: " << conn.size() << std::endl;
+
+            bool loops = Utils::checkLoops(conn);
+            if(loops) {
+                std::cout << "Loops detected!\n";
+            } else {
+                std::cout << "Loops not detected\n";
+            }
+        }
+
         return;
+
+        //        for(int i = 0; i < conn.size(); i++) {
+        //            std::cout << "conn[" << i << "] size: " << conn[i].size() << std::endl;
+        //            for(int j = 0; j < conn[i].size(); j++) {
+        //                std::cout << "conn[" << i << "][" << j << "]: " << glm::to_string(conn[i].at(j)) << std::endl;
+        //            }
+        //        }
     }
 
 
@@ -243,4 +260,8 @@ void MainWindow::on_checkBox_basePart_stateChanged(int arg1){
 void MainWindow::on_checkBox_wireframe_stateChanged(int arg1) {
     _wireframe = (arg1==Qt::Unchecked)?false:true;
     update();
+}
+
+void MainWindow::on_pushButton_rotate_clicked() {
+
 }
