@@ -10,6 +10,7 @@
 #include "glm/ext.hpp"
 #include <iostream>
 #include <QMessageBox>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -33,10 +34,25 @@ MainWindow::MainWindow(QWidget *parent) :
     _cellLoaded = false;
 
     _stlHeader = "";
+
+    _rotateDialog = new RotateDialog(this);
+    connect(_rotateDialog, &RotateDialog::rotate, this, &rotateBasePart);
 }
 
 MainWindow::~MainWindow() {
     delete ui;
+}
+
+void MainWindow::rotateBasePart(float angle, int axis)
+{
+    angle = degreesToRadians(angle);
+    if(axis == 0) {
+        Utils::rotateX(_base, angle);
+    } else if(axis == 1) {
+        Utils::rotateY(_base, angle);
+    } else if(axis == 2) {
+        Utils::rotateZ(_base, angle);
+    }
 }
 
 void MainWindow::on_pushButton_open_clicked() {
@@ -72,6 +88,7 @@ void MainWindow::on_pushButton_open_clicked() {
     ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " mm");
     ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " mm");
     ui->labelHeightZ->setText("Height in Z: " + QString::number(_maxZLength) + " mm");
+    ui->pushButton_rotate->setEnabled(true);
     ui->pushButton_open->setEnabled(false);
 }
 
@@ -129,10 +146,10 @@ void MainWindow::on_pushButton_process_clicked() {
         std::cout << "5\n";
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
         std::cout << "6\n";
-        for(int i = 0; i <= 5; i++) {
-            std::cout << i << "\n";
-            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 10.0*i);
-            std::cout << "contours gete\n";
+//        for(int i = 0; i <= 5; i++) {
+//            std::cout << i << "\n";
+            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 25.0);
+            std::cout << "contours get\n";
             std::cout << cont.size() << std::endl;
             std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
             std::cout << "connected\n";
@@ -144,7 +161,7 @@ void MainWindow::on_pushButton_process_clicked() {
             } else {
                 std::cout << "Loops not detected\n";
             }
-        }
+//        }
 
         return;
 
@@ -263,5 +280,10 @@ void MainWindow::on_checkBox_wireframe_stateChanged(int arg1) {
 }
 
 void MainWindow::on_pushButton_rotate_clicked() {
-
+    _rotateDialog->show();
+//    bool valid;
+//    double d = QInputDialog::getDouble(this, tr("QInputDialog::getDouble()"),
+//                                   tr("Amount:"), 37.56, -10000, 10000, 2, &valid);
+//    if (valid)
+//        std::cout << d << std::endl;
 }

@@ -36,7 +36,8 @@ SOURCES += \
     cube.cpp \
     pyramid.cpp \
     icosphere.cpp \
-    customcell.cpp
+    customcell.cpp \
+    rotatedialog.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS += \
     cube.h \
     pyramid.h \
     icosphere.h \
-    customcell.h
+    customcell.h \
+    rotatedialog.h
 
 FORMS += \
         mainwindow.ui

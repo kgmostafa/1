@@ -87,7 +87,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::ApplicationModal);
-        MainWindow->resize(837, 595);
+        MainWindow->resize(837, 664);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -111,6 +111,7 @@ public:
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
         pushButton_rotate = new QPushButton(groupBox);
         pushButton_rotate->setObjectName(QStringLiteral("pushButton_rotate"));
+        pushButton_rotate->setEnabled(false);
 
         horizontalLayout_3->addWidget(pushButton_rotate);
 

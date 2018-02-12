@@ -7,6 +7,7 @@
 #include "triangle.h"
 #include "cell.h"
 #include "utils.h"
+#include "rotatedialog.h"
 
 namespace Ui {
 class MainWindow;
@@ -45,6 +46,8 @@ public:
 
 
 private slots:
+    void rotateBasePart(float angle, int axis);
+
     void on_pushButton_process_clicked();
 
     void on_radioButton_cellType_custom_toggled(bool checked);
@@ -75,6 +78,8 @@ private:
     std::vector<Facet> _facets;
 
     QString _stlHeader;
+
+    RotateDialog *_rotateDialog;
 };
 
 #endif // MAINWINDOW_H

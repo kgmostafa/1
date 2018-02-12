@@ -634,31 +634,42 @@ std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::ve
         // Check if point is alright on countours result vector
         for(std::vector<std::vector<glm::vec3>>::iterator it2 = result.begin(); it2 != result.end(); ++it2) {
             std::cout << "it2\n";
-            if(glm::distance(it2->back(), aux[i].first) < 0.00001) {  // Exists
-                if(glm::length(glm::cross(dir, aux[i].second - it2->back())) < 0.00001) {
-                    it2->pop_back();
-                }
-                dir = aux[i].second - it2->back();
+//            std::cout << "distance 1: " << glm::distance(it2->back(), aux[i].first) << std::endl <<
+//                         "distance 2: " << glm::distance(it2->back(), aux[i].second) << std::endl;
+            if(glm::distance(it2->back(), aux[i].first) < 0.001) {  // Exists
+                std::cout << "exists\n";
+//                if(glm::length(glm::cross(dir, aux[i].second - it2->back())) < 0.00001) {
+//                    std::cout << "trying to pop_back\n";
+//                    it2->pop_back();
+//                }
+//                dir = aux[i].second - it2->back();
                 it2->push_back(aux[i].second);
                 exist = true;
                 break;
-            } else if(glm::distance(it2->back(), aux[i].second) < 0.00001) {  // Exists
-                if(glm::length(glm::cross(dir, aux[i].first - it2->back())) < 0.00001) {
-                    it2->pop_back();
-                }
-                dir = aux[i].first - it2->back();
+            } else if(glm::distance(it2->back(), aux[i].second) < 0.001) {  // Exists
+                std::cout << "exists\n";
+//                if(glm::length(glm::cross(dir, aux[i].first - it2->back())) < 0.00001) {
+//                    std::cout << "trying to pop_back\n";
+//                    it2->pop_back();
+//                }
+//                dir = aux[i].first - it2->back();
                 it2->push_back(aux[i].first);
                 exist = true;
                 break;
             }
         }
         if(exist) {
+
+            std::cout << "trying to erase\n";
             aux.erase(aux.begin() + i);
             i = 0;
             exist = false;
         } else {
             i++;
+
+            std::cout << "i++\n";
             if(i == aux.size() && aux.size() != 1) {
+                std::cout << "auxsize\n";
                 std::vector<glm::vec3> tmp;
                 tmp.push_back(aux[0].first);
                 dir = aux[0].second - aux[0].first;
@@ -669,19 +680,27 @@ std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::ve
         }
     }
 
+    std::cout << "post-processing\n";
+
+    std::cout << "result.size(): " << result.size() << "\n";
+
+    std::cout << "v.size(): " << v.size() << "\n";
     // Remove remaining duplicates
     // TODO: improve the legibility of this piece of code
     for(std::vector<std::vector<glm::vec3>>::iterator it1 = result.begin(); it1 != result.end(); ++it1) {
-        glm::vec3 v0 = it1->at(0);
-        glm::vec3 v1 = it1->at(1);
-        glm::vec3 vb0 = it1->back();
-        glm::vec3 vb1 = *(it1->end()-2);
-        if(glm::length(glm::cross(v1-v0, v0-vb0)) < 0.00001) {
-            it1->erase(it1->begin());
-        } else if(glm::length(glm::cross(v0-vb0, vb0-vb1)) < 0.00001) {
-            it1->erase(it1->end());
-        }
+
+        std::cout << "it1.size:" << it1->size() << "\n";
     }
+//        glm::vec3 v0 = it1->at(0);
+//        glm::vec3 v1 = it1->at(1);
+//        glm::vec3 vb0 = it1->back();
+//        glm::vec3 vb1 = *(it1->end()-2);
+//        if(glm::length(glm::cross(v1-v0, v0-vb0)) < 0.00001) {
+//            it1->erase(it1->begin());
+//        } else if(glm::length(glm::cross(v0-vb0, vb0-vb1)) < 0.00001) {
+//            it1->erase(it1->end());
+//        }
+//    }
 
     return result;
 }
