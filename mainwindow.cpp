@@ -88,8 +88,8 @@ void MainWindow::on_pushButton_open_clicked() {
     ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " mm");
     ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " mm");
     ui->labelHeightZ->setText("Height in Z: " + QString::number(_maxZLength) + " mm");
-    ui->pushButton_rotate->setEnabled(true);
     ui->pushButton_open->setEnabled(false);
+    ui->pushButton_rotate->setEnabled(true);
 }
 
 void MainWindow::on_pushButton_loadCell_clicked() {

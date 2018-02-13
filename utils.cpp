@@ -179,6 +179,44 @@ std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::
     return std::pair<std::array<float, 2>, std::array<float, 2>>(minimum, maximum);
 }
 
+int Utils::intersectLines(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2, glm::vec3 &intersectionPoint)
+{
+    glm::vec3 v1 = s1.second - s1.first;
+    glm::vec3 v2 = s2.first  - s1.first;
+    glm::vec3 v3 = s2.second - s1.first;
+
+    glm::vec3 u = s1.second - s1.first;
+    glm::vec3 v = s2.second - s2.first;
+    glm::vec3 w = s2.first  - s1.first;
+
+    // Check if the lines are not coplanar
+    if (fabsf(glm::dot(v1, glm::cross(v2, v3))) > std::numeric_limits<float>::epsilon()) {
+        return 0;   // The lines do not intersect
+    }
+
+    // Check if the lines are parallel
+    glm::vec3 paral = glm::cross(u, v);
+    if(fabsf(paral.x) < std::numeric_limits<float>::epsilon() &&
+       fabsf(paral.y) < std::numeric_limits<float>::epsilon() &&
+       fabsf(paral.z) < std::numeric_limits<float>::epsilon()) {
+        // Check if the lines are disjoint
+        glm::vec3 disj = glm::cross(u, v);
+        if(fabsf(disj.x) > std::numeric_limits<float>::epsilon() ||
+           fabsf(disj.y) > std::numeric_limits<float>::epsilon() ||
+           fabsf(disj.z) > std::numeric_limits<float>::epsilon()) {
+            return 0;   // The lines do not intersect
+        } else {
+            intersectionPoint = glm::vec3(0.0);
+            return 1;   // The lines are coincident
+        }
+    }
+
+    // Get the intersection point
+    float s = glm::dot(glm::cross(w, v), glm::cross(u, v)) / glm::dot(glm::cross(u, v), glm::cross(u, v));
+    intersectionPoint = s1.first + (u * s);
+    return 2;
+}
+
 // Based on: http://geomalgorithms.com/a05-_intersect-1.html
 int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::vec3 pNormal, glm::vec3 &intersect) {
     glm::vec3 u = v2-v1;
