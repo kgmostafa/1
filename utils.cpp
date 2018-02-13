@@ -274,26 +274,96 @@ bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
     }
 }
 
+float Utils::distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal)
+{
+    planeNormal = glm::normalize(planeNormal);
+    return glm::dot(planeNormal, point - planePoint);
+}
+
+bool Utils::intersectSegmentPlane(glm::vec3 s1, glm::vec3 s2, glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 &intersectionPoint)
+{
+    float d1 = distanceFromPlane(s1, planePoint, planeNormal);
+    float d2 = distanceFromPlane(s2, planePoint, planeNormal);
+
+    // Check if s1 is in the plane
+    if(fabsf(d1) < std::numeric_limits<float>::epsilon()) {
+        intersectionPoint = s1;
+        return true;
+    }
+
+    // Check if s2 is in the plane
+    if(fabsf(d2) < std::numeric_limits<float>::epsilon()) {
+        intersectionPoint = s2;
+        return true;
+    }
+
+    // Check if points lie on the same side of plane
+    if (d1*d2 > std::numeric_limits<float>::epsilon()) {
+        return false;
+    }
+
+    // Get intersection point
+    float t = d1 / (d1 - d2);
+    intersectionPoint = s1 + (t * (s2 - s1));
+    return true;
+}
+
 // NOTE: This function don't check if the triangle isn't intersecting the plane (it just return the segment).
 // The result must be a pair of points that defines a segment, if both points are the same, it's just a point.
-std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN) {
-    glm::vec3 intersectionPoint;
+std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN)
+{
     std::pair<glm::vec3, glm::vec3> segment;
+    glm::vec3 intersection;
+    // Check if V1 is on the plane
+    if(fabsf(glm::dot(planeN, triangle.getV1()-planeP)) < EPS) {
+        intersectSegmentPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersection);
+        segment.first = intersection;
+        intersectSegmentPlane(triangle.getV2(), triangle.getV3(), planeP, planeN, intersection);
+        segment.second = intersection;
+        return segment;
+    }
+
+    // Check if V2 is on the plane
+    if(fabsf(glm::dot(planeN, triangle.getV2()-planeP)) < EPS) {
+        intersectSegmentPlane(triangle.getV2(), triangle.getV1(), planeP, planeN, intersection);
+        segment.first = intersection;
+        intersectSegmentPlane(triangle.getV1(), triangle.getV3(), planeP, planeN, intersection);
+        segment.second = intersection;
+        return segment;
+    }
+
+    // Check if V3 is on the plane
+    if(fabsf(glm::dot(planeN, triangle.getV3()-planeP)) < EPS) {
+        std::cout << "V3 is over the plane\n";
+        intersectSegmentPlane(triangle.getV3(), triangle.getV1(), planeP, planeN, intersection);
+        segment.first = intersection;
+        intersectSegmentPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersection);
+        segment.second = intersection;
+        return segment;
+    }
+
+    // None of the triangle vertex are on the plane: get the segment by trial and error
     bool second = false;
-    if(Utils::intersectRayPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersectionPoint) == 0) {
-        segment.first = intersectionPoint;
+    if(intersectSegmentPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersection)) {
+        segment.first = intersection;
         second = true;
     }
-    if(Utils::intersectRayPlane(triangle.getV2(), triangle.getV3(), planeP, planeN, intersectionPoint) == 0) {
+
+    if(intersectSegmentPlane(triangle.getV2(), triangle.getV3(), planeP, planeN, intersection)) {
         if(second) {
-            segment.second = intersectionPoint;
+            segment.second = intersection;
+            return segment;
         } else {
-            segment.first = intersectionPoint;
+            segment.first = intersection;
+            second = true;
         }
     }
-    if(Utils::intersectRayPlane(triangle.getV3(), triangle.getV1(), planeP, planeN, intersectionPoint) == 0) {
-        segment.second = intersectionPoint;
+
+    if(intersectSegmentPlane(triangle.getV3(), triangle.getV1(), planeP, planeN, intersection)) {
+        segment.second = intersection;
     }
+
+    assert(second == true);
     return segment;
 }
 
@@ -650,13 +720,58 @@ float Utils::getMaximumZ(std::vector<Vertex> &v) {
 std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std::vector<Triangle> &t, float z) {
     std::vector<std::pair<glm::vec3, glm::vec3>> result;
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
-        if(it->getMinZ() <= z && it->getMaxZ() > z) {
+        if(it->getMinZ() <= z + 0.001 && it->getMaxZ() >= z - 0.001) {
             std::pair<glm::vec3, glm::vec3> tmp;
             tmp = intersectTrianglePlane(*it, glm::vec3(0.0, 0.0, z), glm::vec3(0.0, 0.0, 1.0));
-            result.push_back(tmp);
+
+            // Add only segments
+            if((fabsf(tmp.first.x - tmp.second.x) < std::numeric_limits<float>::epsilon() &&
+               fabsf(tmp.first.y - tmp.second.y) < std::numeric_limits<float>::epsilon() &&
+               fabsf(tmp.first.z - tmp.second.z) < std::numeric_limits<float>::epsilon()) == false) {
+                // Check if can be a duplicate
+                bool checkDuplicate = false;
+                if(fabsf(it->getV1().z - z) <= EPS) {
+                    if(fabsf(it->getV2().z - z) <= EPS) {
+                        checkDuplicate = true;
+                    } else if(fabsf(it->getV3().z - z) <= EPS) {
+                        checkDuplicate = true;
+                    }
+                } else if(fabsf(it->getV2().z - z) <= EPS) {
+                    if(fabsf(it->getV3().z - z) <= EPS) {
+                        checkDuplicate = true;
+                    }
+                }
+
+                if(checkDuplicate) {
+                    if(std::find_if(result.begin(), result.end(),
+                       [tmp](std::pair<glm::vec3, glm::vec3> seg) {
+                        if(fabsf(tmp.first.x - seg.first.x) <= EPS &&
+                           fabsf(tmp.first.y - seg.first.y) <= EPS &&
+                           fabsf(tmp.first.z - seg.first.z) <= EPS) {
+                            if(fabsf(tmp.second.x - seg.second.x) <= EPS &&
+                               fabsf(tmp.second.y - seg.second.y) <= EPS &&
+                               fabsf(tmp.second.z - seg.second.z) <= EPS) {
+                            return true;
+                            }
+                        } else if(fabsf(tmp.first.x - seg.second.x) <= EPS &&
+                                  fabsf(tmp.first.y - seg.second.y) <= EPS &&
+                                  fabsf(tmp.first.z - seg.second.z) <= EPS) {
+                            if(fabsf(tmp.second.x - seg.first.x) <= EPS &&
+                               fabsf(tmp.second.y - seg.first.y) <= EPS &&
+                               fabsf(tmp.second.z - seg.first.z) <= EPS) {
+                            return true;
+                            }
+                        }
+                        return false;
+                    }) == result.end()) {
+                        result.push_back(tmp);
+                    }
+                } else {
+                    result.push_back(tmp);
+                }
+            }
         }
     }
-    // TODO: remove duplicates
     return result;
 }
 
@@ -754,14 +869,14 @@ std::vector<std::vector<glm::vec3> > Utils::getContours(std::vector<std::pair<gl
         segmentsCheck.push_back(false);
     }
 
-    for(int i = 0; i < segments.size(); i ++) {
+    for(int i = 0; i < segments.size(); i++) {
         if(segmentsCheck[i] == true) {
             continue;
         }
-        segmentsCheck[i] = true;
         std::vector<glm::vec3> contour;
         contour.push_back(segments[i].first);
         contour.push_back(segments[i].second);
+        segmentsCheck[i] = true;
         contour = getContour(segments, segmentsCheck, contour, tolerance);
         contours.push_back(contour);
     }
@@ -814,15 +929,6 @@ int Utils::getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3> > &segm
     return -1;
 }
 
-//void Utils::processContour(std::vector<std::pair<glm::vec3, glm::vec3> > &contour) {
-//    for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it1 = s.begin(); it1 != s.end(); ++it1) {
-//        for(std::vector<std::pair<glm::vec3, glm::vec3>>::iterator it2 = it1; it2 != s.end(); ++it2) {
-//            if(Utils::intersectSegments(*it1, *it2) == 2) {
-//                return true;
-//            }
-//        }
-//    }
-//}
 
 // NOTE: This function just check for loops on the same contour
 bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {

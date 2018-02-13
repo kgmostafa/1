@@ -15,6 +15,7 @@ struct Facet {
 
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) ((angleRadians) * 180.0 / M_PI)
+#define EPS std::numeric_limits<float>::epsilon()
 
 class Utils
 {
@@ -44,6 +45,10 @@ public:
     static bool checkTriangleBoxOverlap(Triangle t, glm::vec3 v1, glm::vec3 v2);
     static int intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2);
     static bool inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s);
+
+    static float distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal);
+    static bool intersectSegmentPlane(glm::vec3 s1, glm::vec3 s2, glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 &intersectionPoint);
+
 
     static std::vector<Triangle> slice(std::vector<Triangle> t, float z, float thickness);
     static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);

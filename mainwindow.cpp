@@ -131,38 +131,28 @@ void MainWindow::on_pushButton_process_clicked() {
             offset *= -1.0;
         }
 
-        std::cout << "1\n";
         _processed.insert(_processed.end(), _base.begin(), _base.end());
         v_aux = Utils::getVertexList(_base, f_aux);
-        std::cout << "2\n";
         Utils::offsetVertices(v_aux, f_aux, offset);
-        std::cout << "3\n";
         t_aux = Utils::getTriangleList(v_aux, f_aux);
-        std::cout << "4\n";
-//        Utils::split(t_aux, _base);
-
         _base = t_aux;
         Utils::switchNormal(t_aux);
-        std::cout << "5\n";
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
-        std::cout << "6\n";
-//        for(int i = 0; i <= 5; i++) {
-//            std::cout << i << "\n";
-            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getIntersectionSegments(_processed, 25.0);
-            std::cout << "contours get\n";
-            std::cout << cont.size() << std::endl;
-            std::vector<std::vector<glm::vec3>> conn = Utils::getContours(cont, 0.001);
-//            std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
-            std::cout << "connected\n";
-            std::cout << "conn size: " << conn.size() << std::endl;
 
-            bool loops = Utils::checkLoops(conn);
-            if(loops) {
-                std::cout << "Loops detected!\n";
-            } else {
-                std::cout << "Loops not detected\n";
-            }
+        std::vector<std::pair<glm::vec3, glm::vec3>> intseg = Utils::getIntersectionSegments(_processed, 36.0);
+//        std::cout << "intersect segments size: " << intseg.size() << std::endl;
+//        for(int i = 0; i < intseg.size(); i++) {
+//            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
 //        }
+        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001);
+//        std::cout << "contours size: " << cont.size() << std::endl;
+
+        bool loops = Utils::checkLoops(cont);
+        if(loops) {
+            std::cout << "Loops detected!\n";
+        } else {
+            std::cout << "Loops not detected\n";
+        }
 
         return;
 
