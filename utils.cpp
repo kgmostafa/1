@@ -646,7 +646,8 @@ float Utils::getMaximumZ(std::vector<Vertex> &v) {
     return max;
 }
 
-std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getContours(std::vector<Triangle> &t, float z) {
+// TODO: Check this function result
+std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std::vector<Triangle> &t, float z) {
     std::vector<std::pair<glm::vec3, glm::vec3>> result;
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
         if(it->getMinZ() <= z && it->getMaxZ() > z) {
@@ -659,6 +660,8 @@ std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getContours(std::vector<Tria
     return result;
 }
 
+// Unknown behavior: when the function tries to connect a contour that have an loop and
+// the vertex is intersecting at the loop (4 segments sharing the same vertex, instead of 2)
 std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::vec3, glm::vec3>> &v) {
     std::vector<std::vector<glm::vec3>> result;
 
@@ -743,7 +746,72 @@ std::vector<std::vector<glm::vec3>> Utils::connect(std::vector<std::pair<glm::ve
     return result;
 }
 
-void Utils::getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet> &f, float thickness) {
+std::vector<std::vector<glm::vec3> > Utils::getContours(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, float tolerance)
+{
+    std::vector<std::vector<glm::vec3>> contours;
+    std::vector<bool> segmentsCheck;
+    for(int i = 0; i < segments.size(); i++) {
+        segmentsCheck.push_back(false);
+    }
+
+    for(int i = 0; i < segments.size(); i ++) {
+        if(segmentsCheck[i] == true) {
+            continue;
+        }
+        segmentsCheck[i] = true;
+        std::vector<glm::vec3> contour;
+        contour.push_back(segments[i].first);
+        contour.push_back(segments[i].second);
+        contour = getContour(segments, segmentsCheck, contour, tolerance);
+        contours.push_back(contour);
+    }
+    return contours;
+}
+
+// Unknown behavior: when the function tries to connect a contour that have an loop and
+// the vertex is intersecting at the loop (4 segments sharing the same vertex, instead of 2)
+std::vector<glm::vec3> Utils::getContour(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, std::vector<bool> &segmentsCheck, std::vector<glm::vec3> contour, float tolerance)
+{
+    // Find the next segment
+    int nearestIndex = getNearestSegment(segments, segmentsCheck, contour.back(), tolerance);
+    std::pair<glm::vec3, glm::vec3> nearest = segments[nearestIndex];
+    segmentsCheck[nearestIndex] = true;
+    if(glm::length(nearest.first - contour.back()) < glm::length(nearest.second - contour.back())) {    // The first is the redudant vertex
+        contour.push_back(nearest.second);
+    } else {    // The second is the redudant vertex
+        contour.push_back(nearest.first);
+    }
+
+    // Check if the contour is closed
+    if(fabsf(contour[0].x - contour.back().x) < tolerance &&
+       fabsf(contour[0].y - contour.back().y) < tolerance &&
+       fabsf(contour[0].z - contour.back().z) < tolerance) {
+        contour.pop_back();
+        return contour;
+    } else {
+        return getContour(segments, segmentsCheck, contour, tolerance);
+    }
+}
+
+int Utils::getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, std::vector<bool> &segmentsCheck, glm::vec3 point, float tolerance)
+{
+    for(int i = 0; i < segments.size(); i++) {
+        if(segmentsCheck[i] == false) {
+            std::pair<glm::vec3, glm::vec3> s = segments[i];
+            if(fabsf(s.first.x - point.x) < tolerance &&
+               fabsf(s.first.y - point.y) < tolerance &&
+               fabsf(s.first.z - point.z) < tolerance) {
+                return i;
+            }
+            if(fabsf(s.second.x - point.x) < tolerance &&
+               fabsf(s.second.y - point.y) < tolerance &&
+               fabsf(s.second.z - point.z) < tolerance) {
+                return i;
+            }
+        }
+    }
+    std::cout << "ERROR: Can't find the nearest segment\n";
+    return -1;
 }
 
 //void Utils::processContour(std::vector<std::pair<glm::vec3, glm::vec3> > &contour) {

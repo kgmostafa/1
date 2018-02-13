@@ -148,10 +148,11 @@ void MainWindow::on_pushButton_process_clicked() {
         std::cout << "6\n";
 //        for(int i = 0; i <= 5; i++) {
 //            std::cout << i << "\n";
-            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getContours(_processed, 25.0);
+            std::vector<std::pair<glm::vec3, glm::vec3>> cont = Utils::getIntersectionSegments(_processed, 25.0);
             std::cout << "contours get\n";
             std::cout << cont.size() << std::endl;
-            std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
+            std::vector<std::vector<glm::vec3>> conn = Utils::getContours(cont, 0.001);
+//            std::vector<std::vector<glm::vec3>> conn = Utils::connect(cont);
             std::cout << "connected\n";
             std::cout << "conn size: " << conn.size() << std::endl;
 

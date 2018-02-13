@@ -55,11 +55,13 @@ public:
 
     static float getMinimumZ(std::vector<Vertex> &v);
     static float getMaximumZ(std::vector<Vertex> &v);
-    static std::vector<std::pair<glm::vec3, glm::vec3>> getContours(std::vector<Triangle> &t, float z);
+    static std::vector<std::pair<glm::vec3, glm::vec3>> getIntersectionSegments(std::vector<Triangle> &t, float z);
     static std::vector<std::vector<glm::vec3>> connect(std::vector<std::pair<glm::vec3, glm::vec3>> &v);
-    static void getCrossSectionalContours(std::vector<Vertex> &v, std::vector<Facet> &f, float thickness);
-
     static void processContour(std::vector<std::pair<glm::vec3, glm::vec3>> &contour);
+
+    static std::vector<std::vector<glm::vec3>> getContours(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, float tolerance);
+    static std::vector<glm::vec3> getContour(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, std::vector<bool> &segmentsCheck, std::vector<glm::vec3> contour, float tolerance);
+    static int getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3>> &segments, std::vector<bool> &segmentsCheck, glm::vec3 point, float tolerance);
 
     static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
 
