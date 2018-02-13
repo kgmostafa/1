@@ -720,7 +720,7 @@ float Utils::getMaximumZ(std::vector<Vertex> &v) {
 std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std::vector<Triangle> &t, float z) {
     std::vector<std::pair<glm::vec3, glm::vec3>> result;
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
-        if(it->getMinZ() <= z + 0.001 && it->getMaxZ() >= z - 0.001) {
+        if(it->getMinZ() <= z + EPS && it->getMaxZ() >= z - EPS) {
             std::pair<glm::vec3, glm::vec3> tmp;
             tmp = intersectTrianglePlane(*it, glm::vec3(0.0, 0.0, z), glm::vec3(0.0, 0.0, 1.0));
 
