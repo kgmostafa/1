@@ -14,6 +14,12 @@ Utils::Utils() {
 
 }
 
+// http://mathworld.wolfram.com/WedgeProduct.html
+float Utils::wedge(glm::vec2 a, glm::vec2 b)
+{
+    return a.x*b.y - a.y*b.x;
+}
+
 void Utils::rotateX(std::vector<Triangle> &t, float angle) {
     for (std::vector<Triangle>::iterator it = t.begin() ; it != t.end(); ++it) {
         it->rotateX(angle);
@@ -460,6 +466,59 @@ bool Utils::checkTriangleBoxOverlap(Triangle t, glm::vec3 b1, glm::vec3 b2) {
     return true;   /* box and triangle overlaps */
 }
 
+/* Check if two segments intersect.
+ * Return:  0 - the segments do not intersect
+ *          1 - the segments are collinear and overlapping (multiple intersection points)
+ *          2 - the segments have a single point of intersection
+ * Based on: https://www.codeproject.com/Tips/862988/Find-the-Intersection-Point-of-Two-Line-Segments
+ */
+int Utils::intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pair<glm::vec2, glm::vec2> segment2, glm::vec2 &intersectionPoint)
+{
+    glm::vec2 r = segment1.second - segment1.first;
+    glm::vec2 s = segment2.second - segment2.first;
+    glm::vec2 t = segment2.first  - segment1.first;
+    float rs = wedge(r, s);
+    float tr = wedge(t, r);
+
+    // If r^s = 0 and (s21 - s11)^r = 0, then the two lines are collinear.
+    if(fabsf(rs) < EPS && fabsf(tr) < EPS) {
+        // 1. If either  0 <= (s21 - s11).r <= r.r or 0 <= (s11 - s21).s <= s.s
+        // then the two lines are overlapping,
+        if ((0 <= glm::dot(segment2.first - segment1.first, r) && glm::dot(segment2.first - segment1.first, r) <= glm::dot(r, r)) ||
+            (0 <= glm::dot(segment1.first - segment2.first, s) && glm::dot(segment1.first - segment2.first, s) <= glm::dot(s, s))) {
+            return 1;
+        }
+
+        // 2. If neither 0 <= (s21 - s11).r ≤ r.r nor 0 <= (s11 - s21).s <= s.s
+        // then the two lines are collinear but disjoint.
+        // No need to implement this expression, as it follows from the expression above.
+        return 0;
+    }
+
+    // 3. If r^s = 0 and (s21 - s11).r != 0, then the two lines are parallel and non-intersecting.
+    if (fabsf(rs) < EPS && fabsf(tr) >= EPS) {
+        return 0;
+    }
+
+    // u = (s21 - s11)^s / (r^s)
+    float u = wedge(segment2.first - segment1.first, s) / rs;
+    // v = (s21 - s11)^r / (r^s)
+    float v = wedge(segment2.first - segment1.first, r) / rs;
+
+    // 4. If r^s != 0 and 0 <= u <= 1 and 0 <= v <= 1
+    // the two line segments meet at the point s11 + u*r = s21 + v*s.
+    if (fabsf(rs) >= EPS && (0 <= u && u <= 1) && (0 <= v && v <= 1)) {
+        // We can calculate the intersection point using either u or v.
+        intersectionPoint = segment1.first + u * r;
+
+        // An intersection was found.
+        return 2;
+    }
+
+    // 5. Otherwise, the two line segments are not parallel but do not intersect.
+    return 0;
+}
+
 // inSegment(): determine if a point is inside a segment
 //    Input:  a point P, and a collinear segment S
 //    Return: 1 = P is inside S
@@ -482,7 +541,7 @@ bool Utils::inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s) {
 //===================================================================
 // http://geomalgorithms.com/a05-_intersect-1.html#intersect2D_2Segments()
 // TODO: add intersect point and endpoint
-int Utils::intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2) {
+int Utils::intersectSegments3D(std::pair<glm::vec3, glm::vec3> segment1, std::pair<glm::vec3, glm::vec3> segment2) {
     // intersect2D_2Segments(): find the 2D intersection of 2 finite segments
     //    Input:  two finite segments S1 and S2
     //    Output: *I0 = intersect point (when it exists)
@@ -490,9 +549,9 @@ int Utils::intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::
     //    Return: 0=disjoint (no intersect)
     //            1=intersect  in unique point I0
     //            2=overlap  in segment from I0 to I1
-    glm::vec3 u = s1.second - s1.first;
-    glm::vec3 v = s2.second - s2.first;
-    glm::vec3 w = s1.first - s2.first;
+    glm::vec3 u = segment1.second - segment1.first;
+    glm::vec3 v = segment2.second - segment2.first;
+    glm::vec3 w = segment1.first - segment2.first;
     float D = PERP(u,v);
 
     // test if  they are parallel (includes either being a point)
@@ -505,23 +564,23 @@ int Utils::intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::
         float du = glm::dot(u,u);
         float dv = glm::dot(v,v);
         if (du==0 && dv==0) {            // both segments are points
-            if (s1.first !=  s2.first)         // they are distinct  points
+            if (segment1.first !=  segment2.first)         // they are distinct  points
                  return 0;
             return 1;
         }
         if (du==0) {                     // S1 is a single point
-            if (inSegment(s1.first, s2) == false)  // but is not in S2
+            if (inSegment(segment1.first, segment2) == false)  // but is not in S2
                  return 0;
             return 1;
         }
         if (dv==0) {                     // S2 a single point
-            if  (inSegment(s2.first, s1) == false)  // but is not in S1
+            if  (inSegment(segment2.first, segment1) == false)  // but is not in S1
                  return 0;
             return 1;
         }
         // they are collinear segments - get  overlap (or not)
         float t0, t1;                    // endpoints of S1 in eqn for S2
-        glm::vec3 w2 = s1.second - s2.first;
+        glm::vec3 w2 = segment1.second - segment2.first;
         if (v.x != 0) {
                  t0 = w.x / v.x;
                  t1 = w2.x / v.x;
@@ -932,18 +991,25 @@ int Utils::getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3> > &segm
 
 // NOTE: This function just check for loops on the same contour
 bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {
+    int k = 0;
+    std::cout << "contour size: " << contour.size() << std::endl;
     for(std::vector<std::vector<glm::vec3>>::iterator itContour = contour.begin(); itContour != contour.end(); ++itContour) {
         int i = 0;
         while(i < itContour->size()-1) {
             for(int j = i+2; j < itContour->size()-1; j++) {
-                std::pair<glm::vec3, glm::vec3> s1(itContour->at(i), itContour->at(i+1));
-                std::pair<glm::vec3, glm::vec3> s2(itContour->at(j), itContour->at(j+1));
-                if(Utils::intersectSegments(s1, s2) == 1) {
-                    return true;
+                std::pair<glm::vec2, glm::vec2> s1(itContour->at(i), itContour->at(i+1));
+                std::pair<glm::vec2, glm::vec2> s2(itContour->at(j), itContour->at(j+1));
+                glm::vec2 intersection;
+                if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
+                    std::cout << k << std::endl <<
+                                 glm::to_string(s1.first) << ", " << glm::to_string(s1.second) << std::endl <<
+                                 glm::to_string(s2.first) << ", " << glm::to_string(s2.second) << std::endl;
+//                    return true;
                 }
             }
             i++;
         }
+        k++;
     }
     return false;
 }

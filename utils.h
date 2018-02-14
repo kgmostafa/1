@@ -22,6 +22,8 @@ class Utils
 public:
     Utils();
 
+    static float wedge(glm::vec2 a, glm::vec2 b);
+
     static void rotateX(std::vector<Triangle> &t, float angle);
     static void rotateY(std::vector<Triangle> &t, float angle);
     static void rotateZ(std::vector<Triangle> &t, float angle);
@@ -43,7 +45,8 @@ public:
     static bool intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t);
     static std::pair<glm::vec3, glm::vec3> intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN);
     static bool checkTriangleBoxOverlap(Triangle t, glm::vec3 v1, glm::vec3 v2);
-    static int intersectSegments(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2);
+    static int intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pair<glm::vec2, glm::vec2> segment2, glm::vec2 &intersectionPoint);
+    static int intersectSegments3D(std::pair<glm::vec3, glm::vec3> segment1, std::pair<glm::vec3, glm::vec3> segment2);
     static bool inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s);
 
     static float distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal);
