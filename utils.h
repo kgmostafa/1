@@ -74,6 +74,9 @@ public:
     static std::vector<std::vector<glm::vec2>> convertContourTo2D(std::vector<std::vector<glm::vec3>> &contours);
     static std::vector<std::vector<glm::vec2>> splitLoopsFromContours2D(std::vector<std::vector<glm::vec2>> &contours);
     static std::vector<std::vector<glm::vec2>> splitLoopsFromContour2D(std::vector<glm::vec2> &contour);
+
+    static void removeLoops2D(std::vector<Triangle> &t, float z, std::vector<std::vector<glm::vec2>> &contoursBase, std::vector<std::vector<glm::vec2>> &contoursOffset, float offset, float tolerance);
+
     static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
 
     // Cutting/splitting methods

@@ -1005,34 +1005,10 @@ std::vector<std::vector<glm::vec2> > Utils::convertContourTo2D(std::vector<std::
 // Author: Momesso
 std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContours2D(std::vector<std::vector<glm::vec2>> &contours) {
     std::vector<std::vector<glm::vec2> > result;
-    int i = 0;
     for(std::vector<std::vector<glm::vec2>>::iterator itContour = contours.begin(); itContour != contours.end(); ++itContour) {
-        std::cout << "contour #" << i++ << std::endl;
         std::vector<std::vector<glm::vec2> > aux;
         aux = splitLoopsFromContour2D(*itContour);
         result.insert(result.begin(), aux.begin(), aux.end());
-//        int i = 0;
-//        while(i < itContour->size()-1) {
-//            for(int j = i+2; j < itContour->size()-1; j++) {
-//                std::pair<glm::vec2, glm::vec2> s1(itContour->at(i), itContour->at(i+1));
-//                std::pair<glm::vec2, glm::vec2> s2(itContour->at(j), itContour->at(j+1));
-//                glm::vec2 intersection;
-//                if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
-//                    std::vector<glm::vec3> c1;
-//                    std::vector<glm::vec3> c2;
-//                    c1.push_back(intersection);
-//                    c1.insert(c1.end(), itContour->begin()+i+1, itContour->begin()+j);
-//                    c2.push_back(intersection);
-//                    c2.insert(c2.end(), itContour->begin()+j+1, itContour->end());
-//                    c2.insert(c2.end(), itContour->begin(), itContour->begin()+i);
-//                    result.insert(result.end(), c2.begin(), c2.end());
-//                    std::vector<std::vector<glm::vec3> > aux;
-//                    aux = splitLoopsFromContour(c1, offset, tolerance);
-//                    return result.insert(result.end(), c2.begin(), c2.end());
-//                }
-//            }
-//            i++;
-//        }
     }
     return result;
 }
@@ -1041,15 +1017,12 @@ std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContours2D(std::vector
 std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContour2D(std::vector<glm::vec2> &contour)
 {
     std::vector<std::vector<glm::vec2> > result;
-    int i = 0;
     for(std::vector<glm::vec2>::iterator it1 = contour.begin(); it1 != contour.end()-3; ++it1) {
-        int j = 0;
         for(std::vector<glm::vec2>::iterator it2 = it1+2; it2 != contour.end()-1; ++it2) {
             std::pair<glm::vec2, glm::vec2> s1(*(it1), *(it1+1));
             std::pair<glm::vec2, glm::vec2> s2(*(it2), *(it2+1));
             glm::vec2 intersection;
             if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
-                std::cout << "split\n";
                 std::vector<glm::vec2> c1;
                 std::vector<glm::vec2> c2;
                 c1.push_back(intersection);
@@ -1057,7 +1030,6 @@ std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContour2D(std::vector<
                 c2.push_back(intersection);
                 c2.insert(c2.end(), it2+1, contour.end());
                 c2.insert(c2.end(), contour.begin(), it1);
-//                result.push_back(c2);
                 std::vector<std::vector<glm::vec2> > aux;
                 aux = splitLoopsFromContour2D(c1);
                 result.insert(result.end(), aux.begin(), aux.end());
@@ -1069,6 +1041,30 @@ std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContour2D(std::vector<
     }
     result.push_back(contour);
     return result;
+}
+
+void Utils::removeLoops2D(std::vector<Triangle> &t, float z, std::vector<std::vector<glm::vec2> > &contoursBase, std::vector<std::vector<glm::vec2> > &contoursOffset, float offset, float tolerance)
+{
+    offset = fabsf(offset);
+    // 1. Detect loop contours
+    for(std::vector<std::vector<glm::vec2>>::iterator it1 = contoursBase.begin(); it1 != contoursBase.end(); ++it1) {
+        for(std::vector<glm::vec2>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2) {
+            glm::vec2 pBase = *it2;
+            for(std::vector<std::vector<glm::vec2>>::iterator it3 = contoursOffset.begin(); it3 != contoursOffset.end(); ++it3) {
+                for(std::vector<glm::vec2>::iterator it4 = it3->begin(); it4 != it3->end(); ++it4) {
+                    glm::vec2 pOffset = *it4;
+                    // Maybe the minimum distance between the pBase and the segments of the contour is more robust
+                    if(glm::distance(pBase, pOffset) < offset) {
+                        std::cout << "loop contour found!\n";
+                    }
+                }
+            }
+        }
+    }
+
+    // 2. Remove all intersecting triangles from loop contours
+
+    // 3. Repair mesh
 }
 
 // NOTE: This function just check for loops on the same contour

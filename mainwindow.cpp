@@ -150,6 +150,12 @@ void MainWindow::on_pushButton_process_clicked() {
         std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
         std::cout << "contours size: " << contours.size() << std::endl;
 
+        std::vector<std::vector<glm::vec2>> contoursBase;
+        contoursBase.push_back(contours[0]);
+        std::vector<std::vector<glm::vec2>> contoursOffset;
+        contoursOffset.insert(contoursOffset.begin(), contours.begin()+1, contours.end());
+        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001);
+
 //        bool loops = Utils::checkLoops(cont);
 //        if(loops) {
 //            std::cout << "Loops detected!\n";
