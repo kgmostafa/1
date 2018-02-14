@@ -71,6 +71,9 @@ public:
     static std::vector<glm::vec3> getContour(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, std::vector<bool> &segmentsCheck, std::vector<glm::vec3> contour, float tolerance);
     static int getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3>> &segments, std::vector<bool> &segmentsCheck, glm::vec3 point, float tolerance);
 
+    static std::vector<std::vector<glm::vec2>> convertContourTo2D(std::vector<std::vector<glm::vec3>> &contours);
+    static std::vector<std::vector<glm::vec2>> splitLoopsFromContours2D(std::vector<std::vector<glm::vec2>> &contours);
+    static std::vector<std::vector<glm::vec2>> splitLoopsFromContour2D(std::vector<glm::vec2> &contour);
     static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
 
     // Cutting/splitting methods

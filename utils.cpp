@@ -988,6 +988,88 @@ int Utils::getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3> > &segm
     return -1;
 }
 
+// Author: Momesso
+std::vector<std::vector<glm::vec2> > Utils::convertContourTo2D(std::vector<std::vector<glm::vec3> > &contours)
+{
+    std::vector<std::vector<glm::vec2> > result;
+    for(std::vector<std::vector<glm::vec3> >::iterator it1 = contours.begin(); it1 != contours.end(); ++it1) {
+        std::vector<glm::vec2> aux;
+        for(std::vector<glm::vec3>::iterator it2 = it1->begin(); it2 != it1->end(); ++it2) {
+            aux.push_back(glm::vec3(*it2));
+        }
+        result.push_back(aux);
+    }
+    return result;
+}
+
+// Author: Momesso
+std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContours2D(std::vector<std::vector<glm::vec2>> &contours) {
+    std::vector<std::vector<glm::vec2> > result;
+    int i = 0;
+    for(std::vector<std::vector<glm::vec2>>::iterator itContour = contours.begin(); itContour != contours.end(); ++itContour) {
+        std::cout << "contour #" << i++ << std::endl;
+        std::vector<std::vector<glm::vec2> > aux;
+        aux = splitLoopsFromContour2D(*itContour);
+        result.insert(result.begin(), aux.begin(), aux.end());
+//        int i = 0;
+//        while(i < itContour->size()-1) {
+//            for(int j = i+2; j < itContour->size()-1; j++) {
+//                std::pair<glm::vec2, glm::vec2> s1(itContour->at(i), itContour->at(i+1));
+//                std::pair<glm::vec2, glm::vec2> s2(itContour->at(j), itContour->at(j+1));
+//                glm::vec2 intersection;
+//                if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
+//                    std::vector<glm::vec3> c1;
+//                    std::vector<glm::vec3> c2;
+//                    c1.push_back(intersection);
+//                    c1.insert(c1.end(), itContour->begin()+i+1, itContour->begin()+j);
+//                    c2.push_back(intersection);
+//                    c2.insert(c2.end(), itContour->begin()+j+1, itContour->end());
+//                    c2.insert(c2.end(), itContour->begin(), itContour->begin()+i);
+//                    result.insert(result.end(), c2.begin(), c2.end());
+//                    std::vector<std::vector<glm::vec3> > aux;
+//                    aux = splitLoopsFromContour(c1, offset, tolerance);
+//                    return result.insert(result.end(), c2.begin(), c2.end());
+//                }
+//            }
+//            i++;
+//        }
+    }
+    return result;
+}
+
+// Author: Momesso
+std::vector<std::vector<glm::vec2> > Utils::splitLoopsFromContour2D(std::vector<glm::vec2> &contour)
+{
+    std::vector<std::vector<glm::vec2> > result;
+    int i = 0;
+    for(std::vector<glm::vec2>::iterator it1 = contour.begin(); it1 != contour.end()-3; ++it1) {
+        int j = 0;
+        for(std::vector<glm::vec2>::iterator it2 = it1+2; it2 != contour.end()-1; ++it2) {
+            std::pair<glm::vec2, glm::vec2> s1(*(it1), *(it1+1));
+            std::pair<glm::vec2, glm::vec2> s2(*(it2), *(it2+1));
+            glm::vec2 intersection;
+            if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
+                std::cout << "split\n";
+                std::vector<glm::vec2> c1;
+                std::vector<glm::vec2> c2;
+                c1.push_back(intersection);
+                c1.insert(c1.end(), it1+1, it2);
+                c2.push_back(intersection);
+                c2.insert(c2.end(), it2+1, contour.end());
+                c2.insert(c2.end(), contour.begin(), it1);
+//                result.push_back(c2);
+                std::vector<std::vector<glm::vec2> > aux;
+                aux = splitLoopsFromContour2D(c1);
+                result.insert(result.end(), aux.begin(), aux.end());
+                aux = splitLoopsFromContour2D(c2);
+                result.insert(result.end(), aux.begin(), aux.end());
+                return result;
+            }
+        }
+    }
+    result.push_back(contour);
+    return result;
+}
 
 // NOTE: This function just check for loops on the same contour
 bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {
@@ -1001,6 +1083,7 @@ bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {
                 std::pair<glm::vec2, glm::vec2> s2(itContour->at(j), itContour->at(j+1));
                 glm::vec2 intersection;
                 if(Utils::intersectSegments2D(s1, s2, intersection) == 2) {
+
                     std::cout << k << std::endl <<
                                  glm::to_string(s1.first) << ", " << glm::to_string(s1.second) << std::endl <<
                                  glm::to_string(s2.first) << ", " << glm::to_string(s2.second) << std::endl;

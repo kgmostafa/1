@@ -145,14 +145,17 @@ void MainWindow::on_pushButton_process_clicked() {
 //            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
 //        }
         std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001);
-//        std::cout << "contours size: " << cont.size() << std::endl;
 
-        bool loops = Utils::checkLoops(cont);
-        if(loops) {
-            std::cout << "Loops detected!\n";
-        } else {
-            std::cout << "Loops not detected\n";
-        }
+        std::vector<std::vector<glm::vec2>> cont2D = Utils::convertContourTo2D(cont);
+        std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
+        std::cout << "contours size: " << contours.size() << std::endl;
+
+//        bool loops = Utils::checkLoops(cont);
+//        if(loops) {
+//            std::cout << "Loops detected!\n";
+//        } else {
+//            std::cout << "Loops not detected\n";
+//        }
 
         return;
 
