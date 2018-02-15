@@ -1129,27 +1129,21 @@ bool Utils::isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice)
 
 int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
 {
-    glm::vec2 aux;
+    float area = 0;
+    glm::vec2 aux(0.0, 0.0);
+
     if(contour.size() < 3) {
-        std::cout << "getCentroid()::contour.size() < 3\n";
         return 1;
     }
 
-    float area = 0;
-    for(std::vector<glm::vec2>::iterator it = contour.begin(); it != contour.end()-1; ++it) {
-        glm::vec2 p1 = *it;
-        glm::vec2 p2 = *(it+1);
-        area += (p1.x * p2.y) - (p2.x * p1.y);
-        aux.x += (p1.x + p2.x) * ((p1.x * p2.y) - (p2.x * p1.y));
-        aux.y += (p1.y + p2.y) * ((p1.x * p2.y) - (p2.x * p1.y));
+    for(std::vector<glm::vec2>::iterator p1 = contour.end()-1, p2 = contour.begin(); p2 != contour.end(); p1 = p2, ++p2) {
+        float a = (p1->x * p2->y) - (p2->x * p1->y);
+        area += a;
+        aux.x += (p1->x + p2->x) * a;
+        aux.y += (p1->y + p2->y) * a;
     }
 
     if(fabsf(area) < EPS) {
-        std::cout << "getCentroid()::area == 0\n";
-
-        for(std::vector<glm::vec2>::iterator it = contour.begin(); it != contour.end()-1; ++it) {
-            std::cout << it->x << ", " << it->y << std::endl;
-        }
         return 2;
     }
 
