@@ -1127,6 +1127,36 @@ bool Utils::isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice)
     return inside;
 }
 
+int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
+{
+    glm::vec2 aux;
+    if(contour.size() < 3) {
+        std::cout << "getCentroid()::contour.size() < 3\n";
+        return 1;
+    }
+
+    float area = 0;
+    for(std::vector<glm::vec2>::iterator it = contour.begin(); it != contour.end()-1; ++it) {
+        glm::vec2 p1 = *it;
+        glm::vec2 p2 = *(it+1);
+        area += (p1.x * p2.y) - (p2.x * p1.y);
+        aux.x += (p1.x + p2.x) * ((p1.x * p2.y) - (p2.x * p1.y));
+        aux.y += (p1.y + p2.y) * ((p1.x * p2.y) - (p2.x * p1.y));
+    }
+
+    if(fabsf(area) < EPS) {
+        std::cout << "getCentroid()::area == 0\n";
+
+        for(std::vector<glm::vec2>::iterator it = contour.begin(); it != contour.end()-1; ++it) {
+            std::cout << it->x << ", " << it->y << std::endl;
+        }
+        return 2;
+    }
+
+    centroid = aux / (3.0 * area);
+    return 0;
+}
+
 // Author: Momesso
 //void Utils::split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface) {
 //    // Get intersection points

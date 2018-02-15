@@ -223,18 +223,24 @@ void MainWindow::on_pushButton_process_clicked() {
         }
 
         int zSteps = (int)ceil(_maxZLength/cellThickness);
+        glm::vec2 centroid;
+
         for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
             float z = _minZ + i*cellThickness;
             std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
 
-    //        std::pair<std::array<float, 2>, std::array<float, 2>> boundaries(Utils::getBoundaries(_base, z, layerThickness));
-    //        float xLength = boundaries.second[0]-boundaries.first[0];
-    //        float yLength = boundaries.second[1]-boundaries.first[1];
-
-            int xSteps = (int)ceil(_maxXLength/cellThickness);
-            int ySteps = (int)ceil(_maxYLength/cellThickness);
+            // Get the slice contour centroid
+            std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, z + cellThickness/2.0);
+            if(intersectionSegments.size() < 3) {
+                continue;
+            }
+            std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001);
+            std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
+            assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
 
             if(coordSystem == cartesian) {
+                int xSteps = (int)ceil(_maxXLength/cellThickness);
+                int ySteps = (int)ceil(_maxYLength/cellThickness);
                 // TODO: optimize by using boundaries
                 for(int j = 0; j < ySteps; j++) {
 //                    bool inside = false;
@@ -276,8 +282,8 @@ void MainWindow::on_pushButton_process_clicked() {
                 }
                 for(int r = 0; r < rSteps; r++) {
                     if(r == 0) {
-                        float posX = _minX + (_maxXLength/2.0);
-                        float posY = _minY + (_maxYLength/2.0);
+                        float posX = centroid.x - (cellThickness/2.0);
+                        float posY = centroid.y - (cellThickness/2.0);
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
                         if(Utils::isInsideMesh(slice, cellCenter, true) ||
                            Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
@@ -290,9 +296,8 @@ void MainWindow::on_pushButton_process_clicked() {
                     float circunferece = 2*M_PI*radius;
                     int phiSteps = (int)ceil(circunferece/cellThickness);
                     for(int phi = 0; phi < phiSteps; phi++) {
-                        // TODO: start to be relative to the center of mass
-                        float posX = _minX + (_maxXLength/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
-                        float posY = _minY + (_maxYLength/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                        float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                        float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
                         if(Utils::isInsideMesh(slice, cellCenter, true) ||
                            Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
