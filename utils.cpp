@@ -245,7 +245,8 @@ int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::
     return 0; // Segment intersect the plane
 }
 
-bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
+bool Utils::intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, float &distance)
+{
     const float EPSILON = 0.0000001;
     glm::vec3 vertex0 = t.getV1();
     glm::vec3 vertex1 = t.getV2();
@@ -254,26 +255,27 @@ bool Utils::intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t) {
     float a,f,u,v;
     edge1 = vertex1 - vertex0;
     edge2 = vertex2 - vertex0;
-    h = glm::cross((v2-v1), edge2);
+    h = glm::cross(dir, edge2);
     a = glm::dot(edge1, h);
     if (a > -EPSILON && a < EPSILON) {
         return false;
     }
     f = 1/a;
-    s = v1 - vertex0;
+    s = origin - vertex0;
     u = f * (glm::dot(s, h));
     if (u < 0.0 || u > 1.0) {
         return false;
     }
     q = glm::cross(s, edge1);
-    v = f * glm::dot((v2-v1), q);
+    v = f * glm::dot(dir, q);
     if (v < 0.0 || u + v > 1.0) {
         return false;
     }
 
     // At this stage we can compute t to find out where the intersection point is on the line.
-    float k = f * glm::dot(edge2, q);
-    if (k > EPSILON) { // ray intersection
+    float dist = f * glm::dot(edge2, q);
+    if (dist > EPSILON) { // ray intersection
+        distance = dist;
         return true;
     } else { // This means that there is a line intersection but not a ray intersection.
         return false;
@@ -1094,29 +1096,61 @@ bool Utils::checkLoops(std::vector<std::vector<glm::vec3>> &contour) {
 }
 
 // Author: Momesso
-void Utils::split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface) {
-    // Get intersection points
-    std::vector<glm::vec3> intersectionPoints;
-    for(std::vector<Triangle>::iterator itCut = cuttingSurface.begin(); itCut != cuttingSurface.end(); ++itCut) {
-        for(std::vector<Triangle>::iterator itMesh = mesh.begin(); itMesh != mesh.end(); ++itMesh) {
-            bool intersect = false;
-            // TODO: must be intersect segment triangle
-            if(Utils::intersectRayTriangle(itMesh->getV1(), itMesh->getV2(), *itCut)) {
-                std::cout << std::endl << "intersect:" << glm::to_string(itMesh->getV1()) << std::endl << glm::to_string(itMesh->getV2()) << std::endl << itCut->toString().toStdString() << std::endl;
-                intersect = true;
+// slice: true if the triangle mesh is just a slice (on z-axis) of a bigger mesh
+// POSSIBLE KNOWN PROBLEM: when this function call intersectRayTriangle, if the ray crosses the triangles in their edges, the function return false
+//      expected behavior: get the intersection and take the normals average or just one normal
+bool Utils::isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice)
+{
+    bool inside = false;
+    glm::vec3 dir;
+    if(slice) {
+        dir = glm::vec3(1.0, 1.0, 0.0);
+    } else {
+        dir = glm::vec3(1.0, 1.0, 1.0);
+    }
+
+    float distance = std::numeric_limits<float>::max();
+    for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
+        float aux = distance;
+        if(intersectRayTriangle(cellP, dir, *it, aux)) {
+            if(distance > aux) {
+                distance = aux;
+                if(glm::dot(it->getNormal(), dir) >= 0) {
+                    inside = true;
+                } else {
+                    inside = false;
+                }
             }
-            if(Utils::intersectRayTriangle(itMesh->getV2(), itMesh->getV3(), *itCut)) {
-                intersect = true;
-            }
-            if(Utils::intersectRayTriangle(itMesh->getV3(), itMesh->getV1(), *itCut)) {
-                intersect = true;
-            }
-            if(intersect)
-                std::cout << "intersect\n";
         }
     }
 
-    // Discard outside triangles
-
-    // Reconstruct surface
+    return inside;
 }
+
+// Author: Momesso
+//void Utils::split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface) {
+//    // Get intersection points
+//    std::vector<glm::vec3> intersectionPoints;
+//    for(std::vector<Triangle>::iterator itCut = cuttingSurface.begin(); itCut != cuttingSurface.end(); ++itCut) {
+//        for(std::vector<Triangle>::iterator itMesh = mesh.begin(); itMesh != mesh.end(); ++itMesh) {
+//            bool intersect = false;
+//            // TODO: must be intersect segment triangle
+//            if(Utils::intersectRayTriangle(itMesh->getV1(), itMesh->getV2(), *itCut)) {
+//                std::cout << std::endl << "intersect:" << glm::to_string(itMesh->getV1()) << std::endl << glm::to_string(itMesh->getV2()) << std::endl << itCut->toString().toStdString() << std::endl;
+//                intersect = true;
+//            }
+//            if(Utils::intersectRayTriangle(itMesh->getV2(), itMesh->getV3(), *itCut)) {
+//                intersect = true;
+//            }
+//            if(Utils::intersectRayTriangle(itMesh->getV3(), itMesh->getV1(), *itCut)) {
+//                intersect = true;
+//            }
+//            if(intersect)
+//                std::cout << "intersect\n";
+//        }
+//    }
+
+//    // Discard outside triangles
+
+//    // Reconstruct surface
+//}

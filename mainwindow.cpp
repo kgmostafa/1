@@ -198,6 +198,17 @@ void MainWindow::on_pushButton_process_clicked() {
             cellThickness = 1.0;
         }
 
+        CoordinateSystem coordSystem;
+        if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
+            coordSystem = cartesian;    // Cartesian coordinate system
+        } else if(ui->radioButton_infillCoordinateSystem_cylindrical->isChecked()) {
+            coordSystem = cylindrical;  // Cylindrical coordinate system
+        } else if(ui->radioButton_infillCoordinateSystem_spherical->isChecked()) {
+            coordSystem = spherical;    // Spherical coordinate system
+        } else {
+            coordSystem = cartesian;    // Default: Cartesian coordinate system
+        }
+
         Cell *c = NULL;
         if(cellType == 1) {
             c = new Pyramid(cellThickness);
@@ -223,28 +234,72 @@ void MainWindow::on_pushButton_process_clicked() {
             int xSteps = (int)ceil(_maxXLength/cellThickness);
             int ySteps = (int)ceil(_maxYLength/cellThickness);
 
-            // TODO: optimize by using boundaries
-            for(int j = 0; j < ySteps; j++) {
-                bool inside = false;
-                for(int k = 0; k < xSteps; k++) {
-                    bool sw = false;
-                    // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
-                    float posX = _minX + k*cellThickness;
-                    float posY = _minY + j*cellThickness;
-                    std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness);
-                    for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
-                        inside = true;
-                        if(it->getNormal().x > 0) {
-                            sw = true;
+            if(coordSystem == cartesian) {
+                // TODO: optimize by using boundaries
+                for(int j = 0; j < ySteps; j++) {
+//                    bool inside = false;
+                    for(int k = 0; k < xSteps; k++) {
+//                        bool sw = false;
+                        // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
+                        float posX = _minX + k*cellThickness;
+                        float posY = _minY + j*cellThickness;
+                        // Check if is inside the mesh or if is overlaping the surfaces
+                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                        if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                           Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                            c->place(posX, posY, z);
+                            std::vector<Triangle> t = c->getFacets();
+                            _processed.insert(_processed.end(), t.begin(), t.end());
+                        }
+                        // This commented code is a older approach to check if the cell is inside the mesh
+//                        std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness);
+//                        for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
+//                            inside = true;
+//                            if(it->getNormal().x > 0) {
+//                                sw = true;
+//                            }
+//                        }
+//                        if(inside) {
+//                            c->place(posX, posY, z);
+//                            std::vector<Triangle> t = c->getFacets();
+//                            _processed.insert(_processed.end(), t.begin(), t.end());
+//                        }
+//                        if(sw) {
+//                            inside = false;
+//                        }
+                    }
+                }
+            } else if(coordSystem == cylindrical) {
+                int rSteps = (int)ceil(_maxXLength/cellThickness);
+                if(rSteps < (int)ceil(_maxYLength/cellThickness)) {
+                    rSteps = (int)ceil(_maxYLength/cellThickness);
+                }
+                for(int r = 0; r < rSteps; r++) {
+                    if(r == 0) {
+                        float posX = _minX + (_maxXLength/2.0);
+                        float posY = _minY + (_maxYLength/2.0);
+                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                        if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                           Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                            c->place(posX, posY, z);
+                            std::vector<Triangle> t = c->getFacets();
+                            _processed.insert(_processed.end(), t.begin(), t.end());
                         }
                     }
-                    if(inside) {
-                        c->place(posX, posY, z);
-                        std::vector<Triangle> t = c->getFacets();
-                        _processed.insert(_processed.end(), t.begin(), t.end());
-                    }
-                    if(sw) {
-                        inside = false;
+                    float radius = r*cellThickness;
+                    float circunferece = 2*M_PI*radius;
+                    int phiSteps = (int)ceil(circunferece/cellThickness);
+                    for(int phi = 0; phi < phiSteps; phi++) {
+                        // TODO: start to be relative to the center of mass
+                        float posX = _minX + (_maxXLength/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                        float posY = _minY + (_maxYLength/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                        if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                           Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                            c->place(posX, posY, z);
+                            std::vector<Triangle> t = c->getFacets();
+                            _processed.insert(_processed.end(), t.begin(), t.end());
+                        }
                     }
                 }
             }

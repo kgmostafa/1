@@ -17,6 +17,7 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
+    enum CoordinateSystem { cartesian, cylindrical, spherical };
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();

@@ -42,7 +42,7 @@ public:
 
     static int intersectLines(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2, glm::vec3 &intersectionPoint);
     static int intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::vec3 pNormal, glm::vec3 &intersect);
-    static bool intersectRayTriangle(glm::vec3 v1, glm::vec3 v2, Triangle t);
+    static bool intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, float &distance);
     static std::pair<glm::vec3, glm::vec3> intersectTrianglePlane(Triangle triangle, glm::vec3 planeP, glm::vec3 planeN);
     static bool checkTriangleBoxOverlap(Triangle t, glm::vec3 v1, glm::vec3 v2);
     static int intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pair<glm::vec2, glm::vec2> segment2, glm::vec2 &intersectionPoint);
@@ -78,6 +78,8 @@ public:
     static void removeLoops2D(std::vector<Triangle> &t, float z, std::vector<std::vector<glm::vec2>> &contoursBase, std::vector<std::vector<glm::vec2>> &contoursOffset, float offset, float tolerance);
 
     static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
+
+    static bool isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice);
 
     // Cutting/splitting methods
     // Split one mesh on the surface of another mesh

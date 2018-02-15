@@ -67,6 +67,11 @@ public:
     QLabel *label;
     QLineEdit *lineEdit_cellThickness;
     QLabel *label_2;
+    QGroupBox *groupBox_infillCoordinateSystem;
+    QHBoxLayout *horizontalLayout_8;
+    QRadioButton *radioButton_infillCoordinateSystem_cartesian;
+    QRadioButton *radioButton_infillCoordinateSystem_cylindrical;
+    QRadioButton *radioButton_infillCoordinateSystem_spherical;
     QCheckBox *checkBox_skipInfilling;
     QPushButton *pushButton_process;
     QGroupBox *groupBox_STLInfo;
@@ -87,7 +92,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::ApplicationModal);
-        MainWindow->resize(837, 664);
+        MainWindow->resize(837, 720);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -163,6 +168,7 @@ public:
 
         checkBox_skipHollowing = new QCheckBox(groupBox_hollowing);
         checkBox_skipHollowing->setObjectName(QStringLiteral("checkBox_skipHollowing"));
+        checkBox_skipHollowing->setChecked(true);
 
         verticalLayout_2->addWidget(checkBox_skipHollowing);
 
@@ -278,6 +284,31 @@ public:
 
 
         verticalLayout_3->addWidget(groupBox_infillDensity);
+
+        groupBox_infillCoordinateSystem = new QGroupBox(groupBox_infill);
+        groupBox_infillCoordinateSystem->setObjectName(QStringLiteral("groupBox_infillCoordinateSystem"));
+        horizontalLayout_8 = new QHBoxLayout(groupBox_infillCoordinateSystem);
+        horizontalLayout_8->setSpacing(6);
+        horizontalLayout_8->setContentsMargins(11, 11, 11, 11);
+        horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
+        radioButton_infillCoordinateSystem_cartesian = new QRadioButton(groupBox_infillCoordinateSystem);
+        radioButton_infillCoordinateSystem_cartesian->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cartesian"));
+        radioButton_infillCoordinateSystem_cartesian->setChecked(true);
+
+        horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cartesian);
+
+        radioButton_infillCoordinateSystem_cylindrical = new QRadioButton(groupBox_infillCoordinateSystem);
+        radioButton_infillCoordinateSystem_cylindrical->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cylindrical"));
+
+        horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cylindrical);
+
+        radioButton_infillCoordinateSystem_spherical = new QRadioButton(groupBox_infillCoordinateSystem);
+        radioButton_infillCoordinateSystem_spherical->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_spherical"));
+
+        horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_spherical);
+
+
+        verticalLayout_3->addWidget(groupBox_infillCoordinateSystem);
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
@@ -395,6 +426,10 @@ public:
         label->setText(QApplication::translate("MainWindow", "Cell thickness:", nullptr));
         lineEdit_cellThickness->setText(QApplication::translate("MainWindow", "2.5", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        groupBox_infillCoordinateSystem->setTitle(QApplication::translate("MainWindow", "Coordinate system", nullptr));
+        radioButton_infillCoordinateSystem_cartesian->setText(QApplication::translate("MainWindow", "Cartesian", nullptr));
+        radioButton_infillCoordinateSystem_cylindrical->setText(QApplication::translate("MainWindow", "Cylindrical", nullptr));
+        radioButton_infillCoordinateSystem_spherical->setText(QApplication::translate("MainWindow", "Spherical", nullptr));
         checkBox_skipInfilling->setText(QApplication::translate("MainWindow", "Skip infilling", nullptr));
         pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
         groupBox_STLInfo->setTitle(QApplication::translate("MainWindow", "STL info", nullptr));
