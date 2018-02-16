@@ -1127,6 +1127,8 @@ bool Utils::isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice)
     return inside;
 }
 
+// Centroid of a Polygon
+// G Bashein, PR Detmer - GRAPHICS GEMS, 1994
 int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
 {
     float area = 0;
