@@ -222,6 +222,62 @@ void MainWindow::on_pushButton_process_clicked() {
             c = new Pyramid(cellThickness);
         }
 
+
+
+        if(coordSystem == spherical) {
+            glm::vec3 centroid;
+            Utils::getCentroid(_base, centroid);
+            std::cout << "centroid: " << glm::to_string(centroid) << std::endl;
+            int rSteps = (int)ceil(_maxLength/cellThickness);
+            for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
+                if(r == 0) {
+                    float posX = centroid.x - (cellThickness/2.0);
+                    float posY = centroid.y - (cellThickness/2.0);
+                    float posZ = centroid.z - (cellThickness/2.0);
+                    glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                    if(Utils::isInsideMesh(_base, cellCenter, true) ||
+                       Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                        c->place(posX, posY, posZ);
+                        std::vector<Triangle> t = c->getFacets();
+                        _processed.insert(_processed.end(), t.begin(), t.end());
+                    }
+                }
+                float radius = r*cellThickness;
+                float circunferece = 2.0*M_PI*radius;
+                int phiSteps = (int)ceil((circunferece/2.0)/cellThickness);
+                for(int phi = 0; phi <= phiSteps; phi++) {
+                    float phiAngle = ((float)phi/(float)phiSteps)*180.0;
+                    if(fabsf(sin(degreesToRadians(phiAngle))) < EPS) {
+                        float posX = centroid.x - (cellThickness/2.0);
+                        float posY = centroid.y - (cellThickness/2.0);
+                        float posZ = centroid.z - (cellThickness/2.0) + radius;
+                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                        if(Utils::isInsideMesh(_base, cellCenter, true) ||
+                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                            c->place(posX, posY, posZ);
+                            std::vector<Triangle> t = c->getFacets();
+                            _processed.insert(_processed.end(), t.begin(), t.end());
+                        }
+                    }
+                    circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
+                    int thetaSteps = (int)ceil(circunferece/cellThickness);
+                    for(int theta = 0; theta < thetaSteps; theta++) {
+                        float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
+                        float posX = centroid.x - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
+                        float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
+                        float posZ = centroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
+                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                        if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                            c->place(posX, posY, posZ);
+                            std::vector<Triangle> t = c->getFacets();
+                            _processed.insert(_processed.end(), t.begin(), t.end());
+                        }
+                    }
+                }
+            }
+        }
+
         int zSteps = (int)ceil(_maxZLength/cellThickness);
         glm::vec2 centroid;
 
@@ -293,7 +349,7 @@ void MainWindow::on_pushButton_process_clicked() {
                         }
                     }
                     float radius = r*cellThickness;
-                    float circunferece = 2*M_PI*radius;
+                    float circunferece = 2.0*M_PI*radius;
                     int phiSteps = (int)ceil(circunferece/cellThickness);
                     for(int phi = 0; phi < phiSteps; phi++) {
                         float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));

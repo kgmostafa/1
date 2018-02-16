@@ -1153,6 +1153,23 @@ int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
     return 0;
 }
 
+int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid)
+{
+    float volume = 0;
+    glm::vec3 aux(0.0, 0.0, 0.0);
+
+    for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
+        volume += glm::dot(it->getV1(), it->getNormal());
+        aux.x += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(1.0, 0.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(1.0, 0.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(1.0,0.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(1.0,0.0,0.0)), 2.0));
+        aux.y += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 1.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 1.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,1.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,1.0,0.0)), 2.0));
+        aux.z += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 0.0, 1.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 0.0, 1.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,0.0,1.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,0.0,1.0)), 2.0));
+    }
+
+    volume /= 6.0;
+    centroid = aux / (2.0 * volume);
+    return 0;
+}
+
 // Author: Momesso
 //void Utils::split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface) {
 //    // Get intersection points

@@ -82,6 +82,7 @@ public:
     static bool isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice);
 
     static int getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid);
+    static int getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid);
 
     // Cutting/splitting methods
     // Split one mesh on the surface of another mesh
