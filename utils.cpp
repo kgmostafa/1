@@ -245,9 +245,10 @@ int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::
     return 0; // Segment intersect the plane
 }
 
+// Möller–Trumbore intersection algorithm
 bool Utils::intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, float &distance)
 {
-    const float EPSILON = 0.0000001;
+    const float EPSILON = 0.0000001f;
     glm::vec3 vertex0 = t.getV1();
     glm::vec3 vertex1 = t.getV2();
     glm::vec3 vertex2 = t.getV3();
@@ -680,7 +681,7 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         std::vector<Vertex>::iterator v_it =  std::find(v.begin(), v.end(), it->getV1());
         if(v_it  == v.end()) {
             v.push_back(it->getV1());
-            f_aux.vertex[0] = v.size() - 1;
+            f_aux.vertex[0] = (int)v.size() - 1;
         } else {
             f_aux.vertex[0] = v_it - v.begin();
         }
@@ -688,7 +689,7 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         v_it =  std::find(v.begin(), v.end(), it->getV2());
         if(v_it  == v.end()) {
             v.push_back(it->getV2());
-            f_aux.vertex[1] = v.size() - 1;
+            f_aux.vertex[1] = (int)v.size() - 1;
         } else {
             f_aux.vertex[1] = v_it - v.begin();
         }
@@ -696,7 +697,7 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
         v_it =  std::find(v.begin(), v.end(), it->getV3());
         if(v_it  == v.end()) {
             v.push_back(it->getV3());
-            f_aux.vertex[2] = v.size() - 1;
+            f_aux.vertex[2] = (int)v.size() - 1;
         } else {
             f_aux.vertex[2] = v_it - v.begin();
         }
@@ -706,7 +707,7 @@ std::vector<Vertex> Utils::getVertexList(std::vector<Triangle> &t, std::vector<F
     return v;
 }
 
-// Bahattin  Koc, Yuan-Shin Lee (2001): Non-uniform offsettting and hollowing objects by using biarcs fitting for rapid protoyping processes
+// Bahattin  Koc, Yuan-Shin Lee (2002): Non-uniform offsettting and hollowing objects by using biarcs fitting for rapid protoyping processes
 void Utils::offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d) {
     for(int i = 0; i < v.size(); i++) {
         glm::vec3 normal;
@@ -1153,10 +1154,15 @@ int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
     return 0;
 }
 
+// http://wwwf.imperial.ac.uk/~rn/centroid.pdf
 int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid)
 {
     float volume = 0;
     glm::vec3 aux(0.0, 0.0, 0.0);
+
+    if(t.size() < 4) {
+        return 1;
+    }
 
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
         volume += glm::dot(it->getV1(), it->getNormal());
@@ -1165,7 +1171,12 @@ int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid)
         aux.z += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 0.0, 1.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 0.0, 1.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,0.0,1.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,0.0,1.0)), 2.0));
     }
 
+    if(fabsf(volume) < EPS) {
+        return 2;
+    }
+
     volume /= 6.0;
+    std::cout << "volume: " << volume << std::endl;
     centroid = aux / (2.0 * volume);
     return 0;
 }

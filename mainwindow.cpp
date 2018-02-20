@@ -8,6 +8,8 @@
 #include "stlfile.h"
 #include "utils.h"
 #include "glm/ext.hpp"
+#define _USE_MATH_DEFINES
+#include <math.h>
 #include <iostream>
 #include <QMessageBox>
 #include <QInputDialog>
@@ -36,7 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     _stlHeader = "";
 
     _rotateDialog = new RotateDialog(this);
-    connect(_rotateDialog, &RotateDialog::rotate, this, &rotateBasePart);
+    connect(_rotateDialog, &RotateDialog::rotate, this, &MainWindow::rotateBasePart);
 }
 
 MainWindow::~MainWindow() {
@@ -144,7 +146,7 @@ void MainWindow::on_pushButton_process_clicked() {
 //        for(int i = 0; i < intseg.size(); i++) {
 //            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
 //        }
-        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001);
+        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001f);
 
         std::vector<std::vector<glm::vec2>> cont2D = Utils::convertContourTo2D(cont);
         std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
@@ -154,7 +156,7 @@ void MainWindow::on_pushButton_process_clicked() {
         contoursBase.push_back(contours[0]);
         std::vector<std::vector<glm::vec2>> contoursOffset;
         contoursOffset.insert(contoursOffset.begin(), contours.begin()+1, contours.end());
-        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001);
+        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001f);
 
 //        bool loops = Utils::checkLoops(cont);
 //        if(loops) {
@@ -290,7 +292,7 @@ void MainWindow::on_pushButton_process_clicked() {
             if(intersectionSegments.size() < 3) {
                 continue;
             }
-            std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001);
+            std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
             std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
             assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
 

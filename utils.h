@@ -22,24 +22,25 @@ class Utils
 public:
     Utils();
 
+    // General
     static float wedge(glm::vec2 a, glm::vec2 b);
+    static float distance(Vertex v1, Vertex v2);
+    static float distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal);
+    static bool isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice);
+    static int getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid);
+    static int getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid);
 
+    // Mesh manipulation
     static void rotateX(std::vector<Triangle> &t, float angle);
     static void rotateY(std::vector<Triangle> &t, float angle);
     static void rotateZ(std::vector<Triangle> &t, float angle);
     static void translate(std::vector<Triangle> &t, float x, float y, float z);
 
+    // Cell manipulation
     static void place(Cell &c, float x, float y, float z);
-
     static void shrink(Cell &c, float thickness);
 
-    static float distance(Vertex v1, Vertex v2);
-
-    static std::vector<Triangle> createSquare(float el);
-
-    static bool insideTriangle(glm::vec3 p, Triangle t);
-    static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z, float thickness);
-
+    // Intersection functions
     static int intersectLines(std::pair<glm::vec3, glm::vec3> s1, std::pair<glm::vec3, glm::vec3> s2, glm::vec3 &intersectionPoint);
     static int intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::vec3 pNormal, glm::vec3 &intersect);
     static bool intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, float &distance);
@@ -47,49 +48,46 @@ public:
     static bool checkTriangleBoxOverlap(Triangle t, glm::vec3 v1, glm::vec3 v2);
     static int intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pair<glm::vec2, glm::vec2> segment2, glm::vec2 &intersectionPoint);
     static int intersectSegments3D(std::pair<glm::vec3, glm::vec3> segment1, std::pair<glm::vec3, glm::vec3> segment2);
+    static bool intersectSegmentPlane(glm::vec3 s1, glm::vec3 s2, glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 &intersectionPoint);
+    static bool insideTriangle(glm::vec3 p, Triangle t);
     static bool inSegment(glm::vec3 p, std::pair<glm::vec3, glm::vec3> s);
 
-    static float distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal);
-    static bool intersectSegmentPlane(glm::vec3 s1, glm::vec3 s2, glm::vec3 planePoint, glm::vec3 planeNormal, glm::vec3 &intersectionPoint);
-
-
+    // Slicing
     static std::vector<Triangle> slice(std::vector<Triangle> t, float z, float thickness);
     static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);
+    static std::vector<std::pair<glm::vec3, glm::vec3>> getIntersectionSegments(std::vector<Triangle> &t, float z);
 
+    // Offsetting
     static std::vector<Vertex> getVertexList(std::vector<Triangle> &t, std::vector<Facet> &f);
     static void offsetVertices(std::vector<Vertex> &v, std::vector<Facet> &f, float d);
     static std::vector<Triangle> getTriangleList(std::vector<Vertex> &v, std::vector<Facet> &f);
     static void switchNormal(std::vector<Triangle> &t);
 
-    static float getMinimumZ(std::vector<Vertex> &v);
-    static float getMaximumZ(std::vector<Vertex> &v);
-    static std::vector<std::pair<glm::vec3, glm::vec3>> getIntersectionSegments(std::vector<Triangle> &t, float z);
+    // Contour detection
     static std::vector<std::vector<glm::vec3>> connect(std::vector<std::pair<glm::vec3, glm::vec3>> &v);
     static void processContour(std::vector<std::pair<glm::vec3, glm::vec3>> &contour);
-
     static std::vector<std::vector<glm::vec3>> getContours(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, float tolerance);
     static std::vector<glm::vec3> getContour(std::vector<std::pair<glm::vec3, glm::vec3> > &segments, std::vector<bool> &segmentsCheck, std::vector<glm::vec3> contour, float tolerance);
     static int getNearestSegment(std::vector<std::pair<glm::vec3, glm::vec3>> &segments, std::vector<bool> &segmentsCheck, glm::vec3 point, float tolerance);
-
     static std::vector<std::vector<glm::vec2>> convertContourTo2D(std::vector<std::vector<glm::vec3>> &contours);
     static std::vector<std::vector<glm::vec2>> splitLoopsFromContours2D(std::vector<std::vector<glm::vec2>> &contours);
     static std::vector<std::vector<glm::vec2>> splitLoopsFromContour2D(std::vector<glm::vec2> &contour);
+    static std::pair<std::array<float, 2>, std::array<float, 2>> getBoundaries(std::vector<Triangle> &t, float z, float thickness);
 
+    // Loops
     static void removeLoops2D(std::vector<Triangle> &t, float z, std::vector<std::vector<glm::vec2>> &contoursBase, std::vector<std::vector<glm::vec2>> &contoursOffset, float offset, float tolerance);
-
     static bool checkLoops(std::vector<std::vector<glm::vec3> > &contour);
-
-    static bool isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice);
-
-    static int getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid);
-    static int getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid);
 
     // Cutting/splitting methods
     // Split one mesh on the surface of another mesh
     static void split(std::vector<Triangle> &mesh, std::vector<Triangle> &cuttingSurface);
 
-private:
+    // Others
+    static std::vector<Triangle> createSquare(float el);
+    static float getMinimumZ(std::vector<Vertex> &v);
+    static float getMaximumZ(std::vector<Vertex> &v);
 
+private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);
 };
 

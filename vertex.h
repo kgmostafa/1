@@ -16,7 +16,7 @@ public:
 
     QString toString();
 
-    bool operator==(const Vertex &v) const;
+//    bool operator==(const Vertex &v) const;
 
     typedef float value_type;
 

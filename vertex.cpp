@@ -38,6 +38,6 @@ QString Vertex::toString() {
      return result;
 }
 
-bool Vertex::operator==(const Vertex &v) const {
-    return glm::all(glm::lessThan(glm::abs(*this-v), glm::vec3(std::numeric_limits<float>::epsilon())));
-}
+//bool Vertex::operator==(const Vertex &v) const {
+//    return glm::all(glm::lessThan(glm::abs(*this-v), glm::vec3(std::numeric_limits<float>::epsilon())));
+//}
