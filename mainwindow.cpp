@@ -8,7 +8,7 @@
 #include "stlfile.h"
 #include "utils.h"
 #include "glm/ext.hpp"
-#define _USE_MATH_DEFINES
+//#define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
 #include <QMessageBox>
@@ -249,7 +249,7 @@ void MainWindow::on_pushButton_process_clicked() {
                 int phiSteps = (int)ceil((circunferece/2.0)/cellThickness);
                 for(int phi = 0; phi <= phiSteps; phi++) {
                     float phiAngle = ((float)phi/(float)phiSteps)*180.0;
-                    if(fabsf(sin(degreesToRadians(phiAngle))) < EPS) {
+                    if(fabsf(sin(degreesToRadians(phiAngle))) < EPSILON) {
                         float posX = centroid.x - (cellThickness/2.0);
                         float posY = centroid.y - (cellThickness/2.0);
                         float posZ = centroid.z - (cellThickness/2.0) + radius;

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <float.h>
 #include <glm/common.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/ext.hpp>
@@ -97,8 +98,10 @@ void Triangle::switchNormal() {
 }
 
 void Triangle::calculateMinMax() {
-    glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
-    glm::vec3 max(FLT_MIN, FLT_MIN, FLT_MIN);
+    float minFloat = std::numeric_limits<float>::min();
+    float maxFloat = std::numeric_limits<float>::max();
+    glm::vec3 min(maxFloat, maxFloat, maxFloat);
+    glm::vec3 max(minFloat, minFloat, minFloat);
     for(int i = 0; i < 3; i++) {
         // Check if is lower
         if(_vec[i].x < min.x) {

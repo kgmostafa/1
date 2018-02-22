@@ -15,7 +15,7 @@ struct Facet {
 
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) ((angleRadians) * 180.0 / M_PI)
-#define EPS std::numeric_limits<float>::epsilon()
+#define EPSILON std::numeric_limits<float>::epsilon()
 
 class Utils
 {

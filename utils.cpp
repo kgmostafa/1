@@ -109,8 +109,10 @@ bool Utils::insideTriangle(glm::vec3 p, Triangle t) {
 
 // WARNING: this function must be tested before being used again
 std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::vector<Triangle> &t, float z, float thickness) {
-    std::array<float, 2> minimum = {FLT_MAX, FLT_MAX};
-    std::array<float, 2> maximum = {FLT_MIN, FLT_MIN};
+    float minFloat = std::numeric_limits<float>::min();
+    float maxFloat = std::numeric_limits<float>::max();
+    std::array<float, 2> minimum = {maxFloat, maxFloat};
+    std::array<float, 2> maximum = {minFloat, minFloat};
     float pZ;
 
     for(int i = 0; i < 2; i++) {
@@ -248,7 +250,7 @@ int Utils::intersectRayPlane(glm::vec3 v1, glm::vec3 v2, glm::vec3 pPoint, glm::
 // Möller–Trumbore intersection algorithm
 bool Utils::intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, float &distance)
 {
-    const float EPSILON = 0.0000001f;
+    const float TOLERANCE = 0.0000001f;
     glm::vec3 vertex0 = t.getV1();
     glm::vec3 vertex1 = t.getV2();
     glm::vec3 vertex2 = t.getV3();
@@ -258,7 +260,7 @@ bool Utils::intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, fl
     edge2 = vertex2 - vertex0;
     h = glm::cross(dir, edge2);
     a = glm::dot(edge1, h);
-    if (a > -EPSILON && a < EPSILON) {
+    if (a > -TOLERANCE && a < TOLERANCE) {
         return false;
     }
     f = 1/a;
@@ -275,7 +277,7 @@ bool Utils::intersectRayTriangle(glm::vec3 origin, glm::vec3 dir, Triangle t, fl
 
     // At this stage we can compute t to find out where the intersection point is on the line.
     float dist = f * glm::dot(edge2, q);
-    if (dist > EPSILON) { // ray intersection
+    if (dist > TOLERANCE) { // ray intersection
         distance = dist;
         return true;
     } else { // This means that there is a line intersection but not a ray intersection.
@@ -324,7 +326,7 @@ std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle,
     std::pair<glm::vec3, glm::vec3> segment;
     glm::vec3 intersection;
     // Check if V1 is on the plane
-    if(fabsf(glm::dot(planeN, triangle.getV1()-planeP)) < EPS) {
+    if(fabsf(glm::dot(planeN, triangle.getV1()-planeP)) < EPSILON) {
         intersectSegmentPlane(triangle.getV1(), triangle.getV2(), planeP, planeN, intersection);
         segment.first = intersection;
         intersectSegmentPlane(triangle.getV2(), triangle.getV3(), planeP, planeN, intersection);
@@ -333,7 +335,7 @@ std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle,
     }
 
     // Check if V2 is on the plane
-    if(fabsf(glm::dot(planeN, triangle.getV2()-planeP)) < EPS) {
+    if(fabsf(glm::dot(planeN, triangle.getV2()-planeP)) < EPSILON) {
         intersectSegmentPlane(triangle.getV2(), triangle.getV1(), planeP, planeN, intersection);
         segment.first = intersection;
         intersectSegmentPlane(triangle.getV1(), triangle.getV3(), planeP, planeN, intersection);
@@ -342,7 +344,7 @@ std::pair<glm::vec3, glm::vec3> Utils::intersectTrianglePlane(Triangle triangle,
     }
 
     // Check if V3 is on the plane
-    if(fabsf(glm::dot(planeN, triangle.getV3()-planeP)) < EPS) {
+    if(fabsf(glm::dot(planeN, triangle.getV3()-planeP)) < EPSILON) {
         std::cout << "V3 is over the plane\n";
         intersectSegmentPlane(triangle.getV3(), triangle.getV1(), planeP, planeN, intersection);
         segment.first = intersection;
@@ -484,7 +486,7 @@ int Utils::intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pa
     float tr = wedge(t, r);
 
     // If r^s = 0 and (s21 - s11)^r = 0, then the two lines are collinear.
-    if(fabsf(rs) < EPS && fabsf(tr) < EPS) {
+    if(fabsf(rs) < EPSILON && fabsf(tr) < EPSILON) {
         // 1. If either  0 <= (s21 - s11).r <= r.r or 0 <= (s11 - s21).s <= s.s
         // then the two lines are overlapping,
         if ((0 <= glm::dot(segment2.first - segment1.first, r) && glm::dot(segment2.first - segment1.first, r) <= glm::dot(r, r)) ||
@@ -499,7 +501,7 @@ int Utils::intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pa
     }
 
     // 3. If r^s = 0 and (s21 - s11).r != 0, then the two lines are parallel and non-intersecting.
-    if (fabsf(rs) < EPS && fabsf(tr) >= EPS) {
+    if (fabsf(rs) < EPSILON && fabsf(tr) >= EPSILON) {
         return 0;
     }
 
@@ -510,7 +512,7 @@ int Utils::intersectSegments2D(std::pair<glm::vec2, glm::vec2> segment1, std::pa
 
     // 4. If r^s != 0 and 0 <= u <= 1 and 0 <= v <= 1
     // the two line segments meet at the point s11 + u*r = s21 + v*s.
-    if (fabsf(rs) >= EPS && (0 <= u && u <= 1) && (0 <= v && v <= 1)) {
+    if (fabsf(rs) >= EPSILON && (0 <= u && u <= 1) && (0 <= v && v <= 1)) {
         // We can calculate the intersection point using either u or v.
         intersectionPoint = segment1.first + u * r;
 
@@ -782,7 +784,7 @@ float Utils::getMaximumZ(std::vector<Vertex> &v) {
 std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std::vector<Triangle> &t, float z) {
     std::vector<std::pair<glm::vec3, glm::vec3>> result;
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
-        if(it->getMinZ() <= z + EPS && it->getMaxZ() >= z - EPS) {
+        if(it->getMinZ() <= z + EPSILON && it->getMaxZ() >= z - EPSILON) {
             std::pair<glm::vec3, glm::vec3> tmp;
             tmp = intersectTrianglePlane(*it, glm::vec3(0.0, 0.0, z), glm::vec3(0.0, 0.0, 1.0));
 
@@ -792,14 +794,14 @@ std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std:
                fabsf(tmp.first.z - tmp.second.z) < std::numeric_limits<float>::epsilon()) == false) {
                 // Check if can be a duplicate
                 bool checkDuplicate = false;
-                if(fabsf(it->getV1().z - z) <= EPS) {
-                    if(fabsf(it->getV2().z - z) <= EPS) {
+                if(fabsf(it->getV1().z - z) <= EPSILON) {
+                    if(fabsf(it->getV2().z - z) <= EPSILON) {
                         checkDuplicate = true;
-                    } else if(fabsf(it->getV3().z - z) <= EPS) {
+                    } else if(fabsf(it->getV3().z - z) <= EPSILON) {
                         checkDuplicate = true;
                     }
-                } else if(fabsf(it->getV2().z - z) <= EPS) {
-                    if(fabsf(it->getV3().z - z) <= EPS) {
+                } else if(fabsf(it->getV2().z - z) <= EPSILON) {
+                    if(fabsf(it->getV3().z - z) <= EPSILON) {
                         checkDuplicate = true;
                     }
                 }
@@ -807,20 +809,20 @@ std::vector<std::pair<glm::vec3, glm::vec3>> Utils::getIntersectionSegments(std:
                 if(checkDuplicate) {
                     if(std::find_if(result.begin(), result.end(),
                        [tmp](std::pair<glm::vec3, glm::vec3> seg) {
-                        if(fabsf(tmp.first.x - seg.first.x) <= EPS &&
-                           fabsf(tmp.first.y - seg.first.y) <= EPS &&
-                           fabsf(tmp.first.z - seg.first.z) <= EPS) {
-                            if(fabsf(tmp.second.x - seg.second.x) <= EPS &&
-                               fabsf(tmp.second.y - seg.second.y) <= EPS &&
-                               fabsf(tmp.second.z - seg.second.z) <= EPS) {
+                        if(fabsf(tmp.first.x - seg.first.x) <= EPSILON &&
+                           fabsf(tmp.first.y - seg.first.y) <= EPSILON &&
+                           fabsf(tmp.first.z - seg.first.z) <= EPSILON) {
+                            if(fabsf(tmp.second.x - seg.second.x) <= EPSILON &&
+                               fabsf(tmp.second.y - seg.second.y) <= EPSILON &&
+                               fabsf(tmp.second.z - seg.second.z) <= EPSILON) {
                             return true;
                             }
-                        } else if(fabsf(tmp.first.x - seg.second.x) <= EPS &&
-                                  fabsf(tmp.first.y - seg.second.y) <= EPS &&
-                                  fabsf(tmp.first.z - seg.second.z) <= EPS) {
-                            if(fabsf(tmp.second.x - seg.first.x) <= EPS &&
-                               fabsf(tmp.second.y - seg.first.y) <= EPS &&
-                               fabsf(tmp.second.z - seg.first.z) <= EPS) {
+                        } else if(fabsf(tmp.first.x - seg.second.x) <= EPSILON &&
+                                  fabsf(tmp.first.y - seg.second.y) <= EPSILON &&
+                                  fabsf(tmp.first.z - seg.second.z) <= EPSILON) {
+                            if(fabsf(tmp.second.x - seg.first.x) <= EPSILON &&
+                               fabsf(tmp.second.y - seg.first.y) <= EPSILON &&
+                               fabsf(tmp.second.z - seg.first.z) <= EPSILON) {
                             return true;
                             }
                         }
@@ -1146,7 +1148,7 @@ int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
         aux.y += (p1->y + p2->y) * a;
     }
 
-    if(fabsf(area) < EPS) {
+    if(fabsf(area) < EPSILON) {
         return 2;
     }
 
@@ -1171,7 +1173,7 @@ int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid)
         aux.z += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 0.0, 1.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 0.0, 1.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,0.0,1.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,0.0,1.0)), 2.0));
     }
 
-    if(fabsf(volume) < EPS) {
+    if(fabsf(volume) < EPSILON) {
         return 2;
     }
 
