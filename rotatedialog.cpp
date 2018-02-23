@@ -1,4 +1,3 @@
-//#include <QtGui>
 #include <QLabel>
 #include <QRadioButton>
 #include <QDoubleSpinBox>
@@ -24,8 +23,8 @@ RotateDialog::RotateDialog(QWidget *parent)
     _angleSpinBox->setSuffix(tr(" degree"));
     _rotateButton = new QPushButton(tr("Rotate"));
 
-    connect(_angleSpinBox, SIGNAL(valueChanged(double)), this, SLOT(angleValueChanged(double)));
-    connect(_rotateButton, SIGNAL(clicked()), this, SLOT(rotateClicked()));
+    connect(_angleSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &RotateDialog::angleValueChanged);
+    connect(_rotateButton, &QPushButton::clicked, this, &RotateDialog::rotateClicked);
 
     QHBoxLayout *axisLayout = new QHBoxLayout;
     axisLayout->addWidget(_axisLabel);

@@ -24,9 +24,9 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
-       <widget class="QPushButton" name="pushButton_open">
+       <widget class="QPushButton" name="pushButton_importBase">
         <property name="text">
-         <string>Open base part</string>
+         <string>Import base part</string>
         </property>
        </widget>
       </item>

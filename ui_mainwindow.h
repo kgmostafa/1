@@ -35,7 +35,7 @@ public:
     QWidget *centralWidget;
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
-    QPushButton *pushButton_open;
+    QPushButton *pushButton_importBase;
     QGroupBox *groupBox;
     QHBoxLayout *horizontalLayout_3;
     QPushButton *pushButton_rotate;
@@ -103,10 +103,10 @@ public:
         verticalLayout = new QVBoxLayout();
         verticalLayout->setSpacing(6);
         verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-        pushButton_open = new QPushButton(centralWidget);
-        pushButton_open->setObjectName(QStringLiteral("pushButton_open"));
+        pushButton_importBase = new QPushButton(centralWidget);
+        pushButton_importBase->setObjectName(QStringLiteral("pushButton_importBase"));
 
-        verticalLayout->addWidget(pushButton_open);
+        verticalLayout->addWidget(pushButton_importBase);
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
@@ -403,7 +403,7 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Editor", nullptr));
-        pushButton_open->setText(QApplication::translate("MainWindow", "Open base part", nullptr));
+        pushButton_importBase->setText(QApplication::translate("MainWindow", "Import base part", nullptr));
         groupBox->setTitle(QApplication::translate("MainWindow", "Pre-processing", nullptr));
         pushButton_rotate->setText(QApplication::translate("MainWindow", "Rotate", nullptr));
         groupBox_hollowing->setTitle(QApplication::translate("MainWindow", "Hollowing", nullptr));

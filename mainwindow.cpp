@@ -16,7 +16,8 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow) {
+    ui(new Ui::MainWindow)
+{
     ui->setupUi(this);
     _nTrianglesBase = 0;
     _nTrianglesProcessed = 0;
@@ -36,42 +37,37 @@ MainWindow::MainWindow(QWidget *parent) :
     _cellLoaded = false;
 
     _stlHeader = "";
+    _stlUnit = millimetre;
 
+    _importDialog = new ImportDialog(this);
+    connect(_importDialog, &ImportDialog::import, this, &MainWindow::importBasePart);
     _rotateDialog = new RotateDialog(this);
     connect(_rotateDialog, &RotateDialog::rotate, this, &MainWindow::rotateBasePart);
 }
 
-MainWindow::~MainWindow() {
+MainWindow::~MainWindow()
+{
     delete ui;
 }
 
-void MainWindow::rotateBasePart(float angle, int axis)
+void MainWindow::importBasePart(Unit unit)
 {
-    angle = degreesToRadians(angle);
-    if(axis == 0) {
-        Utils::rotateX(_base1, angle);
-    } else if(axis == 1) {
-        Utils::rotateY(_base1, angle);
-    } else if(axis == 2) {
-        Utils::rotateZ(_base1, angle);
-    }
+    _stlUnit = unit;
 }
 
-void MainWindow::on_pushButton_open_clicked() {
+void MainWindow::on_pushButton_importBase_clicked()
+{
     // Gets the file name
     QString fileName = QFileDialog::getOpenFileName(this,
-        tr("Open"), "", tr("STL Files (*.stl);;All files (*)"));
+        tr("Import"), "", tr("STL Files (*.stl);;All files (*)"));
     if (fileName.isEmpty())
         return;
 
     // Decode the STL file
     STLFile stl(fileName);
     qint32 n = 0;
-    if(_base1.size() > 0) {
-        _base2 = stl.decode(n);
-    } else {
-        _base1 = stl.decode(n);
-    }
+    _base = stl.decode(n);
+
     if(n < 0)
         return; // Return if input file is invalid
 
@@ -90,12 +86,26 @@ void MainWindow::on_pushButton_open_clicked() {
     _maxZ = stl.getMaxZ();
     _stlHeader = stl.getHeader();
 
+    _importDialog->show();
+
     // Updates the UI
     ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " mm");
     ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " mm");
     ui->labelHeightZ->setText("Height in Z: " + QString::number(_maxZLength) + " mm");
-//    ui->pushButton_open->setEnabled(false);
+    ui->pushButton_importBase->setEnabled(false);
     ui->pushButton_rotate->setEnabled(true);
+}
+
+void MainWindow::rotateBasePart(float angle, int axis)
+{
+    angle = degreesToRadians(angle);
+    if(axis == 0) {
+        Utils::rotateX(_base, angle);
+    } else if(axis == 1) {
+        Utils::rotateY(_base, angle);
+    } else if(axis == 2) {
+        Utils::rotateZ(_base, angle);
+    }
 }
 
 void MainWindow::on_pushButton_loadCell_clicked() {
@@ -137,11 +147,11 @@ void MainWindow::on_pushButton_process_clicked() {
             offset *= -1.0;
         }
 
-        _processed.insert(_processed.end(), _base1.begin(), _base1.end());
-        v_aux = Utils::getVertexList(_base1, f_aux);
+        _processed.insert(_processed.end(), _base.begin(), _base.end());
+        v_aux = Utils::getVertexList(_base, f_aux);
         Utils::offsetVertices(v_aux, f_aux, offset);
         t_aux = Utils::getTriangleList(v_aux, f_aux);
-        _base1 = t_aux;
+        _base = t_aux;
         Utils::switchNormal(t_aux);
         _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
 
@@ -230,7 +240,7 @@ void MainWindow::on_pushButton_process_clicked() {
 
         if(coordSystem == spherical) {
             glm::vec3 centroid;
-            Utils::getCentroid(_base1, centroid);
+            Utils::getCentroid(_base, centroid);
             std::cout << "centroid: " << glm::to_string(centroid) << std::endl;
             int rSteps = (int)ceil(_maxLength/cellThickness);
             for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
@@ -239,8 +249,8 @@ void MainWindow::on_pushButton_process_clicked() {
                     float posY = centroid.y - (cellThickness/2.0);
                     float posZ = centroid.z - (cellThickness/2.0);
                     glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                    if(Utils::isInsideMesh(_base1, cellCenter, true) ||
-                       Utils::getTrianglesFromBox(_base1, posX, posY, posZ, cellThickness).size() > 0) {
+                    if(Utils::isInsideMesh(_base, cellCenter, true) ||
+                       Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
                         c->place(posX, posY, posZ);
                         std::vector<Triangle> t = c->getFacets();
                         _processed.insert(_processed.end(), t.begin(), t.end());
@@ -256,8 +266,8 @@ void MainWindow::on_pushButton_process_clicked() {
                         float posY = centroid.y - (cellThickness/2.0);
                         float posZ = centroid.z - (cellThickness/2.0) + radius;
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                        if(Utils::isInsideMesh(_base1, cellCenter, true) ||
-                           Utils::getTrianglesFromBox(_base1, posX, posY, posZ, cellThickness).size() > 0) {
+                        if(Utils::isInsideMesh(_base, cellCenter, true) ||
+                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
                             c->place(posX, posY, posZ);
                             std::vector<Triangle> t = c->getFacets();
                             _processed.insert(_processed.end(), t.begin(), t.end());
@@ -271,8 +281,8 @@ void MainWindow::on_pushButton_process_clicked() {
                         float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
                         float posZ = centroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                        if(Utils::isInsideMesh(_base1, cellCenter, false) ||
-                           Utils::getTrianglesFromBox(_base1, posX, posY, posZ, cellThickness).size() > 0) {
+                        if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
                             c->place(posX, posY, posZ);
                             std::vector<Triangle> t = c->getFacets();
                             _processed.insert(_processed.end(), t.begin(), t.end());
@@ -287,7 +297,7 @@ void MainWindow::on_pushButton_process_clicked() {
 
         for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
             float z = _minZ + i*cellThickness;
-            std::vector<Triangle> slice = Utils::slice(_base1, z, cellThickness);
+            std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
 
             // Get the slice contour centroid
             std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, z + cellThickness/2.0);
@@ -354,7 +364,7 @@ void MainWindow::on_pushButton_process_clicked() {
     }
 
     // Trimm
-    CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base1);
+    CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base);
     CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
     CorkTriMesh *c = new CorkTriMesh;
     computeIntersection(c1, c2, c);
@@ -397,3 +407,5 @@ void MainWindow::on_pushButton_rotate_clicked() {
 //    if (valid)
 //        std::cout << d << std::endl;
 }
+
+

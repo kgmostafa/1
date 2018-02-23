@@ -7,6 +7,7 @@
 #include "triangle.h"
 #include "cell.h"
 #include "utils.h"
+#include "importdialog.h"
 #include "rotatedialog.h"
 
 namespace Ui {
@@ -22,8 +23,7 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    std::vector<Triangle> _base1;
-    std::vector<Triangle> _base2;
+    std::vector<Triangle> _base;
     std::vector<Triangle> _offset;
     std::vector<Triangle> _processed;
     Cell *_cell;
@@ -48,13 +48,12 @@ public:
 
 
 private slots:
+    void importBasePart(Unit unit);
     void rotateBasePart(float angle, int axis);
 
     void on_pushButton_process_clicked();
 
     void on_radioButton_cellType_custom_toggled(bool checked);
-
-    void on_pushButton_open_clicked();
 
     void on_checkBox_basePart_stateChanged(int arg1);
 
@@ -65,6 +64,8 @@ private slots:
     void on_pushButton_save_clicked();
 
     void on_pushButton_rotate_clicked();
+
+    void on_pushButton_importBase_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -80,10 +81,10 @@ private:
     std::vector<Facet> _facets;
 
     QString _stlHeader;
+    Unit _stlUnit;
 
+    ImportDialog *_importDialog;
     RotateDialog *_rotateDialog;
-
-
 };
 
 #endif // MAINWINDOW_H
