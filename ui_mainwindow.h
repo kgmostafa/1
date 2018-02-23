@@ -381,7 +381,7 @@ public:
 
         pushButton_save = new QPushButton(centralWidget);
         pushButton_save->setObjectName(QStringLiteral("pushButton_save"));
-        pushButton_save->setEnabled(false);
+        pushButton_save->setEnabled(true);
 
         verticalLayout->addWidget(pushButton_save);
 

@@ -22,7 +22,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    std::vector<Triangle> _base;
+    std::vector<Triangle> _base1;
+    std::vector<Triangle> _base2;
     std::vector<Triangle> _offset;
     std::vector<Triangle> _processed;
     Cell *_cell;
@@ -81,6 +82,8 @@ private:
     QString _stlHeader;
 
     RotateDialog *_rotateDialog;
+
+
 };
 
 #endif // MAINWINDOW_H

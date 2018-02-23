@@ -8,6 +8,10 @@
 #include "triangle.h"
 #include "vertex.h"
 
+extern "C"{
+#include "3rd_party/cork/cork.h"
+}
+
 struct Facet {
     glm::vec3 normal;
     int vertex[3];
@@ -86,6 +90,9 @@ public:
     static std::vector<Triangle> createSquare(float el);
     static float getMinimumZ(std::vector<Vertex> &v);
     static float getMaximumZ(std::vector<Vertex> &v);
+
+    static CorkTriMesh meshToCorkTriMesh(std::vector<Triangle> &t);
+    static std::vector<Triangle> corkTriMeshToMesh(CorkTriMesh &c);
 
 private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);

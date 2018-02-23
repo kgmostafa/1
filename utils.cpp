@@ -6,7 +6,6 @@
 #include <cassert>
 #include "math.h"
 #include "glm/ext.hpp"
-
 #include "cell.h"
 #include "triangle.h"
 
@@ -778,6 +777,60 @@ float Utils::getMaximumZ(std::vector<Vertex> &v) {
         }
     }
     return max;
+}
+
+CorkTriMesh Utils::meshToCorkTriMesh(std::vector<Triangle> &t)
+{
+    CorkTriMesh cork;
+    std::vector<Facet> facets;
+    std::vector<Vertex> vertices;
+    vertices = getVertexList(t, facets);
+    cork.n_vertices = vertices.size();
+    cork.n_triangles = facets.size();
+    cork.triangles = new uint[(cork.n_triangles) * 3];
+    cork.vertices  = new float[(cork.n_vertices) * 3];
+    int i = 0;
+    for(std::vector<Facet>::iterator it = facets.begin(); it != facets.end(); ++it) {
+        cork.triangles[i*3] = it->vertex[0];
+        cork.triangles[i*3 + 1] = it->vertex[1];
+        cork.triangles[i*3 + 2] = it->vertex[2];
+        i++;
+    }
+
+    i = 0;
+    for(std::vector<Vertex>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
+        cork.vertices[i*3] = it->x;
+        cork.vertices[i*3 + 1] = it->y;
+        cork.vertices[i*3 + 2] = it->z;
+        i++;
+    }
+
+    return cork;
+}
+
+std::vector<Triangle> Utils::corkTriMeshToMesh(CorkTriMesh &c)
+{
+    std::vector<Facet> facets;
+    std::vector<Vertex> vertices;
+
+    int i;
+    for(i = 0; i < c.n_vertices; i++) {
+        float x = c.vertices[i*3];
+        float y = c.vertices[i*3 + 1];
+        float z = c.vertices[i*3 + 2];
+        Vertex v(x, y, z);
+        vertices.push_back(v);
+    }
+
+    for(i = 0; i < c.n_triangles; i++) {
+        Facet f;
+        f.vertex[0] = c.triangles[i*3];
+        f.vertex[1] = c.triangles[i*3 + 1];
+        f.vertex[2] = c.triangles[i*3 + 2];
+        facets.push_back(f);
+    }
+
+    return getTriangleList(vertices, facets);
 }
 
 // TODO: Check this function result
