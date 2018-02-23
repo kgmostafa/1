@@ -228,8 +228,6 @@ void MainWindow::on_pushButton_process_clicked() {
             c = new Pyramid(cellThickness);
         }
 
-
-
         if(coordSystem == spherical) {
             glm::vec3 centroid;
             Utils::getCentroid(_base1, centroid);
@@ -305,9 +303,7 @@ void MainWindow::on_pushButton_process_clicked() {
                 int ySteps = (int)ceil(_maxYLength/cellThickness);
                 // TODO: optimize by using boundaries
                 for(int j = 0; j < ySteps; j++) {
-//                    bool inside = false;
                     for(int k = 0; k < xSteps; k++) {
-//                        bool sw = false;
                         // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
                         float posX = _minX + k*cellThickness;
                         float posY = _minY + j*cellThickness;
@@ -319,22 +315,6 @@ void MainWindow::on_pushButton_process_clicked() {
                             std::vector<Triangle> t = c->getFacets();
                             _processed.insert(_processed.end(), t.begin(), t.end());
                         }
-                        // This commented code is a older approach to check if the cell is inside the mesh
-//                        std::vector<Triangle> aux = Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness);
-//                        for(std::vector<Triangle>::iterator it = aux.begin() ; it != aux.end(); ++it) {
-//                            inside = true;
-//                            if(it->getNormal().x > 0) {
-//                                sw = true;
-//                            }
-//                        }
-//                        if(inside) {
-//                            c->place(posX, posY, z);
-//                            std::vector<Triangle> t = c->getFacets();
-//                            _processed.insert(_processed.end(), t.begin(), t.end());
-//                        }
-//                        if(sw) {
-//                            inside = false;
-//                        }
                     }
                 }
             } else if(coordSystem == cylindrical) {
@@ -373,6 +353,13 @@ void MainWindow::on_pushButton_process_clicked() {
         }
     }
 
+    // Trimm
+    CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base1);
+    CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+    CorkTriMesh *c = new CorkTriMesh;
+    computeIntersection(c1, c2, c);
+    _processed = Utils::corkTriMeshToMesh(*c);
+
     // Updates the UI
     ui->labelNTriangles->setText("Number of triangles: " + _nTrianglesProcessed);
 
@@ -380,15 +367,8 @@ void MainWindow::on_pushButton_process_clicked() {
     ui->pushButton_save->setEnabled(true);
 }
 
-void MainWindow::on_pushButton_save_clicked() {
-    CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base1);
-    CorkTriMesh c2 = Utils::meshToCorkTriMesh(_base2);
-    CorkTriMesh *c = new CorkTriMesh;
-
-    computeDifference(c1, c2, c);
-
-    std::vector<Triangle> result = Utils::corkTriMeshToMesh(*c);
-
+void MainWindow::on_pushButton_save_clicked()
+{
     QString fileName = QFileDialog::getSaveFileName(this,
         tr("Save"), "", tr("STL Files (*.stl);;All files (*)"));
 
@@ -396,8 +376,7 @@ void MainWindow::on_pushButton_save_clicked() {
         return;
 
     STLFile stl(fileName);
-    stl.encode(_stlHeader, result);
-//    stl.encode(_stlHeader, _processed);
+    stl.encode(_stlHeader, _processed);
 }
 
 void MainWindow::on_checkBox_basePart_stateChanged(int arg1){
