@@ -68,6 +68,8 @@ private slots:
     void on_pushButton_importBase_clicked();
 
 private:
+    void updateUI();
+
     Ui::MainWindow *ui;
 
     float _minX;
@@ -82,6 +84,13 @@ private:
 
     QString _stlHeader;
     Unit _stlUnit;
+
+    float _baseVolume;
+    glm::vec3 _baseCentroid;
+
+    bool _baseImported;
+    bool _baseProcessed;
+    bool _customCell;
 
     ImportDialog *_importDialog;
     RotateDialog *_rotateDialog;

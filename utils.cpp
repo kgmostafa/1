@@ -1210,29 +1210,28 @@ int Utils::getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid)
 }
 
 // http://wwwf.imperial.ac.uk/~rn/centroid.pdf
-int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid)
+int Utils::getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid, float &volume)
 {
-    float volume = 0;
-    glm::vec3 aux(0.0, 0.0, 0.0);
+    float volumeAux = 0.0;
+    glm::vec3 centroidAux(0.0, 0.0, 0.0);
 
     if(t.size() < 4) {
         return 1;
     }
 
     for(std::vector<Triangle>::iterator it = t.begin(); it != t.end(); ++it) {
-        volume += glm::dot(it->getV1(), it->getNormal());
-        aux.x += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(1.0, 0.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(1.0, 0.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(1.0,0.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(1.0,0.0,0.0)), 2.0));
-        aux.y += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 1.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 1.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,1.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,1.0,0.0)), 2.0));
-        aux.z += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 0.0, 1.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 0.0, 1.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,0.0,1.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,0.0,1.0)), 2.0));
+        volumeAux += glm::dot(it->getV1(), it->getNormal());
+        centroidAux.x += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(1.0, 0.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(1.0, 0.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(1.0,0.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(1.0,0.0,0.0)), 2.0));
+        centroidAux.y += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 1.0, 0.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 1.0, 0.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,1.0,0.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,1.0,0.0)), 2.0));
+        centroidAux.z += (1.0/24.0) * glm::dot(it->getNormal(), glm::vec3(0.0, 0.0, 1.0)) * (pow(glm::dot(it->getV1()+it->getV2(), glm::vec3(0.0, 0.0, 1.0)), 2.0) + pow(glm::dot(it->getV2()+it->getV3(), glm::vec3(0.0,0.0,1.0)), 2.0) + pow(glm::dot(it->getV3()+it->getV1(), glm::vec3(0.0,0.0,1.0)), 2.0));
     }
 
-    if(fabsf(volume) < EPSILON) {
+    if(fabsf(volumeAux) < EPSILON) {
         return 2;
     }
 
-    volume /= 6.0;
-    std::cout << "volume: " << volume << std::endl;
-    centroid = aux / (2.0 * volume);
+    volume = volumeAux / 6.0;
+    centroid = centroidAux / (2.0 * volume);
     return 0;
 }
 

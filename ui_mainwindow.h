@@ -38,13 +38,13 @@ public:
     QPushButton *pushButton_importBase;
     QGroupBox *groupBox;
     QHBoxLayout *horizontalLayout_3;
-    QPushButton *pushButton_rotate;
+    QPushButton *pushButton_rotateBase;
     QGroupBox *groupBox_hollowing;
     QVBoxLayout *verticalLayout_2;
     QHBoxLayout *horizontalLayout_5;
     QLabel *label_4;
     QLineEdit *lineEdit_hollowingOffset;
-    QLabel *label_3;
+    QLabel *label_offsetUnit;
     QCheckBox *checkBox_shell;
     QCheckBox *checkBox_skipHollowing;
     QGroupBox *groupBox_infill;
@@ -66,7 +66,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QLabel *label;
     QLineEdit *lineEdit_cellThickness;
-    QLabel *label_2;
+    QLabel *label_cellUnit;
     QGroupBox *groupBox_infillCoordinateSystem;
     QHBoxLayout *horizontalLayout_8;
     QRadioButton *radioButton_infillCoordinateSystem_cartesian;
@@ -76,22 +76,26 @@ public:
     QPushButton *pushButton_process;
     QGroupBox *groupBox_STLInfo;
     QVBoxLayout *verticalLayout_6;
-    QLabel *labelNTriangles;
+    QLabel *label_nTriangles;
     QLabel *labelWidthX;
     QLabel *labelWidthY;
     QLabel *labelHeightZ;
-    QGroupBox *groupBox_options;
+    QLabel *label_baseOrigin;
+    QLabel *label_baseCentroid;
+    QLabel *label_baseVolume;
+    QPushButton *pushButton_save;
+    QVBoxLayout *verticalLayout_viewer;
+    STLPreview *openGLWidget;
+    QGroupBox *groupBox_viewerOptions;
     QVBoxLayout *verticalLayout_5;
     QCheckBox *checkBox_basePart;
     QCheckBox *checkBox_wireframe;
-    QPushButton *pushButton_save;
-    STLPreview *openGLWidget;
 
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
-        MainWindow->setWindowModality(Qt::ApplicationModal);
+        MainWindow->setWindowModality(Qt::WindowModal);
         MainWindow->resize(837, 720);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
@@ -114,11 +118,11 @@ public:
         horizontalLayout_3->setSpacing(6);
         horizontalLayout_3->setContentsMargins(11, 11, 11, 11);
         horizontalLayout_3->setObjectName(QStringLiteral("horizontalLayout_3"));
-        pushButton_rotate = new QPushButton(groupBox);
-        pushButton_rotate->setObjectName(QStringLiteral("pushButton_rotate"));
-        pushButton_rotate->setEnabled(false);
+        pushButton_rotateBase = new QPushButton(groupBox);
+        pushButton_rotateBase->setObjectName(QStringLiteral("pushButton_rotateBase"));
+        pushButton_rotateBase->setEnabled(false);
 
-        horizontalLayout_3->addWidget(pushButton_rotate);
+        horizontalLayout_3->addWidget(pushButton_rotateBase);
 
 
         verticalLayout->addWidget(groupBox);
@@ -153,10 +157,10 @@ public:
 
         horizontalLayout_5->addWidget(lineEdit_hollowingOffset);
 
-        label_3 = new QLabel(groupBox_hollowing);
-        label_3->setObjectName(QStringLiteral("label_3"));
+        label_offsetUnit = new QLabel(groupBox_hollowing);
+        label_offsetUnit->setObjectName(QStringLiteral("label_offsetUnit"));
 
-        horizontalLayout_5->addWidget(label_3);
+        horizontalLayout_5->addWidget(label_offsetUnit);
 
 
         verticalLayout_2->addLayout(horizontalLayout_5);
@@ -274,10 +278,10 @@ public:
 
         horizontalLayout->addWidget(lineEdit_cellThickness);
 
-        label_2 = new QLabel(groupBox_infillDensity);
-        label_2->setObjectName(QStringLiteral("label_2"));
+        label_cellUnit = new QLabel(groupBox_infillDensity);
+        label_cellUnit->setObjectName(QStringLiteral("label_cellUnit"));
 
-        horizontalLayout->addWidget(label_2);
+        horizontalLayout->addWidget(label_cellUnit);
 
 
         verticalLayout_4->addLayout(horizontalLayout);
@@ -320,7 +324,7 @@ public:
 
         pushButton_process = new QPushButton(centralWidget);
         pushButton_process->setObjectName(QStringLiteral("pushButton_process"));
-        pushButton_process->setEnabled(true);
+        pushButton_process->setEnabled(false);
 
         verticalLayout->addWidget(pushButton_process);
 
@@ -330,15 +334,15 @@ public:
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
         verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
-        labelNTriangles = new QLabel(groupBox_STLInfo);
-        labelNTriangles->setObjectName(QStringLiteral("labelNTriangles"));
+        label_nTriangles = new QLabel(groupBox_STLInfo);
+        label_nTriangles->setObjectName(QStringLiteral("label_nTriangles"));
         QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Minimum);
         sizePolicy2.setHorizontalStretch(0);
         sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(labelNTriangles->sizePolicy().hasHeightForWidth());
-        labelNTriangles->setSizePolicy(sizePolicy2);
+        sizePolicy2.setHeightForWidth(label_nTriangles->sizePolicy().hasHeightForWidth());
+        label_nTriangles->setSizePolicy(sizePolicy2);
 
-        verticalLayout_6->addWidget(labelNTriangles);
+        verticalLayout_6->addWidget(label_nTriangles);
 
         labelWidthX = new QLabel(groupBox_STLInfo);
         labelWidthX->setObjectName(QStringLiteral("labelWidthX"));
@@ -355,43 +359,69 @@ public:
 
         verticalLayout_6->addWidget(labelHeightZ);
 
+        label_baseOrigin = new QLabel(groupBox_STLInfo);
+        label_baseOrigin->setObjectName(QStringLiteral("label_baseOrigin"));
+
+        verticalLayout_6->addWidget(label_baseOrigin);
+
+        label_baseCentroid = new QLabel(groupBox_STLInfo);
+        label_baseCentroid->setObjectName(QStringLiteral("label_baseCentroid"));
+
+        verticalLayout_6->addWidget(label_baseCentroid);
+
+        label_baseVolume = new QLabel(groupBox_STLInfo);
+        label_baseVolume->setObjectName(QStringLiteral("label_baseVolume"));
+
+        verticalLayout_6->addWidget(label_baseVolume);
+
 
         verticalLayout->addWidget(groupBox_STLInfo);
 
-        groupBox_options = new QGroupBox(centralWidget);
-        groupBox_options->setObjectName(QStringLiteral("groupBox_options"));
-        verticalLayout_5 = new QVBoxLayout(groupBox_options);
-        verticalLayout_5->setSpacing(6);
-        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
-        checkBox_basePart = new QCheckBox(groupBox_options);
-        checkBox_basePart->setObjectName(QStringLiteral("checkBox_basePart"));
-        checkBox_basePart->setChecked(true);
-
-        verticalLayout_5->addWidget(checkBox_basePart);
-
-        checkBox_wireframe = new QCheckBox(groupBox_options);
-        checkBox_wireframe->setObjectName(QStringLiteral("checkBox_wireframe"));
-        checkBox_wireframe->setChecked(true);
-
-        verticalLayout_5->addWidget(checkBox_wireframe);
-
-
-        verticalLayout->addWidget(groupBox_options);
-
         pushButton_save = new QPushButton(centralWidget);
         pushButton_save->setObjectName(QStringLiteral("pushButton_save"));
-        pushButton_save->setEnabled(true);
+        pushButton_save->setEnabled(false);
 
         verticalLayout->addWidget(pushButton_save);
 
 
         horizontalLayout_2->addLayout(verticalLayout);
 
+        verticalLayout_viewer = new QVBoxLayout();
+        verticalLayout_viewer->setSpacing(6);
+        verticalLayout_viewer->setObjectName(QStringLiteral("verticalLayout_viewer"));
         openGLWidget = new STLPreview(centralWidget);
         openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
 
-        horizontalLayout_2->addWidget(openGLWidget);
+        verticalLayout_viewer->addWidget(openGLWidget);
+
+        groupBox_viewerOptions = new QGroupBox(centralWidget);
+        groupBox_viewerOptions->setObjectName(QStringLiteral("groupBox_viewerOptions"));
+        QSizePolicy sizePolicy3(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy3.setHorizontalStretch(0);
+        sizePolicy3.setVerticalStretch(0);
+        sizePolicy3.setHeightForWidth(groupBox_viewerOptions->sizePolicy().hasHeightForWidth());
+        groupBox_viewerOptions->setSizePolicy(sizePolicy3);
+        verticalLayout_5 = new QVBoxLayout(groupBox_viewerOptions);
+        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        checkBox_basePart = new QCheckBox(groupBox_viewerOptions);
+        checkBox_basePart->setObjectName(QStringLiteral("checkBox_basePart"));
+        checkBox_basePart->setChecked(true);
+
+        verticalLayout_5->addWidget(checkBox_basePart);
+
+        checkBox_wireframe = new QCheckBox(groupBox_viewerOptions);
+        checkBox_wireframe->setObjectName(QStringLiteral("checkBox_wireframe"));
+        checkBox_wireframe->setChecked(true);
+
+        verticalLayout_5->addWidget(checkBox_wireframe);
+
+
+        verticalLayout_viewer->addWidget(groupBox_viewerOptions);
+
+
+        horizontalLayout_2->addLayout(verticalLayout_viewer);
 
         MainWindow->setCentralWidget(centralWidget);
 
@@ -405,11 +435,11 @@ public:
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Editor", nullptr));
         pushButton_importBase->setText(QApplication::translate("MainWindow", "Import base part", nullptr));
         groupBox->setTitle(QApplication::translate("MainWindow", "Pre-processing", nullptr));
-        pushButton_rotate->setText(QApplication::translate("MainWindow", "Rotate", nullptr));
+        pushButton_rotateBase->setText(QApplication::translate("MainWindow", "Rotate", nullptr));
         groupBox_hollowing->setTitle(QApplication::translate("MainWindow", "Hollowing", nullptr));
         label_4->setText(QApplication::translate("MainWindow", "Offset:", nullptr));
         lineEdit_hollowingOffset->setText(QApplication::translate("MainWindow", "5.0", nullptr));
-        label_3->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        label_offsetUnit->setText(QApplication::translate("MainWindow", "mm", nullptr));
         checkBox_shell->setText(QApplication::translate("MainWindow", "External offset (shell)", nullptr));
         checkBox_skipHollowing->setText(QApplication::translate("MainWindow", "Skip hollowing", nullptr));
         groupBox_infill->setTitle(QApplication::translate("MainWindow", "Infill", nullptr));
@@ -425,7 +455,7 @@ public:
         radioButton_density_high->setText(QApplication::translate("MainWindow", "High", nullptr));
         label->setText(QApplication::translate("MainWindow", "Cell thickness:", nullptr));
         lineEdit_cellThickness->setText(QApplication::translate("MainWindow", "2.5", nullptr));
-        label_2->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        label_cellUnit->setText(QApplication::translate("MainWindow", "mm", nullptr));
         groupBox_infillCoordinateSystem->setTitle(QApplication::translate("MainWindow", "Coordinate system", nullptr));
         radioButton_infillCoordinateSystem_cartesian->setText(QApplication::translate("MainWindow", "Cartesian", nullptr));
         radioButton_infillCoordinateSystem_cylindrical->setText(QApplication::translate("MainWindow", "Cylindrical", nullptr));
@@ -433,14 +463,17 @@ public:
         checkBox_skipInfilling->setText(QApplication::translate("MainWindow", "Skip infilling", nullptr));
         pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
         groupBox_STLInfo->setTitle(QApplication::translate("MainWindow", "STL info", nullptr));
-        labelNTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
+        label_nTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
         labelWidthX->setText(QApplication::translate("MainWindow", "Width in X: -", nullptr));
         labelWidthY->setText(QApplication::translate("MainWindow", "Width in Y: -", nullptr));
         labelHeightZ->setText(QApplication::translate("MainWindow", "Height in Z: -", nullptr));
-        groupBox_options->setTitle(QApplication::translate("MainWindow", "Options", nullptr));
+        label_baseOrigin->setText(QApplication::translate("MainWindow", "Origin: -", nullptr));
+        label_baseCentroid->setText(QApplication::translate("MainWindow", "Centroid: -", nullptr));
+        label_baseVolume->setText(QApplication::translate("MainWindow", "Volume: -", nullptr));
+        pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));
+        groupBox_viewerOptions->setTitle(QApplication::translate("MainWindow", "Viewer options", nullptr));
         checkBox_basePart->setText(QApplication::translate("MainWindow", "Show base part", nullptr));
         checkBox_wireframe->setText(QApplication::translate("MainWindow", "Wireframe", nullptr));
-        pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));
     } // retranslateUi
 
 };

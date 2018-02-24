@@ -34,7 +34,7 @@ public:
     static float distanceFromPlane(glm::vec3 point, glm::vec3 planePoint, glm::vec3 planeNormal);
     static bool isInsideMesh(std::vector<Triangle> &t, glm::vec3 cellP, bool slice);
     static int getCentroid(std::vector<glm::vec2> &contour, glm::vec2 &centroid);
-    static int getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid);
+    static int getCentroid(std::vector<Triangle> &t, glm::vec3 &centroid, float &volume);
 
     // Mesh manipulation
     static void rotateX(std::vector<Triangle> &t, float angle);
