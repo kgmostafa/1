@@ -46,6 +46,29 @@ void Cell::translate(float x, float y, float z) {
     calculateBounds();
 }
 
+void Cell::resize(float x, float y, float z)
+{
+    float factorX = x/_maxXLength;
+    float factorY = y/_maxYLength;
+    float factorZ = z/_maxZLength;
+    scale(factorX, factorY, factorZ);
+    calculateBounds();
+}
+
+void Cell::resizeX(float size)
+{
+    float factor = size/_maxXLength;
+    scale(factor, 1.0, 1.0);
+    calculateBounds();
+}
+
+void Cell::resizeY(float size)
+{
+    float factor = size/_maxYLength;
+    scale(1.0, factor, 1.0);
+    calculateBounds();
+}
+
 void Cell::resizeZ(float size)
 {
     float factor = size/_maxZLength;

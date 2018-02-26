@@ -67,6 +67,7 @@ public:
     QLabel *label;
     QLineEdit *lineEdit_cellThickness;
     QLabel *label_cellUnit;
+    QCheckBox *checkBox_constantCellSize;
     QGroupBox *groupBox_infillCoordinateSystem;
     QHBoxLayout *horizontalLayout_8;
     QRadioButton *radioButton_infillCoordinateSystem_cartesian;
@@ -286,6 +287,11 @@ public:
 
         verticalLayout_4->addLayout(horizontalLayout);
 
+        checkBox_constantCellSize = new QCheckBox(groupBox_infillDensity);
+        checkBox_constantCellSize->setObjectName(QStringLiteral("checkBox_constantCellSize"));
+
+        verticalLayout_4->addWidget(checkBox_constantCellSize);
+
 
         verticalLayout_3->addWidget(groupBox_infillDensity);
 
@@ -456,6 +462,7 @@ public:
         label->setText(QApplication::translate("MainWindow", "Cell thickness:", nullptr));
         lineEdit_cellThickness->setText(QApplication::translate("MainWindow", "2.5", nullptr));
         label_cellUnit->setText(QApplication::translate("MainWindow", "mm", nullptr));
+        checkBox_constantCellSize->setText(QApplication::translate("MainWindow", "Constant cell size", nullptr));
         groupBox_infillCoordinateSystem->setTitle(QApplication::translate("MainWindow", "Coordinate system", nullptr));
         radioButton_infillCoordinateSystem_cartesian->setText(QApplication::translate("MainWindow", "Cartesian", nullptr));
         radioButton_infillCoordinateSystem_cylindrical->setText(QApplication::translate("MainWindow", "Cylindrical", nullptr));

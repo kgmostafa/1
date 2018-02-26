@@ -264,6 +264,13 @@
               </item>
              </layout>
             </item>
+            <item>
+             <widget class="QCheckBox" name="checkBox_constantCellSize">
+              <property name="text">
+               <string>Constant cell size</string>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
