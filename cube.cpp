@@ -2,12 +2,14 @@
 #include "utils.h"
 
 Cube::Cube() :
-    Cell(), _edgeLength(10.0) {
+    Cell(), _edgeLength(10.0)
+{
     _initialized = init();
 }
 
 Cube::Cube(float el) :
-    Cell(), _edgeLength(el) {
+    Cell(), _edgeLength(el)
+{
     _initialized = init();
 }
 

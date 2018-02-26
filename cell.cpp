@@ -46,6 +46,13 @@ void Cell::translate(float x, float y, float z) {
     calculateBounds();
 }
 
+void Cell::resizeZ(float size)
+{
+    float factor = size/_maxZLength;
+    scale(1.0, 1.0, factor);
+    calculateBounds();
+}
+
 void Cell::place(float x, float y, float z) {
     moveToOrigin();
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
@@ -96,4 +103,8 @@ void Cell::calculateBounds() {
     }
     _min = min;
     _max = max;
+
+    _maxXLength = _max.x - _min.x;
+    _maxYLength = _max.y - _min.y;
+    _maxZLength = _max.z - _min.z;
 }

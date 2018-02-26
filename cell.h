@@ -16,6 +16,7 @@ public:
     void rotateY(float angle);
     void rotateZ(float angle);
     void translate(float x, float y, float z);
+    void resizeZ(float size);
 
     void place(float x, float y, float z);
     void moveToOrigin();

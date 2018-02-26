@@ -1,17 +1,20 @@
 #include "icosphere.h"
 
 Icosphere::Icosphere() :
-    Cell(), _radius(10.0), _recursionLevel(2) {
+    Cell(), _radius(10.0), _recursionLevel(2)
+{
     _initialized = init();
 }
 
 Icosphere::Icosphere(float r) :
-    Cell(), _radius(r), _recursionLevel(2) {
+    Cell(), _radius(r), _recursionLevel(2)
+{
     _initialized = init();
 }
 
 Icosphere::Icosphere(float r, quint8 rl) :
-    Cell(), _radius(r), _recursionLevel(rl) {
+    Cell(), _radius(r), _recursionLevel(rl)
+{
     _initialized = init();
 }
 

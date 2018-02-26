@@ -3,11 +3,14 @@
 #include "utils.h"
 
 Pyramid::Pyramid() :
-    Cell(), _baseLength(10.0) {
+    Cell(), _baseLength(10.0)
+{
+    _initialized = init();
 }
 
 Pyramid::Pyramid(float bl) :
-    Cell(), _baseLength(bl) {
+    Cell(), _baseLength(bl)
+{
     _initialized = init();
 }
 
