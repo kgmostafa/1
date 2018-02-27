@@ -181,7 +181,8 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked)
     updateUI();
 }
 
-void MainWindow::on_pushButton_process_clicked() {
+void MainWindow::on_pushButton_process_clicked()
+{
     bool constantCell = ui->checkBox_constantCellSize->isChecked();
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
@@ -242,8 +243,6 @@ void MainWindow::on_pushButton_process_clicked() {
         //            }
         //        }
     }
-
-
 
     if(skipInfill == false) {
         int cellType = 0; // None
@@ -419,16 +418,14 @@ void MainWindow::on_pushButton_process_clicked() {
             if(coordSystem == cartesian) {
                 std::cout << "cartesian\n";
                 int xSteps = (int)ceil(_maxXLength/cellThickness);
-                int ySteps = (int)ceil(_maxYLength/cellThickness);
                 // TODO: optimize by using boundaries
-                float posX = _minX;
-                while(posX < _maxX) {
+
+                for(int i = 0; i < xSteps; i++) {
+                    float posX = _minX + i*cellThickness;
                     float posY = _minY;
-                    float cellHeightX;
+                    float cellHeightX = cellThickness;
                     while(posY < _maxY) {
                         float posZ = _minZ;
-                        cellHeightX = std::min((posX + posY)/10.0f, 25.0f);
-                        cellHeightX = std::max(cellHeightX, 2.5f);
                         float cellHeightY = std::min((posX + posY)/10.0f, 25.0f);
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
@@ -492,11 +489,6 @@ void MainWindow::on_checkBox_wireframe_stateChanged(int arg1) {
 
 void MainWindow::on_pushButton_rotate_clicked() {
     _rotateDialog->show();
-//    bool valid;
-//    double d = QInputDialog::getDouble(this, tr("QInputDialog::getDouble()"),
-//                                   tr("Amount:"), 37.56, -10000, 10000, 2, &valid);
-//    if (valid)
-//        std::cout << d << std::endl;
 }
 
 
