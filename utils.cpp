@@ -662,11 +662,11 @@ std::vector<Triangle> Utils::slice(std::vector<Triangle> t, float z, float thick
     return t;
 }
 
-std::vector<Triangle> Utils::getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness) {
+std::vector<Triangle> Utils::getTrianglesFromBox(std::vector<Triangle> t, glm::vec3 pos, float thickness) {
     t.erase(std::remove_if(t.begin(),
                            t.end(),
-                           [x, y, z, thickness](Triangle aux) {
-                               return !(checkTriangleBoxOverlap(aux, glm::vec3(x, y, z), glm::vec3(x+thickness, y+thickness, z+thickness)));
+                           [pos, thickness](Triangle aux) {
+                               return !(checkTriangleBoxOverlap(aux, pos, pos+thickness));
                            }),
             t.end());
     return t;

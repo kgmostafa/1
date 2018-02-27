@@ -60,7 +60,7 @@ public:
 
     // Slicing
     static std::vector<Triangle> slice(std::vector<Triangle> t, float z, float thickness);
-    static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, float x, float y, float z, float thickness);
+    static std::vector<Triangle> getTrianglesFromBox(std::vector<Triangle> t, glm::vec3 pos, float thickness);
     static std::vector<std::pair<glm::vec3, glm::vec3>> getIntersectionSegments(std::vector<Triangle> &t, float z);
 
     // Offsetting

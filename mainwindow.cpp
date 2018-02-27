@@ -152,6 +152,20 @@ void MainWindow::updateUI()
     ui->pushButton_save->setEnabled(_baseProcessed);
 }
 
+void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, Cell *c)
+{
+    glm::vec3 cellCenter = pos + (size/2.0);
+
+    // Check if is inside the mesh or if is overlaping the surfaces
+    if(Utils::isInsideMesh(_base, cellCenter, false) ||
+       Utils::getTrianglesFromBox(_base, pos, std::max(std::max(size.x, size.y), size.z)).size() > 0) {
+        c->resize(size);
+        c->place(pos);
+        std::vector<Triangle> t = c->getFacets();
+        _processed.insert(_processed.end(), t.begin(), t.end());
+    }
+}
+
 void MainWindow::rotateBasePart(float angle, int axis)
 {
     angle = degreesToRadians(angle);
@@ -313,9 +327,10 @@ void MainWindow::on_pushButton_process_clicked()
                     float posX = _baseCentroid.x - (cellThickness/2.0);
                     float posY = _baseCentroid.y - (cellThickness/2.0);
                     float posZ = _baseCentroid.z - (cellThickness/2.0);
+                    glm::vec3 pos(posX, posY, posZ);
                     glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
                     if(Utils::isInsideMesh(_base, cellCenter, true) ||
-                       Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                       Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
                         c->place(posX, posY, posZ);
                         std::vector<Triangle> t = c->getFacets();
                         _processed.insert(_processed.end(), t.begin(), t.end());
@@ -330,9 +345,10 @@ void MainWindow::on_pushButton_process_clicked()
                         float posX = _baseCentroid.x - (cellThickness/2.0);
                         float posY = _baseCentroid.y - (cellThickness/2.0);
                         float posZ = _baseCentroid.z - (cellThickness/2.0) + radius;
+                        glm::vec3 pos(posX, posY, posZ);
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
                         if(Utils::isInsideMesh(_base, cellCenter, true) ||
-                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                           Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
                             c->place(posX, posY, posZ);
                             std::vector<Triangle> t = c->getFacets();
                             _processed.insert(_processed.end(), t.begin(), t.end());
@@ -345,9 +361,10 @@ void MainWindow::on_pushButton_process_clicked()
                         float posX = _baseCentroid.x - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
                         float posY = _baseCentroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
                         float posZ = _baseCentroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
+                        glm::vec3 pos(posX, posY, posZ);
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
                         if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                           Utils::getTrianglesFromBox(_base, posX, posY, posZ, cellThickness).size() > 0) {
+                           Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
                             c->place(posX, posY, posZ);
                             std::vector<Triangle> t = c->getFacets();
                             _processed.insert(_processed.end(), t.begin(), t.end());
@@ -383,10 +400,11 @@ void MainWindow::on_pushButton_process_clicked()
                             // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
                             float posX = _minX + k*cellThickness;
                             float posY = _minY + j*cellThickness;
+                            glm::vec3 pos(posX, posY, z);
                             // Check if is inside the mesh or if is overlaping the surfaces
                             glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
                             if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
                                 c->place(posX, posY, z);
                                 std::vector<Triangle> t = c->getFacets();
                                 _processed.insert(_processed.end(), t.begin(), t.end());
@@ -402,9 +420,10 @@ void MainWindow::on_pushButton_process_clicked()
                         if(r == 0) {
                             float posX = centroid.x - (cellThickness/2.0);
                             float posY = centroid.y - (cellThickness/2.0);
+                            glm::vec3 pos(posX, posY, z);
                             glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
                             if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
                                 c->place(posX, posY, z);
                                 std::vector<Triangle> t = c->getFacets();
                                 _processed.insert(_processed.end(), t.begin(), t.end());
@@ -416,9 +435,10 @@ void MainWindow::on_pushButton_process_clicked()
                         for(int phi = 0; phi < phiSteps; phi++) {
                             float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
                             float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                            glm::vec3 pos(posX, posY, z);
                             glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
                             if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, posX, posY, z, cellThickness).size() > 0) {
+                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
                                 c->place(posX, posY, z);
                                 std::vector<Triangle> t = c->getFacets();
                                 _processed.insert(_processed.end(), t.begin(), t.end());
@@ -433,7 +453,6 @@ void MainWindow::on_pushButton_process_clicked()
                 float posX = infillOrigin.x;
                 while(posX < _maxX) {
                     float x = posX - infillOrigin.x;
-//                    float deltaY = (float)ySteps - (_maxYLength/cellThickness);
                     float posY = infillOrigin.y;
                     float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
                     cellHeightX = std::max(cellHeightX, 2.5f);;
@@ -444,45 +463,34 @@ void MainWindow::on_pushButton_process_clicked()
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
                             float z = posZ - infillOrigin.z;
-                            // TODO: posZ must be relative to the origin
                             // Limit cell height
                             float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
                             cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            // Check if is inside the mesh or if is overlaping the surfaces
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY+(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
-                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
-                                c->place(posX, posY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
+
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                            insertCell(pos, size, c);
+
                             posZ += cellHeightZ;
                         }
                         posY += cellHeightY;
                     }
                     posY = infillOrigin.y;
                     while(posY > _minY) {
-                        std::cout << "posY > _minY: " << posY << std::endl;
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
                         float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
                             float z = posZ - infillOrigin.z;
-                            // TODO: posZ must be relative to the origin
                             // Limit cell height
                             float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
                             cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            // Check if is inside the mesh or if is overlaping the surfaces
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY-(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
-                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
-                                c->place(posX, posY-cellHeightY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
+
+                            glm::vec3 pos(posX, posY-cellHeightY, posZ);
+                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                            insertCell(pos, size, c);
+
                             posZ += cellHeightZ;
                         }
                         posY -= cellHeightY;
@@ -492,7 +500,6 @@ void MainWindow::on_pushButton_process_clicked()
                 posX = infillOrigin.x;
                 while(posX > _minX) {
                     float x = posX - infillOrigin.x;
-//                    float deltaY = (float)ySteps - (_maxYLength/cellThickness);
                     float posY = infillOrigin.y;
                     float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
                     cellHeightX = std::max(cellHeightX, 2.5f);
@@ -503,45 +510,34 @@ void MainWindow::on_pushButton_process_clicked()
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
                             float z = posZ - infillOrigin.z;
-                            // TODO: posZ must be relative to the origin
                             // Limit cell height
                             float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
                             cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            // Check if is inside the mesh or if is overlaping the surfaces
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY+(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
-                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
-                                c->place(posX-cellHeightX, posY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
+
+                            glm::vec3 pos(posX-cellHeightX, posY, posZ);
+                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                            insertCell(pos, size, c);
+
                             posZ += cellHeightZ;
                         }
                         posY += cellHeightY;
                     }
                     posY = infillOrigin.y;
                     while(posY > _minY) {
-                        std::cout << "posY > _minY: " << posY << std::endl;
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
                         float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
                             float z = posZ - infillOrigin.z;
-                            // TODO: posZ must be relative to the origin
                             // Limit cell height
                             float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
                             cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            // Check if is inside the mesh or if is overlaping the surfaces
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY-(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
-                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
-                                c->place(posX-cellHeightX, posY-cellHeightY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
+
+                            glm::vec3 pos(posX-cellHeightX, posY-cellHeightY, posZ);
+                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                            insertCell(pos, size, c);
+
                             posZ += cellHeightZ;
                         }
                         posY -= cellHeightY;

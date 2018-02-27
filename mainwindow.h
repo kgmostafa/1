@@ -71,6 +71,8 @@ private slots:
 private:
     void updateUI();
 
+    void insertCell(glm::vec3 pos, glm::vec3 size, Cell *c);
+
     Ui::MainWindow *ui;
 
     float _minX;

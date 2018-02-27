@@ -1,14 +1,17 @@
 #include "cell.h"
 
 Cell::Cell() :
-    _initialized(false) {
+    _initialized(false)
+{
 }
 
-std::vector<Triangle> Cell::getFacets() {
+std::vector<Triangle> Cell::getFacets()
+{
     return _facets;
 }
 
-void Cell::scale(float x, float y, float z) {
+void Cell::scale(float x, float y, float z)
+{
     glm::vec3 tmpMin = _min;
     moveToOrigin();
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
@@ -18,32 +21,41 @@ void Cell::scale(float x, float y, float z) {
     calculateBounds();
 }
 
-void Cell::rotateX(float angle) {
+void Cell::rotateX(float angle)
+{
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateX(angle);
     }
     calculateBounds();
 }
 
-void Cell::rotateY(float angle) {
+void Cell::rotateY(float angle)
+{
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateY(angle);
     }
     calculateBounds();
 }
 
-void Cell::rotateZ(float angle) {
+void Cell::rotateZ(float angle)
+{
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateZ(angle);
     }
     calculateBounds();
 }
 
-void Cell::translate(float x, float y, float z) {
+void Cell::translate(float x, float y, float z)
+{
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->translate(x, y, z);
     }
     calculateBounds();
+}
+
+void Cell::resize(glm::vec3 size)
+{
+    resize(size.x, size.y, size.z);
 }
 
 void Cell::resize(float x, float y, float z)
@@ -76,7 +88,13 @@ void Cell::resizeZ(float size)
     calculateBounds();
 }
 
-void Cell::place(float x, float y, float z) {
+void Cell::place(glm::vec3 pos)
+{
+    place(pos.x, pos.y, pos.z);
+}
+
+void Cell::place(float x, float y, float z)
+{
     moveToOrigin();
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->translate(x, y, z);
@@ -84,18 +102,21 @@ void Cell::place(float x, float y, float z) {
     calculateBounds();
 }
 
-void Cell::moveToOrigin() {
+void Cell::moveToOrigin()
+{
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->translate(-_min.x, -_min.y, -_min.z);
     }
     calculateBounds();
 }
 
-bool Cell::isInitialized() {
+bool Cell::isInitialized()
+{
     return _initialized;
 }
 
-void Cell::calculateBounds() {
+void Cell::calculateBounds()
+{
     glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
     glm::vec3 max(FLT_MIN, FLT_MIN, FLT_MIN);
 
