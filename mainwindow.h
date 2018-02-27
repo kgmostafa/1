@@ -49,6 +49,7 @@ public:
 
 private slots:
     void importBasePart(Unit unit);
+
     void rotateBasePart(float angle, int axis);
 
     void on_pushButton_process_clicked();
@@ -63,9 +64,9 @@ private slots:
 
     void on_pushButton_save_clicked();
 
-    void on_pushButton_rotate_clicked();
-
     void on_pushButton_importBase_clicked();
+
+    void on_pushButton_rotateBase_clicked();
 
 private:
     void updateUI();

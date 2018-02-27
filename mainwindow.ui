@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>837</width>
-    <height>720</height>
+    <height>721</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -308,6 +308,70 @@
           </widget>
          </item>
          <item>
+          <widget class="QGroupBox" name="groupBox_2">
+           <property name="title">
+            <string>Origin</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <item>
+               <widget class="QLabel" name="label_2">
+                <property name="text">
+                 <string>X:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_infill_originX">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_3">
+                <property name="text">
+                 <string>Y:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_infill_originY">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Z:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="doubleSpinBox_infill_originZ">
+                <property name="enabled">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
           <widget class="QCheckBox" name="checkBox_skipInfilling">
            <property name="text">
             <string>Skip infilling</string>
@@ -328,7 +392,30 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButton_save">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Save</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="verticalLayout_viewer">
+      <item>
+       <widget class="STLPreview" name="openGLWidget"/>
+      </item>
+      <item>
        <widget class="QGroupBox" name="groupBox_STLInfo">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="title">
          <string>STL info</string>
         </property>
@@ -390,23 +477,6 @@
          </item>
         </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pushButton_save">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </item>
-    <item>
-     <layout class="QVBoxLayout" name="verticalLayout_viewer">
-      <item>
-       <widget class="STLPreview" name="openGLWidget"/>
       </item>
       <item>
        <widget class="QGroupBox" name="groupBox_viewerOptions">

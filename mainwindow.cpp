@@ -102,6 +102,9 @@ void MainWindow::on_pushButton_importBase_clicked()
     _importDialog->show();
 
     // Updates the UI
+    ui->doubleSpinBox_infill_originX->setValue(_baseCentroid.x);
+    ui->doubleSpinBox_infill_originY->setValue(_baseCentroid.y);
+    ui->doubleSpinBox_infill_originZ->setValue(_baseCentroid.z);
     updateUI();
 }
 
@@ -183,6 +186,8 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked)
 
 void MainWindow::on_pushButton_process_clicked()
 {
+    // TODO: change infill custom origin min/max values (QDoubleSpinBox)
+    bool customOrigin = true;
     bool constantCell = ui->checkBox_constantCellSize->isChecked();
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
@@ -290,6 +295,14 @@ void MainWindow::on_pushButton_process_clicked()
             c = _cell;
         } else {    // Default: Pyramid
             c = new Pyramid(cellThickness);
+        }
+
+
+        glm::vec3 infillOrigin;
+        if(customOrigin) {
+            infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
+            infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
+            infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
         }
 
         if(coordSystem == spherical) {
@@ -415,23 +428,25 @@ void MainWindow::on_pushButton_process_clicked()
                 }
             }
         } else {
+            // Approach 1
             if(coordSystem == cartesian) {
-                std::cout << "cartesian\n";
-                int xSteps = (int)ceil(_maxXLength/cellThickness);
-                // TODO: optimize by using boundaries
-
-                for(int i = 0; i < xSteps; i++) {
-                    float posX = _minX + i*cellThickness;
-                    float posY = _minY;
-                    float cellHeightX = cellThickness;
+                float posX = infillOrigin.x;
+                while(posX < _maxX) {
+                    float x = posX - infillOrigin.x;
+//                    float deltaY = (float)ySteps - (_maxYLength/cellThickness);
+                    float posY = infillOrigin.y;
+                    float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
+                    cellHeightX = std::max(cellHeightX, 2.5f);;
                     while(posY < _maxY) {
+                        float y = posY - infillOrigin.y;
                         float posZ = _minZ;
-                        float cellHeightY = std::min((posX + posY)/10.0f, 25.0f);
+                        float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
                         cellHeightY = std::max(cellHeightY, 2.5f);
                         while(posZ < _maxZ) {
+                            float z = posZ - infillOrigin.z;
                             // TODO: posZ must be relative to the origin
                             // Limit cell height
-                            float cellHeightZ = std::min((posX + posY + posZ)/10.0f, 25.0f);
+                            float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
                             cellHeightZ = std::max(cellHeightZ, 2.5f);
                             // Check if is inside the mesh or if is overlaping the surfaces
                             glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY+(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
@@ -446,7 +461,92 @@ void MainWindow::on_pushButton_process_clicked()
                         }
                         posY += cellHeightY;
                     }
+                    posY = infillOrigin.y;
+                    while(posY > _minY) {
+                        std::cout << "posY > _minY: " << posY << std::endl;
+                        float y = posY - infillOrigin.y;
+                        float posZ = _minZ;
+                        float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
+                        cellHeightY = std::max(cellHeightY, 2.5f);
+                        while(posZ < _maxZ) {
+                            float z = posZ - infillOrigin.z;
+                            // TODO: posZ must be relative to the origin
+                            // Limit cell height
+                            float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
+                            cellHeightZ = std::max(cellHeightZ, 2.5f);
+                            // Check if is inside the mesh or if is overlaping the surfaces
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY-(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
+                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
+                                c->place(posX, posY-cellHeightY, posZ);
+                                std::vector<Triangle> t = c->getFacets();
+                                _processed.insert(_processed.end(), t.begin(), t.end());
+                            }
+                            posZ += cellHeightZ;
+                        }
+                        posY -= cellHeightY;
+                    }
                     posX += cellHeightX;
+                }
+                posX = infillOrigin.x;
+                while(posX > _minX) {
+                    float x = posX - infillOrigin.x;
+//                    float deltaY = (float)ySteps - (_maxYLength/cellThickness);
+                    float posY = infillOrigin.y;
+                    float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
+                    cellHeightX = std::max(cellHeightX, 2.5f);
+                    while(posY < _maxY) {
+                        float y = posY - infillOrigin.y;
+                        float posZ = _minZ;
+                        float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
+                        cellHeightY = std::max(cellHeightY, 2.5f);
+                        while(posZ < _maxZ) {
+                            float z = posZ - infillOrigin.z;
+                            // TODO: posZ must be relative to the origin
+                            // Limit cell height
+                            float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
+                            cellHeightZ = std::max(cellHeightZ, 2.5f);
+                            // Check if is inside the mesh or if is overlaping the surfaces
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY+(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
+                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
+                                c->place(posX-cellHeightX, posY, posZ);
+                                std::vector<Triangle> t = c->getFacets();
+                                _processed.insert(_processed.end(), t.begin(), t.end());
+                            }
+                            posZ += cellHeightZ;
+                        }
+                        posY += cellHeightY;
+                    }
+                    posY = infillOrigin.y;
+                    while(posY > _minY) {
+                        std::cout << "posY > _minY: " << posY << std::endl;
+                        float y = posY - infillOrigin.y;
+                        float posZ = _minZ;
+                        float cellHeightY = std::min((fabsf(x) + fabsf(y))/5.0f, 25.0f);
+                        cellHeightY = std::max(cellHeightY, 2.5f);
+                        while(posZ < _maxZ) {
+                            float z = posZ - infillOrigin.z;
+                            // TODO: posZ must be relative to the origin
+                            // Limit cell height
+                            float cellHeightZ = std::min((fabsf(x) + fabsf(y) + fabsf(z))/10.0f, 25.0f);
+                            cellHeightZ = std::max(cellHeightZ, 2.5f);
+                            // Check if is inside the mesh or if is overlaping the surfaces
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellHeightX/2.0), posY-(cellHeightY/2.0), posZ+(cellHeightZ/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                               Utils::getTrianglesFromBox(_base, posX, posY, posZ, std::max(cellThickness, cellHeightZ)).size() > 0) {
+                                c->resize(cellHeightX, cellHeightY, cellHeightZ);
+                                c->place(posX-cellHeightX, posY-cellHeightY, posZ);
+                                std::vector<Triangle> t = c->getFacets();
+                                _processed.insert(_processed.end(), t.begin(), t.end());
+                            }
+                            posZ += cellHeightZ;
+                        }
+                        posY -= cellHeightY;
+                    }
+                    posX -= cellHeightX;
                 }
             }
         }
@@ -487,8 +587,7 @@ void MainWindow::on_checkBox_wireframe_stateChanged(int arg1) {
     update();
 }
 
-void MainWindow::on_pushButton_rotate_clicked() {
+void MainWindow::on_pushButton_rotateBase_clicked()
+{
     _rotateDialog->show();
 }
-
-
