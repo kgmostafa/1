@@ -221,30 +221,30 @@ void MainWindow::on_pushButton_process_clicked()
             offset *= -1.0;
         }
 
-        _processed.insert(_processed.end(), _base.begin(), _base.end());
+//        _processed.insert(_processed.end(), _base.begin(), _base.end());
         v_aux = Utils::getVertexList(_base, f_aux);
         Utils::offsetVertices(v_aux, f_aux, offset);
         t_aux = Utils::getTriangleList(v_aux, f_aux);
-        _base = t_aux;
-        Utils::switchNormal(t_aux);
-        _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
+        _offset = t_aux;
+//        Utils::switchNormal(t_aux);
+//        _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
 
-        std::vector<std::pair<glm::vec3, glm::vec3>> intseg = Utils::getIntersectionSegments(_processed, 36.0);
-//        std::cout << "intersect segments size: " << intseg.size() << std::endl;
-//        for(int i = 0; i < intseg.size(); i++) {
-//            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
-//        }
-        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001f);
+//        std::vector<std::pair<glm::vec3, glm::vec3>> intseg = Utils::getIntersectionSegments(_processed, 36.0);
+////        std::cout << "intersect segments size: " << intseg.size() << std::endl;
+////        for(int i = 0; i < intseg.size(); i++) {
+////            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
+////        }
+//        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001f);
 
-        std::vector<std::vector<glm::vec2>> cont2D = Utils::convertContourTo2D(cont);
-        std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
-        std::cout << "contours size: " << contours.size() << std::endl;
+//        std::vector<std::vector<glm::vec2>> cont2D = Utils::convertContourTo2D(cont);
+//        std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
+//        std::cout << "contours size: " << contours.size() << std::endl;
 
-        std::vector<std::vector<glm::vec2>> contoursBase;
-        contoursBase.push_back(contours[0]);
-        std::vector<std::vector<glm::vec2>> contoursOffset;
-        contoursOffset.insert(contoursOffset.begin(), contours.begin()+1, contours.end());
-        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001f);
+//        std::vector<std::vector<glm::vec2>> contoursBase;
+//        contoursBase.push_back(contours[0]);
+//        std::vector<std::vector<glm::vec2>> contoursOffset;
+//        contoursOffset.insert(contoursOffset.begin(), contours.begin()+1, contours.end());
+//        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001f);
 
 //        bool loops = Utils::checkLoops(cont);
 //        if(loops) {
@@ -253,7 +253,7 @@ void MainWindow::on_pushButton_process_clicked()
 //            std::cout << "Loops not detected\n";
 //        }
 
-        return;
+//        return;
 
         //        for(int i = 0; i < conn.size(); i++) {
         //            std::cout << "conn[" << i << "] size: " << conn[i].size() << std::endl;
@@ -261,6 +261,8 @@ void MainWindow::on_pushButton_process_clicked()
         //                std::cout << "conn[" << i << "][" << j << "]: " << glm::to_string(conn[i].at(j)) << std::endl;
         //            }
         //        }
+    } else {
+        _offset = _base;
     }
 
     if(skipInfill == false) {
@@ -546,14 +548,19 @@ void MainWindow::on_pushButton_process_clicked()
                 }
             }
         }
+        // Trimm
+        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
+        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+        CorkTriMesh *cork = new CorkTriMesh;
+        computeIntersection(c1, c2, cork);
+        _processed = Utils::corkTriMeshToMesh(*cork);
     }
 
-    // Trimm
-    CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base);
-    CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-    CorkTriMesh *c = new CorkTriMesh;
-    computeIntersection(c1, c2, c);
-    _processed = Utils::corkTriMeshToMesh(*c);
+    if(skipHollow == false) {
+        Utils::switchNormal(_offset);
+        _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
+        _processed.insert(_processed.begin(), _base.begin(), _base.end());
+    }
 
     _baseProcessed = true;
 

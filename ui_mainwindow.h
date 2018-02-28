@@ -183,7 +183,7 @@ public:
 
         checkBox_skipHollowing = new QCheckBox(groupBox_hollowing);
         checkBox_skipHollowing->setObjectName(QStringLiteral("checkBox_skipHollowing"));
-        checkBox_skipHollowing->setChecked(true);
+        checkBox_skipHollowing->setChecked(false);
 
         verticalLayout_2->addWidget(checkBox_skipHollowing);
 
@@ -383,6 +383,7 @@ public:
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
+        checkBox_skipInfilling->setChecked(true);
 
         verticalLayout_3->addWidget(checkBox_skipInfilling);
 
