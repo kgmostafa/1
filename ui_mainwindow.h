@@ -107,7 +107,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 721);
+        MainWindow->resize(837, 616);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -125,6 +125,11 @@ public:
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
+        QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+        sizePolicy.setHorizontalStretch(0);
+        sizePolicy.setVerticalStretch(0);
+        sizePolicy.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
+        groupBox->setSizePolicy(sizePolicy);
         horizontalLayout_3 = new QHBoxLayout(groupBox);
         horizontalLayout_3->setSpacing(6);
         horizontalLayout_3->setContentsMargins(11, 11, 11, 11);
@@ -140,6 +145,8 @@ public:
 
         groupBox_hollowing = new QGroupBox(centralWidget);
         groupBox_hollowing->setObjectName(QStringLiteral("groupBox_hollowing"));
+        sizePolicy.setHeightForWidth(groupBox_hollowing->sizePolicy().hasHeightForWidth());
+        groupBox_hollowing->setSizePolicy(sizePolicy);
         verticalLayout_2 = new QVBoxLayout(groupBox_hollowing);
         verticalLayout_2->setSpacing(6);
         verticalLayout_2->setContentsMargins(11, 11, 11, 11);
@@ -149,21 +156,21 @@ public:
         horizontalLayout_5->setObjectName(QStringLiteral("horizontalLayout_5"));
         label_4 = new QLabel(groupBox_hollowing);
         label_4->setObjectName(QStringLiteral("label_4"));
-        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
-        sizePolicy.setHorizontalStretch(0);
-        sizePolicy.setVerticalStretch(0);
-        sizePolicy.setHeightForWidth(label_4->sizePolicy().hasHeightForWidth());
-        label_4->setSizePolicy(sizePolicy);
+        QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Preferred);
+        sizePolicy1.setHorizontalStretch(0);
+        sizePolicy1.setVerticalStretch(0);
+        sizePolicy1.setHeightForWidth(label_4->sizePolicy().hasHeightForWidth());
+        label_4->setSizePolicy(sizePolicy1);
 
         horizontalLayout_5->addWidget(label_4);
 
         lineEdit_hollowingOffset = new QLineEdit(groupBox_hollowing);
         lineEdit_hollowingOffset->setObjectName(QStringLiteral("lineEdit_hollowingOffset"));
-        QSizePolicy sizePolicy1(QSizePolicy::Fixed, QSizePolicy::Fixed);
-        sizePolicy1.setHorizontalStretch(0);
-        sizePolicy1.setVerticalStretch(0);
-        sizePolicy1.setHeightForWidth(lineEdit_hollowingOffset->sizePolicy().hasHeightForWidth());
-        lineEdit_hollowingOffset->setSizePolicy(sizePolicy1);
+        QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        sizePolicy2.setHorizontalStretch(0);
+        sizePolicy2.setVerticalStretch(0);
+        sizePolicy2.setHeightForWidth(lineEdit_hollowingOffset->sizePolicy().hasHeightForWidth());
+        lineEdit_hollowingOffset->setSizePolicy(sizePolicy2);
         lineEdit_hollowingOffset->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
         horizontalLayout_5->addWidget(lineEdit_hollowingOffset);
@@ -192,6 +199,8 @@ public:
 
         groupBox_infill = new QGroupBox(centralWidget);
         groupBox_infill->setObjectName(QStringLiteral("groupBox_infill"));
+        sizePolicy.setHeightForWidth(groupBox_infill->sizePolicy().hasHeightForWidth());
+        groupBox_infill->setSizePolicy(sizePolicy);
         verticalLayout_3 = new QVBoxLayout(groupBox_infill);
         verticalLayout_3->setSpacing(6);
         verticalLayout_3->setContentsMargins(11, 11, 11, 11);
@@ -276,15 +285,15 @@ public:
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
         label = new QLabel(groupBox_infillDensity);
         label->setObjectName(QStringLiteral("label"));
-        sizePolicy.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy);
+        sizePolicy1.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
+        label->setSizePolicy(sizePolicy1);
 
         horizontalLayout->addWidget(label);
 
         lineEdit_cellThickness = new QLineEdit(groupBox_infillDensity);
         lineEdit_cellThickness->setObjectName(QStringLiteral("lineEdit_cellThickness"));
-        sizePolicy1.setHeightForWidth(lineEdit_cellThickness->sizePolicy().hasHeightForWidth());
-        lineEdit_cellThickness->setSizePolicy(sizePolicy1);
+        sizePolicy2.setHeightForWidth(lineEdit_cellThickness->sizePolicy().hasHeightForWidth());
+        lineEdit_cellThickness->setSizePolicy(sizePolicy2);
         lineEdit_cellThickness->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
 
         horizontalLayout->addWidget(lineEdit_cellThickness);
@@ -415,11 +424,8 @@ public:
 
         groupBox_STLInfo = new QGroupBox(centralWidget);
         groupBox_STLInfo->setObjectName(QStringLiteral("groupBox_STLInfo"));
-        QSizePolicy sizePolicy2(QSizePolicy::Preferred, QSizePolicy::Fixed);
-        sizePolicy2.setHorizontalStretch(0);
-        sizePolicy2.setVerticalStretch(0);
-        sizePolicy2.setHeightForWidth(groupBox_STLInfo->sizePolicy().hasHeightForWidth());
-        groupBox_STLInfo->setSizePolicy(sizePolicy2);
+        sizePolicy.setHeightForWidth(groupBox_STLInfo->sizePolicy().hasHeightForWidth());
+        groupBox_STLInfo->setSizePolicy(sizePolicy);
         verticalLayout_6 = new QVBoxLayout(groupBox_STLInfo);
         verticalLayout_6->setSpacing(6);
         verticalLayout_6->setContentsMargins(11, 11, 11, 11);
@@ -469,8 +475,8 @@ public:
 
         groupBox_viewerOptions = new QGroupBox(centralWidget);
         groupBox_viewerOptions->setObjectName(QStringLiteral("groupBox_viewerOptions"));
-        sizePolicy2.setHeightForWidth(groupBox_viewerOptions->sizePolicy().hasHeightForWidth());
-        groupBox_viewerOptions->setSizePolicy(sizePolicy2);
+        sizePolicy.setHeightForWidth(groupBox_viewerOptions->sizePolicy().hasHeightForWidth());
+        groupBox_viewerOptions->setSizePolicy(sizePolicy);
         verticalLayout_5 = new QVBoxLayout(groupBox_viewerOptions);
         verticalLayout_5->setSpacing(6);
         verticalLayout_5->setContentsMargins(11, 11, 11, 11);

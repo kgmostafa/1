@@ -457,7 +457,8 @@ void MainWindow::on_pushButton_process_clicked()
                     float x = posX - infillOrigin.x;
                     float posY = infillOrigin.y;
                     float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
-                    cellHeightX = std::max(cellHeightX, 2.5f);;
+                    cellHeightX = std::max(cellHeightX, 2.5f);
+                    // Q1
                     while(posY < _maxY) {
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
@@ -478,6 +479,7 @@ void MainWindow::on_pushButton_process_clicked()
                         posY += cellHeightY;
                     }
                     posY = infillOrigin.y;
+                    // Q4
                     while(posY > _minY) {
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
@@ -505,6 +507,7 @@ void MainWindow::on_pushButton_process_clicked()
                     float posY = infillOrigin.y;
                     float cellHeightX = std::min((fabsf(x))/2.0f, 25.0f);
                     cellHeightX = std::max(cellHeightX, 2.5f);
+                    // Q2
                     while(posY < _maxY) {
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
@@ -525,6 +528,7 @@ void MainWindow::on_pushButton_process_clicked()
                         posY += cellHeightY;
                     }
                     posY = infillOrigin.y;
+                    // Q3
                     while(posY > _minY) {
                         float y = posY - infillOrigin.y;
                         float posZ = _minZ;
@@ -558,8 +562,20 @@ void MainWindow::on_pushButton_process_clicked()
 
     if(skipHollow == false) {
         Utils::switchNormal(_offset);
-        _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
-        _processed.insert(_processed.begin(), _base.begin(), _base.end());
+        if(skipInfill == false) {
+            _base.insert(_base.begin(), _offset.begin(), _offset.end());
+
+            // Trimm
+//            CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base);
+//            CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+//            CorkTriMesh *cork = new CorkTriMesh;
+//            computeIntersection(c1, c2, cork);
+//            _processed = Utils::corkTriMeshToMesh(*cork);
+            _processed.insert(_processed.begin(), _base.begin(), _base.end());
+        } else {
+            _processed.insert(_processed.begin(), _base.begin(), _base.end());
+            _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
+        }
     }
 
     _baseProcessed = true;
