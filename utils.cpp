@@ -108,7 +108,7 @@ bool Utils::insideTriangle(glm::vec3 p, Triangle t) {
 
 // WARNING: this function must be tested before being used again
 std::pair<std::array<float, 2>, std::array<float, 2>> Utils::getBoundaries(std::vector<Triangle> &t, float z, float thickness) {
-    float minFloat = std::numeric_limits<float>::min();
+    float minFloat = std::numeric_limits<float>::lowest();
     float maxFloat = std::numeric_limits<float>::max();
     std::array<float, 2> minimum = {maxFloat, maxFloat};
     std::array<float, 2> maximum = {minFloat, minFloat};
@@ -770,7 +770,7 @@ float Utils::getMinimumZ(std::vector<Vertex> &v) {
 }
 
 float Utils::getMaximumZ(std::vector<Vertex> &v) {
-    float max = std::numeric_limits<float>::min();
+    float max = std::numeric_limits<float>::lowest();
     for(std::vector<Vertex>::iterator it = v.begin() ; it != v.end(); ++it) {
         if(it->z > max) {
             max = it->z;

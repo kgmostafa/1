@@ -61,14 +61,17 @@ void Triangle::translate(float x, float y, float z) {
 
 void Triangle::rotateX(float angle) {
     rotate(angle, glm::vec3(1.0, 0.0, 0.0));
+    calculateMinMax();
 }
 
 void Triangle::rotateY(float angle) {
     rotate(angle, glm::vec3(0.0, 1.0, 0.0));
+    calculateMinMax();
 }
 
 void Triangle::rotateZ(float angle) {
     rotate(angle, glm::vec3(0.0, 0.0, 1.0));
+    calculateMinMax();
 }
 
 void Triangle::rotate(float angle, glm::vec3 normal) {
@@ -98,7 +101,7 @@ void Triangle::switchNormal() {
 }
 
 void Triangle::calculateMinMax() {
-    float minFloat = std::numeric_limits<float>::min();
+    float minFloat = std::numeric_limits<float>::lowest();
     float maxFloat = std::numeric_limits<float>::max();
     glm::vec3 min(maxFloat, maxFloat, maxFloat);
     glm::vec3 max(minFloat, minFloat, minFloat);

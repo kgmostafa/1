@@ -1,6 +1,4 @@
 #include "cell.h"
-#include <iostream>
-#include "glm/ext.hpp"
 
 #define EPSILON std::numeric_limits<float>::epsilon()
 
@@ -21,7 +19,6 @@ void Cell::scale(float x, float y, float z)
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->scale(x, y, z);
     }
-    std::cout << "tmpMin: " << glm::to_string(tmpMin) << std::endl;
     translate(tmpMin.x, tmpMin.y, tmpMin.z);
     calculateBounds();
 }
@@ -87,13 +84,9 @@ void Cell::resize(glm::vec3 size)
 void Cell::resize(float x, float y, float z)
 {
     calculateBounds();
-    std::cout << "resize\n";
     float factorX = x/_maxXLength;
     float factorY = y/_maxYLength;
     float factorZ = z/_maxZLength;
-    std::cout << "factorX = " << factorX << std::endl;
-    std::cout << "factorY = " << factorY << std::endl;
-    std::cout << "factorZ = " << factorZ << std::endl;
     scale(factorX, factorY, factorZ);
     calculateBounds();
 }
@@ -126,7 +119,6 @@ void Cell::place(glm::vec3 pos)
 
 void Cell::place(float x, float y, float z)
 {
-    std::cout << "place\n";
     moveToOrigin();
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->translate(x, y, z);
@@ -140,7 +132,6 @@ void Cell::moveToOrigin()
         it->translate(-_min.x, -_min.y, -_min.z);
     }
     calculateBounds();
-    std::cout << "movedToOrigin! new _min: " << glm::to_string(_min) << std::endl;
 }
 
 bool Cell::isInitialized()
@@ -150,8 +141,10 @@ bool Cell::isInitialized()
 
 void Cell::calculateBounds()
 {
-    glm::vec3 min(FLT_MAX, FLT_MAX, FLT_MAX);
-    glm::vec3 max(FLT_MIN, FLT_MIN, FLT_MIN);
+    const float minFloat = std::numeric_limits<float>::lowest();
+    const float maxFloat = std::numeric_limits<float>::max();
+    glm::vec3 min(maxFloat, maxFloat, maxFloat);
+    glm::vec3 max(minFloat, minFloat, minFloat);
 
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         glm::vec3 tmpMin = it->getMin();

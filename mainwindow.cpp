@@ -144,7 +144,7 @@ void MainWindow::updateUI()
     ui->label_nTriangles->setText("Number of triangles: " + QString::number(_nTrianglesProcessed));
     ui->label_baseOrigin->setText("Origin: (" + QString::number(_minX) + ", " + QString::number(_minY) + ", " + QString::number(_minZ) + ")");
     ui->label_baseCentroid->setText("Centroid: (" + QString::number(_baseCentroid.x) + ", " + QString::number(_baseCentroid.y) + ", " + QString::number(_baseCentroid.z) + ")");
-    ui->label_baseVolume->setText("Volume: " + QString::number(_baseVolume) + " " + unit + "²");
+    ui->label_baseVolume->setText("Volume: " + QString::number(_baseVolume) + " " + unit + "³");
     ui->pushButton_importBase->setEnabled(!_baseImported);
     ui->pushButton_rotateBase->setEnabled(_baseImported && !_baseProcessed);
     ui->pushButton_loadCell->setEnabled(_customCell);
@@ -154,9 +154,6 @@ void MainWindow::updateUI()
 
 void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, Cell *c)
 {
-    std::cout << glm::to_string(pos) << std::endl;
-    std::cout << glm::to_string(size) << std::endl;
-    std::cout << c->_maxYLength << std::endl;
     insertCell(pos, size, glm::vec3(0.0f, 0.0f, 0.0f), c);
 }
 
@@ -167,9 +164,9 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_base, cellCenter, false) ||
        Utils::getTrianglesFromBox(_base, pos, std::max(std::max(size.x, size.y), size.z)).size() > 0) {
-//        c->rotateX(rotation.x);
-//        c->rotateY(rotation.y);
-//        c->rotateZ(rotation.z);
+        c->rotateX(rotation.x);
+        c->rotateY(rotation.y);
+        c->rotateZ(rotation.z);
         c->resize(size);
         c->place(pos);
         std::vector<Triangle> t = c->getFacets();
@@ -567,19 +564,18 @@ void MainWindow::on_pushButton_process_clicked()
                 }
                 float r = 0;
                 while(r < maxR) {
-                    std::cout << "r: " << r << std::endl;
                     float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
                     cellSizeX = std::max(cellSizeX, 2.5f);
                     float phi = 0.0;
                     while(phi < 360.0) {
-                        float cellSizeY = 2.5;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
                         cellSizeY = std::max(cellSizeY, 2.5f);
                         float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
                         float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
                         float z = infillOrigin.z;
                         while(z < _maxZ) {
                             float posZ = z;
-                            float cellSizeZ = 2.5f;//std::min(fabsf(z)/4.0f + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
                             cellSizeZ = std::max(cellSizeZ, 2.5f);
                             glm::vec3 pos(posX, posY, posZ);
                             glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
@@ -593,7 +589,7 @@ void MainWindow::on_pushButton_process_clicked()
                         z = infillOrigin.z;
                         while(z > _minZ) {
                             float posZ = z;
-                            float cellSizeZ = 2.5f;// std::min(fabsf(z)/4.0f + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
                             cellSizeZ = std::max(cellSizeZ, 2.5f);
                             glm::vec3 pos(posX, posY, posZ-cellSizeZ);
                             glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
@@ -614,11 +610,11 @@ void MainWindow::on_pushButton_process_clicked()
             }
         }
         // Trimm
-//        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
-//        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-//        CorkTriMesh *cork = new CorkTriMesh;
-//        computeIntersection(c1, c2, cork);
-//        _processed = Utils::corkTriMeshToMesh(*cork);
+        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
+        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+        CorkTriMesh *cork = new CorkTriMesh;
+        computeIntersection(c1, c2, cork);
+        _processed = Utils::corkTriMeshToMesh(*cork);
     }
 
     if(skipHollow == false) {
