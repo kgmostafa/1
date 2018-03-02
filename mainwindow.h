@@ -72,6 +72,7 @@ private:
     void updateUI();
 
     void insertCell(glm::vec3 pos, glm::vec3 size, Cell *c);
+    void insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, Cell *c);
 
     Ui::MainWindow *ui;
 

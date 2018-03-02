@@ -154,11 +154,22 @@ void MainWindow::updateUI()
 
 void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, Cell *c)
 {
+    std::cout << glm::to_string(pos) << std::endl;
+    std::cout << glm::to_string(size) << std::endl;
+    std::cout << c->_maxYLength << std::endl;
+    insertCell(pos, size, glm::vec3(0.0f, 0.0f, 0.0f), c);
+}
+
+void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, Cell *c)
+{
     glm::vec3 cellCenter = pos + (size/2.0);
 
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_base, cellCenter, false) ||
        Utils::getTrianglesFromBox(_base, pos, std::max(std::max(size.x, size.y), size.z)).size() > 0) {
+//        c->rotateX(rotation.x);
+//        c->rotateY(rotation.y);
+//        c->rotateZ(rotation.z);
         c->resize(size);
         c->place(pos);
         std::vector<Triangle> t = c->getFacets();
@@ -313,7 +324,6 @@ void MainWindow::on_pushButton_process_clicked()
             c = new Pyramid(cellThickness);
         }
 
-
         glm::vec3 infillOrigin;
         if(customOrigin) {
             infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
@@ -321,32 +331,15 @@ void MainWindow::on_pushButton_process_clicked()
             infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
         }
 
-        if(coordSystem == spherical) {
-            std::cout << "centroid: " << glm::to_string(_baseCentroid) << std::endl;
-            int rSteps = (int)ceil(_maxLength/cellThickness);
-            for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
-                if(r == 0) {
-                    float posX = _baseCentroid.x - (cellThickness/2.0);
-                    float posY = _baseCentroid.y - (cellThickness/2.0);
-                    float posZ = _baseCentroid.z - (cellThickness/2.0);
-                    glm::vec3 pos(posX, posY, posZ);
-                    glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                    if(Utils::isInsideMesh(_base, cellCenter, true) ||
-                       Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-                        c->place(posX, posY, posZ);
-                        std::vector<Triangle> t = c->getFacets();
-                        _processed.insert(_processed.end(), t.begin(), t.end());
-                    }
-                }
-                float radius = r*cellThickness;
-                float circunferece = 2.0*M_PI*radius;
-                int phiSteps = (int)ceil((circunferece/2.0)/cellThickness);
-                for(int phi = 0; phi <= phiSteps; phi++) {
-                    float phiAngle = ((float)phi/(float)phiSteps)*180.0;
-                    if(fabsf(sin(degreesToRadians(phiAngle))) < EPSILON) {
+        if(constantCell) {
+            if(coordSystem == spherical) {
+                std::cout << "centroid: " << glm::to_string(_baseCentroid) << std::endl;
+                int rSteps = (int)ceil(_maxLength/cellThickness);
+                for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
+                    if(r == 0) {
                         float posX = _baseCentroid.x - (cellThickness/2.0);
                         float posY = _baseCentroid.y - (cellThickness/2.0);
-                        float posZ = _baseCentroid.z - (cellThickness/2.0) + radius;
+                        float posZ = _baseCentroid.z - (cellThickness/2.0);
                         glm::vec3 pos(posX, posY, posZ);
                         glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
                         if(Utils::isInsideMesh(_base, cellCenter, true) ||
@@ -356,94 +349,110 @@ void MainWindow::on_pushButton_process_clicked()
                             _processed.insert(_processed.end(), t.begin(), t.end());
                         }
                     }
-                    circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
-                    int thetaSteps = (int)ceil(circunferece/cellThickness);
-                    for(int theta = 0; theta < thetaSteps; theta++) {
-                        float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
-                        float posX = _baseCentroid.x - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
-                        float posY = _baseCentroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
-                        float posZ = _baseCentroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
-                        glm::vec3 pos(posX, posY, posZ);
-                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                        if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                           Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-                            c->place(posX, posY, posZ);
-                            std::vector<Triangle> t = c->getFacets();
-                            _processed.insert(_processed.end(), t.begin(), t.end());
+                    float radius = r*cellThickness;
+                    float circunferece = 2.0*M_PI*radius;
+                    int phiSteps = (int)ceil((circunferece/2.0)/cellThickness);
+                    for(int phi = 0; phi <= phiSteps; phi++) {
+                        float phiAngle = ((float)phi/(float)phiSteps)*180.0;
+                        if(fabsf(sin(degreesToRadians(phiAngle))) < EPSILON) {
+                            float posX = _baseCentroid.x - (cellThickness/2.0);
+                            float posY = _baseCentroid.y - (cellThickness/2.0);
+                            float posZ = _baseCentroid.z - (cellThickness/2.0) + radius;
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, true) ||
+                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
+                                c->place(posX, posY, posZ);
+                                std::vector<Triangle> t = c->getFacets();
+                                _processed.insert(_processed.end(), t.begin(), t.end());
+                            }
                         }
-                    }
-                }
-            }
-        }
-
-        int zSteps = (int)ceil(_maxZLength/cellThickness);
-        glm::vec2 centroid;
-
-        if(constantCell) {
-            for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
-                float z = _minZ + i*cellThickness;
-                std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
-
-                // Get the slice contour centroid
-                std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, z + cellThickness/2.0);
-                if(intersectionSegments.size() < 3) {
-                    continue;
-                }
-                std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
-                std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
-                assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
-
-                if(coordSystem == cartesian) {
-                    int xSteps = (int)ceil(_maxXLength/cellThickness);
-                    int ySteps = (int)ceil(_maxYLength/cellThickness);
-                    // TODO: optimize by using boundaries
-                    for(int j = 0; j < ySteps; j++) {
-                        for(int k = 0; k < xSteps; k++) {
-                            // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
-                            float posX = _minX + k*cellThickness;
-                            float posY = _minY + j*cellThickness;
-                            glm::vec3 pos(posX, posY, z);
-                            // Check if is inside the mesh or if is overlaping the surfaces
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                            if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                c->place(posX, posY, z);
+                        circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
+                        int thetaSteps = (int)ceil(circunferece/cellThickness);
+                        for(int theta = 0; theta < thetaSteps; theta++) {
+                            float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
+                            float posX = _baseCentroid.x - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
+                            float posY = _baseCentroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
+                            float posZ = _baseCentroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
+                                c->place(posX, posY, posZ);
                                 std::vector<Triangle> t = c->getFacets();
                                 _processed.insert(_processed.end(), t.begin(), t.end());
                             }
                         }
                     }
-                } else if(coordSystem == cylindrical) {
-                    int rSteps = (int)ceil(_maxXLength/cellThickness);
-                    if(rSteps < (int)ceil(_maxYLength/cellThickness)) {
-                        rSteps = (int)ceil(_maxYLength/cellThickness);
+                }
+            } else {
+                int zSteps = (int)ceil(_maxZLength/cellThickness);
+                glm::vec2 centroid;
+                for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
+                    float z = _minZ + i*cellThickness;
+                    std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
+
+                    // Get the slice contour centroid
+                    std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, z + cellThickness/2.0);
+                    if(intersectionSegments.size() < 3) {
+                        continue;
                     }
-                    for(int r = 0; r < rSteps; r++) {
-                        if(r == 0) {
-                            float posX = centroid.x - (cellThickness/2.0);
-                            float posY = centroid.y - (cellThickness/2.0);
-                            glm::vec3 pos(posX, posY, z);
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                            if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                c->place(posX, posY, z);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
+                    std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
+                    std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
+                    assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
+
+                    if(coordSystem == cartesian) {
+                        int xSteps = (int)ceil(_maxXLength/cellThickness);
+                        int ySteps = (int)ceil(_maxYLength/cellThickness);
+                        // TODO: optimize by using boundaries
+                        for(int j = 0; j < ySteps; j++) {
+                            for(int k = 0; k < xSteps; k++) {
+                                // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
+                                float posX = _minX + k*cellThickness;
+                                float posY = _minY + j*cellThickness;
+                                glm::vec3 pos(posX, posY, z);
+                                // Check if is inside the mesh or if is overlaping the surfaces
+                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
+                                    c->place(posX, posY, z);
+                                    std::vector<Triangle> t = c->getFacets();
+                                    _processed.insert(_processed.end(), t.begin(), t.end());
+                                }
                             }
                         }
-                        float radius = r*cellThickness;
-                        float circunferece = 2.0*M_PI*radius;
-                        int phiSteps = (int)ceil(circunferece/cellThickness);
-                        for(int phi = 0; phi < phiSteps; phi++) {
-                            float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
-                            float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
-                            glm::vec3 pos(posX, posY, z);
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                            if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                c->place(posX, posY, z);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
+                    } else if(coordSystem == cylindrical) {
+                        int rSteps = (int)ceil(_maxXLength/cellThickness);
+                        if(rSteps < (int)ceil(_maxYLength/cellThickness)) {
+                            rSteps = (int)ceil(_maxYLength/cellThickness);
+                        }
+                        for(int r = 0; r < rSteps; r++) {
+                            if(r == 0) {
+                                float posX = centroid.x - (cellThickness/2.0);
+                                float posY = centroid.y - (cellThickness/2.0);
+                                glm::vec3 pos(posX, posY, z);
+                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
+                                    c->place(posX, posY, z);
+                                    std::vector<Triangle> t = c->getFacets();
+                                    _processed.insert(_processed.end(), t.begin(), t.end());
+                                }
+                            }
+                            float radius = r*cellThickness;
+                            float circunferece = 2.0*M_PI*radius;
+                            int phiSteps = (int)ceil(circunferece/cellThickness);
+                            for(int phi = 0; phi < phiSteps; phi++) {
+                                float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                                float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                                glm::vec3 pos(posX, posY, z);
+                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
+                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
+                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
+                                    c->place(posX, posY, z);
+                                    std::vector<Triangle> t = c->getFacets();
+                                    _processed.insert(_processed.end(), t.begin(), t.end());
+                                }
                             }
                         }
                     }
@@ -550,14 +559,66 @@ void MainWindow::on_pushButton_process_clicked()
                     }
                     posX -= cellHeightX;
                 }
+            } else if(coordSystem == cylindrical) {
+                // This should fail if the infill origin is outside the cylinder
+                float maxR = _maxXLength;
+                if(maxR < _maxYLength) {
+                    maxR = _maxYLength;
+                }
+                float r = 0;
+                while(r < maxR) {
+                    std::cout << "r: " << r << std::endl;
+                    float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
+                    cellSizeX = std::max(cellSizeX, 2.5f);
+                    float phi = 0.0;
+                    while(phi < 360.0) {
+                        float cellSizeY = 2.5;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                        cellSizeY = std::max(cellSizeY, 2.5f);
+                        float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
+                        float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
+                        float z = infillOrigin.z;
+                        while(z < _maxZ) {
+                            float posZ = z;
+                            float cellSizeZ = 2.5f;//std::min(fabsf(z)/4.0f + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+//                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
+                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                            // Approach taken: rotated with the cylindrical orientation
+                            //                            insertCell(pos, size, rotation, c);
+                            insertCell(pos, size, c);
+                            z += cellSizeZ;
+                        }
+                        z = infillOrigin.z;
+                        while(z > _minZ) {
+                            float posZ = z;
+                            float cellSizeZ = 2.5f;// std::min(fabsf(z)/4.0f + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+                            glm::vec3 pos(posX, posY, posZ-cellSizeZ);
+                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+//                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
+                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                            // Approach taken: rotated with the cylindrical orientation
+//                            insertCell(pos, size, rotation, c);
+                            insertCell(pos, size, c);
+                            z -= cellSizeZ;
+                        }
+                        float radius = r;
+                        float circunferece = 2.0*M_PI*radius;
+                        float phiSteps = cellSizeY/circunferece;
+                        phi += (phiSteps*360.0);
+                    }
+                    r += cellSizeX;
+                }
             }
         }
         // Trimm
-        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
-        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-        CorkTriMesh *cork = new CorkTriMesh;
-        computeIntersection(c1, c2, cork);
-        _processed = Utils::corkTriMeshToMesh(*cork);
+//        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
+//        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+//        CorkTriMesh *cork = new CorkTriMesh;
+//        computeIntersection(c1, c2, cork);
+//        _processed = Utils::corkTriMeshToMesh(*cork);
     }
 
     if(skipHollow == false) {

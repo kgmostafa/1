@@ -12,6 +12,8 @@ public:
     std::vector<Triangle> getFacets();
 
     void scale(float x, float y, float z);
+    void rotate(glm::vec3 angles);
+    void rotate(float x, float y, float z);
     void rotateX(float angle);
     void rotateY(float angle);
     void rotateZ(float angle);

@@ -190,7 +190,7 @@ public:
 
         checkBox_skipHollowing = new QCheckBox(groupBox_hollowing);
         checkBox_skipHollowing->setObjectName(QStringLiteral("checkBox_skipHollowing"));
-        checkBox_skipHollowing->setChecked(false);
+        checkBox_skipHollowing->setChecked(true);
 
         verticalLayout_2->addWidget(checkBox_skipHollowing);
 
@@ -322,12 +322,13 @@ public:
         horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
         radioButton_infillCoordinateSystem_cartesian = new QRadioButton(groupBox_infillCoordinateSystem);
         radioButton_infillCoordinateSystem_cartesian->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cartesian"));
-        radioButton_infillCoordinateSystem_cartesian->setChecked(true);
+        radioButton_infillCoordinateSystem_cartesian->setChecked(false);
 
         horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cartesian);
 
         radioButton_infillCoordinateSystem_cylindrical = new QRadioButton(groupBox_infillCoordinateSystem);
         radioButton_infillCoordinateSystem_cylindrical->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cylindrical"));
+        radioButton_infillCoordinateSystem_cylindrical->setChecked(true);
 
         horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cylindrical);
 
@@ -392,7 +393,7 @@ public:
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
-        checkBox_skipInfilling->setChecked(true);
+        checkBox_skipInfilling->setChecked(false);
 
         verticalLayout_3->addWidget(checkBox_skipInfilling);
 

@@ -1,4 +1,8 @@
 #include "cell.h"
+#include <iostream>
+#include "glm/ext.hpp"
+
+#define EPSILON std::numeric_limits<float>::epsilon()
 
 Cell::Cell() :
     _initialized(false)
@@ -17,12 +21,28 @@ void Cell::scale(float x, float y, float z)
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->scale(x, y, z);
     }
+    std::cout << "tmpMin: " << glm::to_string(tmpMin) << std::endl;
     translate(tmpMin.x, tmpMin.y, tmpMin.z);
     calculateBounds();
 }
 
+void Cell::rotate(glm::vec3 angles)
+{
+    rotate(angles.x, angles.y, angles.z);
+}
+
+void Cell::rotate(float x, float y, float z)
+{
+    rotateX(x);
+    rotateY(y);
+    rotateZ(z);
+}
+
 void Cell::rotateX(float angle)
 {
+    if(angle < EPSILON) {
+        return;
+    }
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateX(angle);
     }
@@ -31,6 +51,9 @@ void Cell::rotateX(float angle)
 
 void Cell::rotateY(float angle)
 {
+    if(angle < EPSILON) {
+        return;
+    }
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateY(angle);
     }
@@ -39,6 +62,9 @@ void Cell::rotateY(float angle)
 
 void Cell::rotateZ(float angle)
 {
+    if(angle < EPSILON) {
+        return;
+    }
     for(std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->rotateZ(angle);
     }
@@ -60,9 +86,14 @@ void Cell::resize(glm::vec3 size)
 
 void Cell::resize(float x, float y, float z)
 {
+    calculateBounds();
+    std::cout << "resize\n";
     float factorX = x/_maxXLength;
     float factorY = y/_maxYLength;
     float factorZ = z/_maxZLength;
+    std::cout << "factorX = " << factorX << std::endl;
+    std::cout << "factorY = " << factorY << std::endl;
+    std::cout << "factorZ = " << factorZ << std::endl;
     scale(factorX, factorY, factorZ);
     calculateBounds();
 }
@@ -95,6 +126,7 @@ void Cell::place(glm::vec3 pos)
 
 void Cell::place(float x, float y, float z)
 {
+    std::cout << "place\n";
     moveToOrigin();
     for (std::vector<Triangle>::iterator it = _facets.begin() ; it != _facets.end(); ++it) {
         it->translate(x, y, z);
@@ -108,6 +140,7 @@ void Cell::moveToOrigin()
         it->translate(-_min.x, -_min.y, -_min.z);
     }
     calculateBounds();
+    std::cout << "movedToOrigin! new _min: " << glm::to_string(_min) << std::endl;
 }
 
 bool Cell::isInitialized()
