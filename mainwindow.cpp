@@ -579,6 +579,94 @@ void MainWindow::on_pushButton_process_clicked()
                             cellSizeZ = std::max(cellSizeZ, 2.5f);
                             glm::vec3 pos(posX, posY, posZ);
                             glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                            insertCell(pos, size, c);
+                            z += cellSizeZ;
+                        }
+                        z = infillOrigin.z;
+                        while(z > _minZ) {
+                            float posZ = z;
+                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+                            glm::vec3 pos(posX, posY, posZ-cellSizeZ);
+                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                            insertCell(pos, size, c);
+                            z -= cellSizeZ;
+                        }
+                        float radius = r;
+                        float circunferece = 2.0*M_PI*radius;
+                        float phiSteps = cellSizeY/circunferece;
+                        phi += (phiSteps*360.0);
+                    }
+                    r += cellSizeX;
+                }
+            } else if(coordSystem == spherical) {
+                // This should fail if the infill origin is outside the cylinder
+                float maxR = _maxXLength;
+                if(maxR < _maxYLength) {
+                    maxR = _maxYLength;
+                }
+                if(maxR < _maxZLength) {
+                    maxR = _maxZLength;
+                }
+                float r = 0;
+                while(r < maxR) {
+                    float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
+                    cellSizeX = std::max(cellSizeX, 2.5f);
+                    float theta = 0.0;
+                    float circunferece = 2.0*M_PI*r;
+                    while(theta < 360.0) {
+
+                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                        cellSizeY = std::max(cellSizeY, 2.5f);
+                        float phi = 0.0;
+                        while(phi < 180.0) {
+                            circunferece = 2.0*M_PI*(r*sin(degreesToRadians(phi)));
+                            float cellSizeZ = std::min(fabsf(r)/4.0f, 25.0f);
+                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+                            float posX = _baseCentroid.x - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*cos(degreesToRadians(theta));
+                            float posY = _baseCentroid.y - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*sin(degreesToRadians(theta));
+                            float posZ = _baseCentroid.z - (cellThickness/2.0) + r*cos(degreesToRadians(phi));
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                            insertCell(pos, size, c);
+                            float phiSteps = cellSizeY/circunferece;
+                            phi += (phiSteps*180.0);
+                        }
+                        float phiSteps = cellSizeY/circunferece;
+                        phi += (phiSteps*180.0);
+                    }
+                    for(int phi = 0; phi <= phiSteps; phi++) {
+                        float phiAngle = ((float)phi/(float)phiSteps)*180.0;
+                        circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
+                        int thetaSteps = (int)ceil(circunferece/cellThickness);
+                        for(int theta = 0; theta < thetaSteps; theta++) {
+                            float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
+
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
+                                c->place(posX, posY, posZ);
+                                std::vector<Triangle> t = c->getFacets();
+                                _processed.insert(_processed.end(), t.begin(), t.end());
+                            }
+                        }
+                    }
+                    while(phi < 360.0) {
+                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+                        cellSizeY = std::max(cellSizeY, 2.5f);
+                        float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
+                        float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
+                        float z = infillOrigin.z;
+                        while(z < _maxZ) {
+                            float posZ = z;
+                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+                            glm::vec3 pos(posX, posY, posZ);
+                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
 //                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
                             // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
                             // Approach taken: rotated with the cylindrical orientation
