@@ -40,7 +40,8 @@ SOURCES += \
     customcell.cpp \
     rotatedialog.cpp \
     stlpreview.cpp \
-    importdialog.cpp
+    importdialog.cpp \
+    3rd_party/tinyexpr/tinyexpr.c
 
 HEADERS += \
         mainwindow.h \
@@ -79,7 +80,8 @@ HEADERS += \
     3rd_party/cork/util/shortVec.h \
     3rd_party/cork/util/unionFind.h \
     3rd_party/cork/cork.h \
-    importdialog.h
+    importdialog.h \
+    3rd_party/tinyexpr/tinyexpr.h
 
 
 FORMS += \

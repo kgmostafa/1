@@ -83,6 +83,18 @@ public:
     QDoubleSpinBox *doubleSpinBox_infill_originY;
     QLabel *label_5;
     QDoubleSpinBox *doubleSpinBox_infill_originZ;
+    QGroupBox *groupBox_3;
+    QVBoxLayout *verticalLayout_8;
+    QHBoxLayout *horizontalLayout_9;
+    QLabel *label_6;
+    QLineEdit *lineEdit_cellSizeX;
+    QHBoxLayout *horizontalLayout_11;
+    QLabel *label_7;
+    QLineEdit *lineEdit_cellSizeY;
+    QHBoxLayout *horizontalLayout_12;
+    QLabel *label_8;
+    QLineEdit *lineEdit_cellSizeZ;
+    QCheckBox *checkBox_variableInfill;
     QCheckBox *checkBox_skipInfilling;
     QPushButton *pushButton_process;
     QPushButton *pushButton_save;
@@ -107,7 +119,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 616);
+        MainWindow->resize(837, 756);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -322,13 +334,13 @@ public:
         horizontalLayout_8->setObjectName(QStringLiteral("horizontalLayout_8"));
         radioButton_infillCoordinateSystem_cartesian = new QRadioButton(groupBox_infillCoordinateSystem);
         radioButton_infillCoordinateSystem_cartesian->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cartesian"));
-        radioButton_infillCoordinateSystem_cartesian->setChecked(false);
+        radioButton_infillCoordinateSystem_cartesian->setChecked(true);
 
         horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cartesian);
 
         radioButton_infillCoordinateSystem_cylindrical = new QRadioButton(groupBox_infillCoordinateSystem);
         radioButton_infillCoordinateSystem_cylindrical->setObjectName(QStringLiteral("radioButton_infillCoordinateSystem_cylindrical"));
-        radioButton_infillCoordinateSystem_cylindrical->setChecked(true);
+        radioButton_infillCoordinateSystem_cylindrical->setChecked(false);
 
         horizontalLayout_8->addWidget(radioButton_infillCoordinateSystem_cylindrical);
 
@@ -390,6 +402,81 @@ public:
 
 
         verticalLayout_3->addWidget(groupBox_2);
+
+        groupBox_3 = new QGroupBox(groupBox_infill);
+        groupBox_3->setObjectName(QStringLiteral("groupBox_3"));
+        verticalLayout_8 = new QVBoxLayout(groupBox_3);
+        verticalLayout_8->setSpacing(6);
+        verticalLayout_8->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_8->setObjectName(QStringLiteral("verticalLayout_8"));
+        horizontalLayout_9 = new QHBoxLayout();
+        horizontalLayout_9->setSpacing(6);
+        horizontalLayout_9->setObjectName(QStringLiteral("horizontalLayout_9"));
+        label_6 = new QLabel(groupBox_3);
+        label_6->setObjectName(QStringLiteral("label_6"));
+        sizePolicy1.setHeightForWidth(label_6->sizePolicy().hasHeightForWidth());
+        label_6->setSizePolicy(sizePolicy1);
+
+        horizontalLayout_9->addWidget(label_6);
+
+        lineEdit_cellSizeX = new QLineEdit(groupBox_3);
+        lineEdit_cellSizeX->setObjectName(QStringLiteral("lineEdit_cellSizeX"));
+        sizePolicy.setHeightForWidth(lineEdit_cellSizeX->sizePolicy().hasHeightForWidth());
+        lineEdit_cellSizeX->setSizePolicy(sizePolicy);
+
+        horizontalLayout_9->addWidget(lineEdit_cellSizeX);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_9);
+
+        horizontalLayout_11 = new QHBoxLayout();
+        horizontalLayout_11->setSpacing(6);
+        horizontalLayout_11->setObjectName(QStringLiteral("horizontalLayout_11"));
+        label_7 = new QLabel(groupBox_3);
+        label_7->setObjectName(QStringLiteral("label_7"));
+        sizePolicy1.setHeightForWidth(label_7->sizePolicy().hasHeightForWidth());
+        label_7->setSizePolicy(sizePolicy1);
+
+        horizontalLayout_11->addWidget(label_7);
+
+        lineEdit_cellSizeY = new QLineEdit(groupBox_3);
+        lineEdit_cellSizeY->setObjectName(QStringLiteral("lineEdit_cellSizeY"));
+        sizePolicy.setHeightForWidth(lineEdit_cellSizeY->sizePolicy().hasHeightForWidth());
+        lineEdit_cellSizeY->setSizePolicy(sizePolicy);
+
+        horizontalLayout_11->addWidget(lineEdit_cellSizeY);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_11);
+
+        horizontalLayout_12 = new QHBoxLayout();
+        horizontalLayout_12->setSpacing(6);
+        horizontalLayout_12->setObjectName(QStringLiteral("horizontalLayout_12"));
+        label_8 = new QLabel(groupBox_3);
+        label_8->setObjectName(QStringLiteral("label_8"));
+        sizePolicy1.setHeightForWidth(label_8->sizePolicy().hasHeightForWidth());
+        label_8->setSizePolicy(sizePolicy1);
+
+        horizontalLayout_12->addWidget(label_8);
+
+        lineEdit_cellSizeZ = new QLineEdit(groupBox_3);
+        lineEdit_cellSizeZ->setObjectName(QStringLiteral("lineEdit_cellSizeZ"));
+        sizePolicy.setHeightForWidth(lineEdit_cellSizeZ->sizePolicy().hasHeightForWidth());
+        lineEdit_cellSizeZ->setSizePolicy(sizePolicy);
+
+        horizontalLayout_12->addWidget(lineEdit_cellSizeZ);
+
+
+        verticalLayout_8->addLayout(horizontalLayout_12);
+
+        checkBox_variableInfill = new QCheckBox(groupBox_3);
+        checkBox_variableInfill->setObjectName(QStringLiteral("checkBox_variableInfill"));
+        checkBox_variableInfill->setChecked(true);
+
+        verticalLayout_8->addWidget(checkBox_variableInfill);
+
+
+        verticalLayout_3->addWidget(groupBox_3);
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
@@ -542,6 +629,14 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "X:", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "Y:", nullptr));
         label_5->setText(QApplication::translate("MainWindow", "Z:", nullptr));
+        groupBox_3->setTitle(QApplication::translate("MainWindow", "Cell size", nullptr));
+        label_6->setText(QApplication::translate("MainWindow", "X =", nullptr));
+        lineEdit_cellSizeX->setText(QApplication::translate("MainWindow", "1.0*x", nullptr));
+        label_7->setText(QApplication::translate("MainWindow", "Y =", nullptr));
+        lineEdit_cellSizeY->setText(QApplication::translate("MainWindow", "1.0*x + 1.0*y", nullptr));
+        label_8->setText(QApplication::translate("MainWindow", "Z =", nullptr));
+        lineEdit_cellSizeZ->setText(QApplication::translate("MainWindow", "1.0*x + 1.0*y + 1.0*z", nullptr));
+        checkBox_variableInfill->setText(QApplication::translate("MainWindow", "Variable infill", nullptr));
         checkBox_skipInfilling->setText(QApplication::translate("MainWindow", "Skip infilling", nullptr));
         pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
         pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));
