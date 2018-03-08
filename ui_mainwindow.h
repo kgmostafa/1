@@ -64,11 +64,6 @@ public:
     QRadioButton *radioButton_density_low;
     QRadioButton *radioButton_density_medium;
     QRadioButton *radioButton_density_high;
-    QHBoxLayout *horizontalLayout;
-    QLabel *label;
-    QLineEdit *lineEdit_cellThickness;
-    QLabel *label_cellUnit;
-    QCheckBox *checkBox_constantCellSize;
     QGroupBox *groupBox_infillCoordinateSystem;
     QHBoxLayout *horizontalLayout_8;
     QRadioButton *radioButton_infillCoordinateSystem_cartesian;
@@ -136,7 +131,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 916);
+        MainWindow->resize(837, 865);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -313,37 +308,6 @@ public:
 
 
         verticalLayout_4->addLayout(horizontalLayout_7);
-
-        horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setSpacing(6);
-        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        label = new QLabel(groupBox_infillDensity);
-        label->setObjectName(QStringLiteral("label"));
-        sizePolicy1.setHeightForWidth(label->sizePolicy().hasHeightForWidth());
-        label->setSizePolicy(sizePolicy1);
-
-        horizontalLayout->addWidget(label);
-
-        lineEdit_cellThickness = new QLineEdit(groupBox_infillDensity);
-        lineEdit_cellThickness->setObjectName(QStringLiteral("lineEdit_cellThickness"));
-        sizePolicy2.setHeightForWidth(lineEdit_cellThickness->sizePolicy().hasHeightForWidth());
-        lineEdit_cellThickness->setSizePolicy(sizePolicy2);
-        lineEdit_cellThickness->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
-
-        horizontalLayout->addWidget(lineEdit_cellThickness);
-
-        label_cellUnit = new QLabel(groupBox_infillDensity);
-        label_cellUnit->setObjectName(QStringLiteral("label_cellUnit"));
-
-        horizontalLayout->addWidget(label_cellUnit);
-
-
-        verticalLayout_4->addLayout(horizontalLayout);
-
-        checkBox_constantCellSize = new QCheckBox(groupBox_infillDensity);
-        checkBox_constantCellSize->setObjectName(QStringLiteral("checkBox_constantCellSize"));
-
-        verticalLayout_4->addWidget(checkBox_constantCellSize);
 
 
         verticalLayout_3->addWidget(groupBox_infillDensity);
@@ -738,10 +702,6 @@ public:
         radioButton_density_low->setText(QApplication::translate("MainWindow", "Low", nullptr));
         radioButton_density_medium->setText(QApplication::translate("MainWindow", "Medium", nullptr));
         radioButton_density_high->setText(QApplication::translate("MainWindow", "High", nullptr));
-        label->setText(QApplication::translate("MainWindow", "Cell thickness:", nullptr));
-        lineEdit_cellThickness->setText(QApplication::translate("MainWindow", "2.5", nullptr));
-        label_cellUnit->setText(QApplication::translate("MainWindow", "mm", nullptr));
-        checkBox_constantCellSize->setText(QApplication::translate("MainWindow", "Constant cell size", nullptr));
         groupBox_infillCoordinateSystem->setTitle(QApplication::translate("MainWindow", "Coordinate system", nullptr));
         radioButton_infillCoordinateSystem_cartesian->setText(QApplication::translate("MainWindow", "Cartesian", nullptr));
         radioButton_infillCoordinateSystem_cylindrical->setText(QApplication::translate("MainWindow", "Cylindrical", nullptr));

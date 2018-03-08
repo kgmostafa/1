@@ -9,6 +9,7 @@
 #include "utils.h"
 #include "importdialog.h"
 #include "rotatedialog.h"
+#include "3rd_party/tinyexpr/tinyexpr.h"
 
 namespace Ui {
 class MainWindow;
@@ -100,6 +101,19 @@ private:
 
     ImportDialog *_importDialog;
     RotateDialog *_rotateDialog;
+    void simpleCartesian(Cell *cell, glm::vec3 cellSize);
+    void simpleCylindrical(Cell *cell, glm::vec3 cellSize);
+    void simpleSpherical(Cell *cell, glm::vec3 cellSize);
+
+    void variableCartesian(Cell *cell, glm::vec3 infillOrigin);
+    void variableCylindrical(Cell *cell, glm::vec3 infillOrigin);
+
+    te_expr *_exprX;
+    te_expr *_exprY;
+    te_expr *_exprZ;
+    double _varX;
+    double _varY;
+    double _varZ;
 };
 
 #endif // MAINWINDOW_H

@@ -54,6 +54,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _stlHeader = "";
     _stlUnit = millimetre;
 
+    _exprX = NULL;
+    _exprY = NULL;
+    _exprZ = NULL;
+
     _importDialog = new ImportDialog(this);
     connect(_importDialog, &ImportDialog::import, this, &MainWindow::importBasePart);
     _rotateDialog = new RotateDialog(this);
@@ -151,7 +155,7 @@ void MainWindow::updateUI()
     }
 
     ui->label_offsetUnit->setText(unit);
-    ui->label_cellUnit->setText(unit);
+//    ui->label_cellUnit->setText(unit);
     ui->labelWidthX->setText("Width in X: " + QString::number(_maxXLength) + " " + unit);
     ui->labelWidthY->setText("Width in Y: " + QString::number(_maxYLength) + " " + unit);
     ui->labelHeightZ->setText("Height in Z: " + QString::number(_maxZLength) + " " + unit);
@@ -177,7 +181,7 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
 
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_base, cellCenter, false) ||
-       Utils::getTrianglesFromBox(_base, pos, std::max(std::max(size.x, size.y), size.z)).size() > 0) {
+       Utils::getTrianglesFromBox(_base, pos, size).size() > 0) {
         c->rotateX(rotation.x);
         c->rotateY(rotation.y);
         c->rotateZ(rotation.z);
@@ -226,7 +230,6 @@ void MainWindow::on_pushButton_process_clicked()
     // TODO: change infill custom origin min/max values (QDoubleSpinBox)
     bool customOrigin = true;
     bool variableInfill = ui->checkBox_variableInfill->isChecked();
-    bool constantCell = ui->checkBox_constantCellSize->isChecked();
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
@@ -305,14 +308,6 @@ void MainWindow::on_pushButton_process_clicked()
             cellType = 4; // Custom
         }
 
-        float cellThickness;
-        bool valid = false;
-        cellThickness = ui->lineEdit_cellThickness->text().toFloat(&valid);
-        if(!valid) {
-            std::cout << "Invalid input. Using layerThickness = 1 mm\n";
-            cellThickness = 1.0;
-        }
-
         CoordinateSystem coordSystem;
         if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
             coordSystem = cartesian;    // Cartesian coordinate system
@@ -324,17 +319,17 @@ void MainWindow::on_pushButton_process_clicked()
             coordSystem = cartesian;    // Default: Cartesian coordinate system
         }
 
-        Cell *c = NULL;
+        Cell *cell = NULL;
         if(cellType == 1) {
-            c = new Pyramid(cellThickness);
+            cell = new Pyramid();
         } else if(cellType == 2) {
-            c = new Cube(cellThickness);
+            cell = new Cube();
         } else if(cellType == 3) {
-            c = new Icosphere(cellThickness);
+            cell = new Icosphere();
         } else if(cellType == 4) {
-            c = _cell;
+            cell = _cell;
         } else {    // Default: Pyramid
-            c = new Pyramid(cellThickness);
+            cell = new Pyramid();
         }
 
         glm::vec3 infillOrigin;
@@ -345,357 +340,78 @@ void MainWindow::on_pushButton_process_clicked()
         }
 
         // TODO: handle number of variables per axis
-        double x, y, z;
-        te_variable vars[] = {{"x", &x}, {"y", &y}, {"z", &z}};
-        te_expr *exprX = NULL;
-        te_expr *exprY = NULL;
-        te_expr *exprZ = NULL;
+        te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
+        glm::vec3 cellSize(0.0f, 0.0f, 0.0f);
         if(variableInfill) {
             int errX;
-            const char *xString = ui->lineEdit_cellSizeX->text().toLatin1().data();
-            exprX = te_compile(xString, vars, 3, &errX);
+            QByteArray xBA = ui->lineEdit_cellSizeX->text().toLatin1();
+            const char *xString = xBA.data();
+            _exprX = te_compile(xString, vars, 3, &errX);
 
             int errY;
-            const char *yString = ui->lineEdit_cellSizeY->text().toLatin1().data();
-            exprY = te_compile(yString, vars, 3, &errY);
+            QByteArray yBA = ui->lineEdit_cellSizeY->text().toLatin1();
+            const char *yString = yBA.data();
+            _exprY = te_compile(yString, vars, 3, &errY);
 
             int errZ;
-            const char *zString = ui->lineEdit_cellSizeZ->text().toLatin1().data();
-            exprZ = te_compile(zString, vars, 3, &errZ);
+            QByteArray zBA = ui->lineEdit_cellSizeZ->text().toLatin1();
+            const char *zString = zBA.data();
+            _exprZ = te_compile(zString, vars, 3, &errZ);
 
-            if(exprX && exprY && exprZ) {
+            if(_exprX && _exprY && _exprZ) {
             } else {
+                // TODO: stop processing here if parse fails (_expr can be NULL).
                 printf("Parse error at x: %d\n", errX);
                 printf("Parse error at y: %d\n", errY);
                 printf("Parse error at z: %d\n", errZ);
             }
+        } else {
+            bool valid = false;
+            cellSize.x = ui->lineEdit_cellSizeX->text().toFloat(&valid);
+            if(!valid) {
+                // TODO: show error dialog
+                cellSize.x = 5.0f;
+            }
+            cellSize.y = ui->lineEdit_cellSizeY->text().toFloat(&valid);
+            if(!valid) {
+
+                cellSize.y = 5.0f;
+            }
+            cellSize.z = ui->lineEdit_cellSizeZ->text().toFloat(&valid);
+            if(!valid) {
+
+                cellSize.z = 5.0f;
+            }
+
         }
 
-        if(constantCell) {
-            if(coordSystem == spherical) {
-                std::cout << "centroid: " << glm::to_string(_baseCentroid) << std::endl;
-                int rSteps = (int)ceil(_maxLength/cellThickness);
-                for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
-                    if(r == 0) {
-                        float posX = _baseCentroid.x - (cellThickness/2.0);
-                        float posY = _baseCentroid.y - (cellThickness/2.0);
-                        float posZ = _baseCentroid.z - (cellThickness/2.0);
-                        glm::vec3 pos(posX, posY, posZ);
-                        glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                        if(Utils::isInsideMesh(_base, cellCenter, true) ||
-                           Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-                            c->place(posX, posY, posZ);
-                            std::vector<Triangle> t = c->getFacets();
-                            _processed.insert(_processed.end(), t.begin(), t.end());
-                        }
-                    }
-                    float radius = r*cellThickness;
-                    float circunferece = 2.0*M_PI*radius;
-                    int phiSteps = (int)ceil((circunferece/2.0)/cellThickness);
-                    for(int phi = 0; phi <= phiSteps; phi++) {
-                        float phiAngle = ((float)phi/(float)phiSteps)*180.0;
-                        if(fabsf(sin(degreesToRadians(phiAngle))) < EPSILON) {
-                            float posX = _baseCentroid.x - (cellThickness/2.0);
-                            float posY = _baseCentroid.y - (cellThickness/2.0);
-                            float posZ = _baseCentroid.z - (cellThickness/2.0) + radius;
-                            glm::vec3 pos(posX, posY, posZ);
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, true) ||
-                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-                                c->place(posX, posY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
-                        }
-                        circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
-                        int thetaSteps = (int)ceil(circunferece/cellThickness);
-                        for(int theta = 0; theta < thetaSteps; theta++) {
-                            float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
-                            float posX = _baseCentroid.x - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
-                            float posY = _baseCentroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
-                            float posZ = _baseCentroid.z - (cellThickness/2.0) + radius*cos(degreesToRadians(phiAngle));
-                            glm::vec3 pos(posX, posY, posZ);
-                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-                                c->place(posX, posY, posZ);
-                                std::vector<Triangle> t = c->getFacets();
-                                _processed.insert(_processed.end(), t.begin(), t.end());
-                            }
-                        }
-                    }
+        switch(coordSystem) {
+            case cartesian: {
+                if(variableInfill) {
+                    variableCartesian(cell, infillOrigin);
+                } else {
+                    simpleCartesian(cell, cellSize);
                 }
-            } else {
-                int zSteps = (int)ceil(_maxZLength/cellThickness);
-                glm::vec2 centroid;
-                for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
-                    float z = _minZ + i*cellThickness;
-                    std::vector<Triangle> slice = Utils::slice(_base, z, cellThickness);
-
-                    // Get the slice contour centroid
-                    std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, z + cellThickness/2.0);
-                    if(intersectionSegments.size() < 3) {
-                        continue;
-                    }
-                    std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
-                    std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
-                    assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
-
-                    if(coordSystem == cartesian) {
-                        int xSteps = (int)ceil(_maxXLength/cellThickness);
-                        int ySteps = (int)ceil(_maxYLength/cellThickness);
-                        // TODO: optimize by using boundaries
-                        for(int j = 0; j < ySteps; j++) {
-                            for(int k = 0; k < xSteps; k++) {
-                                // TODO (OPTIONAL CONFIG): start from the middle and cut the cell on the boundaries
-                                float posX = _minX + k*cellThickness;
-                                float posY = _minY + j*cellThickness;
-                                glm::vec3 pos(posX, posY, z);
-                                // Check if is inside the mesh or if is overlaping the surfaces
-                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                    c->place(posX, posY, z);
-                                    std::vector<Triangle> t = c->getFacets();
-                                    _processed.insert(_processed.end(), t.begin(), t.end());
-                                }
-                            }
-                        }
-                    } else if(coordSystem == cylindrical) {
-                        int rSteps = (int)ceil(_maxXLength/cellThickness);
-                        if(rSteps < (int)ceil(_maxYLength/cellThickness)) {
-                            rSteps = (int)ceil(_maxYLength/cellThickness);
-                        }
-                        for(int r = 0; r < rSteps; r++) {
-                            if(r == 0) {
-                                float posX = centroid.x - (cellThickness/2.0);
-                                float posY = centroid.y - (cellThickness/2.0);
-                                glm::vec3 pos(posX, posY, z);
-                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                    c->place(posX, posY, z);
-                                    std::vector<Triangle> t = c->getFacets();
-                                    _processed.insert(_processed.end(), t.begin(), t.end());
-                                }
-                            }
-                            float radius = r*cellThickness;
-                            float circunferece = 2.0*M_PI*radius;
-                            int phiSteps = (int)ceil(circunferece/cellThickness);
-                            for(int phi = 0; phi < phiSteps; phi++) {
-                                float posX = centroid.x - (cellThickness/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
-                                float posY = centroid.y - (cellThickness/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
-                                glm::vec3 pos(posX, posY, z);
-                                glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), z+(cellThickness/2.0));
-                                if(Utils::isInsideMesh(slice, cellCenter, true) ||
-                                   Utils::getTrianglesFromBox(slice, pos, cellThickness).size() > 0) {
-                                    c->place(posX, posY, z);
-                                    std::vector<Triangle> t = c->getFacets();
-                                    _processed.insert(_processed.end(), t.begin(), t.end());
-                                }
-                            }
-                        }
-                    }
+            } break;
+            case cylindrical: {
+                if(variableInfill) {
+                    variableCylindrical(cell, infillOrigin);
+                } else {
+                    simpleCylindrical(cell, cellSize);
                 }
-            }
-        } else {
-            // Approach 1
-            if(coordSystem == cartesian) {
-                float posX = infillOrigin.x;
-                while(posX < _maxX) {
-                    x = posX - infillOrigin.x;
-                    float posY = infillOrigin.y;
-                    float cellHeightX;
-                    if(variableInfill) {
-                        cellHeightX = std::min(te_eval(exprX), 25.0);
-                        cellHeightX = std::max(cellHeightX, 2.5f);
-                    } else {
-                        cellHeightX = 5.0f;
-                    }
-                    // Q1
-                    while(posY < _maxY) {
-                        y = posY - infillOrigin.y;
-                        float posZ = _minZ;
-                        float cellHeightY;
-                        if(variableInfill) {
-                            cellHeightY = std::min(te_eval(exprY), 25.0);
-                            cellHeightY = std::max(cellHeightY, 2.5f);
-                        } else {
-                            cellHeightY = 5.0f;
-                        }
-                        while(posZ < _maxZ) {
-                            z = posZ - infillOrigin.z;
-                            // Limit cell height
-                            float cellHeightZ;
-                            if(variableInfill) {
-                                cellHeightZ = std::min(te_eval(exprZ), 25.0);
-                                cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            } else {
-                                cellHeightZ = 5.0f;
-                            }
-
-                            glm::vec3 pos(posX, posY, posZ);
-                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
-                            insertCell(pos, size, c);
-
-                            posZ += cellHeightZ;
-                        }
-                        posY += cellHeightY;
-                    }
-                    posY = infillOrigin.y;
-                    // Q4
-                    while(posY > _minY) {
-                        y = posY - infillOrigin.y;
-                        float posZ = _minZ;
-                        float cellHeightY;
-                        if(variableInfill) {
-                            cellHeightY = std::min(te_eval(exprY), 25.0);
-                            cellHeightY = std::max(cellHeightY, 2.5f);
-                        } else {
-                            cellHeightY = 5.0f;
-                        }
-                        while(posZ < _maxZ) {
-                            z = posZ - infillOrigin.z;
-                            // Limit cell height
-                            float cellHeightZ;
-                            if(variableInfill) {
-                                cellHeightZ = std::min(te_eval(exprZ), 25.0);
-                                cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            } else {
-                                cellHeightZ = 5.0f;
-                            }
-
-                            glm::vec3 pos(posX, posY-cellHeightY, posZ);
-                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
-                            insertCell(pos, size, c);
-
-                            posZ += cellHeightZ;
-                        }
-                        posY -= cellHeightY;
-                    }
-                    posX += cellHeightX;
+            } break;
+            case spherical: {
+                if(variableInfill) {
+                    std::cerr << "TODO: variable infill with spherical coordinate system\n";
+                } else {
+                    simpleSpherical(cell, cellSize);
                 }
-                posX = infillOrigin.x;
-                while(posX > _minX) {
-                    x = posX - infillOrigin.x;
-                    float posY = infillOrigin.y;
-                    float cellHeightX;
-                    if(variableInfill) {
-                        cellHeightX = std::min(te_eval(exprX), 25.0);
-                        cellHeightX = std::max(cellHeightX, 2.5f);
-                    } else {
-                        cellHeightX = 5.0f;
-                    }
-                    // Q2
-                    while(posY < _maxY) {
-                        y = posY - infillOrigin.y;
-                        float posZ = _minZ;
-                        float cellHeightY;
-                        if(variableInfill) {
-                            cellHeightY = std::min(te_eval(exprY), 25.0);
-                            cellHeightY = std::max(cellHeightY, 2.5f);
-                        } else {
-                            cellHeightY = 5.0f;
-                        }
-                        while(posZ < _maxZ) {
-                            z = posZ - infillOrigin.z;
-                            // Limit cell height
-                            float cellHeightZ;
-                            if(variableInfill) {
-                                cellHeightZ = std::min(te_eval(exprZ), 25.0);
-                                cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            } else {
-                                cellHeightZ = 5.0f;
-                            }
+            } break;
+        }
 
-                            glm::vec3 pos(posX-cellHeightX, posY, posZ);
-                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
-                            insertCell(pos, size, c);
 
-                            posZ += cellHeightZ;
-                        }
-                        posY += cellHeightY;
-                    }
-                    posY = infillOrigin.y;
-                    // Q3
-                    while(posY > _minY) {
-                        y = posY - infillOrigin.y;
-                        float posZ = _minZ;
-                        float cellHeightY;
-                        if(variableInfill) {
-                            cellHeightY = std::min(te_eval(exprY), 25.0);
-                            cellHeightY = std::max(cellHeightY, 2.5f);
-                        } else {
-                            cellHeightY = 5.0f;
-                        }
-                        while(posZ < _maxZ) {
-                            z = posZ - infillOrigin.z;
-                            // Limit cell height
-                            float cellHeightZ;
-                            if(variableInfill) {
-                                cellHeightZ = std::min(te_eval(exprZ), 25.0);
-                                cellHeightZ = std::max(cellHeightZ, 2.5f);
-                            } else {
-                                cellHeightZ = 5.0f;
-                            }
-
-                            glm::vec3 pos(posX-cellHeightX, posY-cellHeightY, posZ);
-                            glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
-                            insertCell(pos, size, c);
-
-                            posZ += cellHeightZ;
-                        }
-                        posY -= cellHeightY;
-                    }
-                    posX -= cellHeightX;
-                }
-            } else if(coordSystem == cylindrical) {
-                // This should fail if the infill origin is outside the cylinder
-                float maxR = _maxXLength;
-                if(maxR < _maxYLength) {
-                    maxR = _maxYLength;
-                }
-                float r = 0;
-                while(r < maxR) {
-                    float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
-                    cellSizeX = std::max(cellSizeX, 2.5f);
-                    float phi = 0.0;
-                    while(phi < 360.0) {
-                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
-                        cellSizeY = std::max(cellSizeY, 2.5f);
-                        float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
-                        float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
-                        float z = infillOrigin.z;
-                        while(z < _maxZ) {
-                            float posZ = z;
-                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
-                            cellSizeZ = std::max(cellSizeZ, 2.5f);
-                            glm::vec3 pos(posX, posY, posZ);
-                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
-                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
-                            insertCell(pos, size, c);
-                            z += cellSizeZ;
-                        }
-                        z = infillOrigin.z;
-                        while(z > _minZ) {
-                            float posZ = z;
-                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
-                            cellSizeZ = std::max(cellSizeZ, 2.5f);
-                            glm::vec3 pos(posX, posY, posZ-cellSizeZ);
-                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
-                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
-                            insertCell(pos, size, c);
-                            z -= cellSizeZ;
-                        }
-                        float radius = r;
-                        float circunferece = 2.0*M_PI*radius;
-                        float phiSteps = cellSizeY/circunferece;
-                        phi += (phiSteps*360.0);
-                    }
-                    r += cellSizeX;
-                }
-            } else if(coordSystem == spherical) {
-                std::cout << "TODO\n";
+//            } else if(coordSystem == spherical) {
+//                std::cout << "TODO\n";
 //                // This should fail if the infill origin is outside the cylinder
 //                float maxR = _maxXLength;
 //                if(maxR < _maxYLength) {
@@ -789,8 +505,8 @@ void MainWindow::on_pushButton_process_clicked()
 //                    }
 //                    r += cellSizeX;
 //                }
-            }
-        }
+//            }
+//        }
         // Trimm
         Eigen::MatrixXd vOffset;
         Eigen::MatrixXi fOffset;
@@ -802,20 +518,13 @@ void MainWindow::on_pushButton_process_clicked()
         CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
         CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
 
-//        _offset = _base;
-//        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
-//            it->translate(25.0, 25.0, 25.0);
-//        }
-//        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
-//        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_base);
         igl::copyleft::cork::from_cork_mesh(c1, vOffset, fOffset);
         igl::copyleft::cork::from_cork_mesh(c2, vProcessed, fProcessed);
-        igl::copyleft::cork::mesh_boolean(vOffset, fOffset, vProcessed, fProcessed, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
+        igl::copyleft::cgal::mesh_boolean(vOffset, fOffset, vProcessed, fProcessed, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
 
         CorkTriMesh cOut;
         igl::copyleft::cork::to_cork_mesh(vOutput, fOutput, cOut);
-//        CorkTriMesh *cork = new CorkTriMesh;
-//        computeIntersection(c1, c2, cork);
+
         _processed = Utils::corkTriMeshToMesh(cOut);
     }
 
@@ -842,6 +551,281 @@ void MainWindow::on_pushButton_process_clicked()
 
     // Updates the UI
     updateUI();
+}
+
+void MainWindow::simpleCartesian(Cell *cell, glm::vec3 cellSize)
+{
+    std::cout << glm::to_string(cellSize) << std::endl;
+    int zSteps = (int)ceil(_maxZLength/cellSize.z);
+    glm::vec2 centroid;
+    glm::vec3 pos(_minX, _minY, _minZ);
+    for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
+        pos.z = _minZ + i*cellSize.z;
+        std::vector<Triangle> slice = Utils::slice(_base, pos.z, cellSize.z);
+
+        // Get the slice contour centroid
+        std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, pos.z + cellSize.z/2.0);
+        if(intersectionSegments.size() < 3) {
+            continue;
+        }
+        std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
+        std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
+        assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
+        int xSteps = (int)ceil(_maxXLength/cellSize.x);
+        int ySteps = (int)ceil(_maxYLength/cellSize.y);
+
+        for(int j = 0; j < ySteps; j++) {
+            for(int k = 0; k < xSteps; k++) {
+                pos.x = _minX + k*cellSize.x;
+                pos.y = _minY + j*cellSize.y;
+                // Try to insert cell
+                insertCell(pos, cellSize, cell);
+            }
+        }
+    }
+}
+
+void MainWindow::simpleCylindrical(Cell *cell, glm::vec3 cellSize)
+{
+    int zSteps = (int)ceil(_maxZLength/cellSize.z);
+    glm::vec2 centroid;
+    glm::vec3 pos(_minX, _minY, _minZ);
+    for(int i = 0; i < zSteps; i++) {   // Step layer by layer on z axis
+        pos.z = _minZ + i*cellSize.z;
+        std::vector<Triangle> slice = Utils::slice(_base, pos.z, cellSize.z);
+
+        // Get the slice contour centroid
+        std::vector<std::pair<glm::vec3, glm::vec3>> intersectionSegments = Utils::getIntersectionSegments(slice, pos.z + cellSize.z/2.0);
+        if(intersectionSegments.size() < 3) {
+            continue;
+        }
+        std::vector<std::vector<glm::vec3>> contours = Utils::getContours(intersectionSegments, 0.00001f);
+        std::vector<std::vector<glm::vec2>> contours2D = Utils::convertContourTo2D(contours);
+        assert(Utils::getCentroid(*(contours2D.begin()), centroid) == 0);
+
+        // TODO: check if this is the best way to get the rSteps
+        int rSteps = (int)ceil(_maxXLength/cellSize.x);
+        float radiusStep = cellSize.x;
+        if(rSteps < (int)ceil(_maxYLength/cellSize.y)) {
+            rSteps = (int)ceil(_maxYLength/cellSize.y);
+            radiusStep = cellSize.y;
+        }
+        for(int r = 0; r < rSteps; r++) {
+            if(r == 0) {
+                pos.x = centroid.x - (cellSize.x/2.0);
+                pos.y = centroid.y - (cellSize.y/2.0);
+                // Try to insert cell
+                insertCell(pos, cellSize, cell);
+            }
+            float radius = r*radiusStep;
+            float circunferece = 2.0*M_PI*radius;
+            int phiSteps = (int)ceil(circunferece/radiusStep);
+            for(int phi = 0; phi < phiSteps; phi++) {
+                pos.x = centroid.x - (cellSize.x/2.0) + radius*cos(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                pos.y = centroid.y - (cellSize.y/2.0) + radius*sin(degreesToRadians(((float)phi/(float)phiSteps)*360.0));
+                // Try to insert cell
+                insertCell(pos, cellSize, cell);
+            }
+        }
+    }
+}
+
+void MainWindow::simpleSpherical(Cell *cell, glm::vec3 cellSize)
+{
+    glm::vec3 pos = _baseCentroid - (cellSize/2.0f);
+    float radiusStep = std::min(cellSize.x, cellSize.y);
+    int rSteps = (int)ceil(_maxLength/radiusStep);
+    for(int r = 0; r < rSteps; r++) {   // Step spherical surface on r coordinate
+        if(r == 0) {
+            // Try to insert cell
+            insertCell(pos, cellSize, cell);
+        }
+        float radius = r*cellSize.z;
+        float circunferecePhi = 2.0*M_PI*radius;
+        // TODO: check if this is the best way to get phiSteps
+        int phiSteps = (int)ceil((circunferecePhi/2.0)/cellSize.z);
+        for(int phi = 0; phi <= phiSteps; phi++) {
+            float phiAngle = ((float)phi/(float)phiSteps)*180.0;
+            if(fabsf(sin(degreesToRadians(phiAngle))) < EPSILON) {
+                pos = _baseCentroid - (cellSize/2.0f);
+                pos.z += radius;
+                // Try to insert cell
+                insertCell(pos, cellSize, cell);
+            }
+            radius = r*radiusStep;
+            float circunfereceTheta = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
+            // TODO: check if this is the best way to get thetaSteps
+            int thetaSteps = (int)ceil(circunfereceTheta/radiusStep);
+            for(int theta = 0; theta < thetaSteps; theta++) {
+                float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
+                pos.x = _baseCentroid.x - (cellSize.x/2.0) + radius*sin(degreesToRadians(phiAngle))*cos(degreesToRadians(thetaAngle));
+                pos.y = _baseCentroid.y - (cellSize.y/2.0) + radius*sin(degreesToRadians(phiAngle))*sin(degreesToRadians(thetaAngle));
+                pos.z = _baseCentroid.z - (cellSize.z/2.0) + radius*cos(degreesToRadians(phiAngle));
+                // Try to insert cell
+                insertCell(pos, cellSize, cell);
+            }
+        }
+    }
+}
+
+void MainWindow::variableCartesian(Cell *cell, glm::vec3 infillOrigin)
+{
+    glm::vec3 pos(0.0f, 0.0f, 0.0f);
+    pos.x = infillOrigin.x;
+    while(pos.x < _maxX) {
+        _varX = pos.x - infillOrigin.x;
+        pos.y = infillOrigin.y;
+        float cellHeightX;
+        cellHeightX = std::min(te_eval(_exprX), 25.0);
+        cellHeightX = std::max(cellHeightX, 2.5f);
+
+        // Q1
+        while(pos.y < _maxY) {
+            _varY = pos.y - infillOrigin.y;
+            pos.z = _minZ;
+            float cellHeightY;
+            cellHeightY = std::min(te_eval(_exprY), 25.0);
+            cellHeightY = std::max(cellHeightY, 2.5f);
+            while(pos.z < _maxZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(pos, size, cell);
+
+                pos.z += cellHeightZ;
+            }
+            pos.y += cellHeightY;
+        }
+        pos.y = infillOrigin.y;
+        // Q4
+        while(pos.y > _minY) {
+            _varY= pos.y - infillOrigin.y;
+            pos.z = _minZ;
+            float cellHeightY;
+            cellHeightY = std::min(te_eval(_exprY), 25.0);
+            cellHeightY = std::max(cellHeightY, 2.5f);
+            while(pos.z < _maxZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
+
+                glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z += cellHeightZ;
+            }
+            pos.y -= cellHeightY;
+        }
+        pos.x += cellHeightX;
+    }
+    pos.x = infillOrigin.x;
+    while(pos.x > _minX) {
+        _varX = pos.x - infillOrigin.x;
+        pos.y = infillOrigin.y;
+        float cellHeightX;
+        cellHeightX = std::min(te_eval(_exprX), 25.0);
+        cellHeightX = std::max(cellHeightX, 2.5f);
+        // Q2
+        while(pos.y < _maxY) {
+            _varY = pos.y - infillOrigin.y;
+            pos.z = _minZ;
+            float cellHeightY;
+            cellHeightY = std::min(te_eval(_exprY), 25.0);
+            cellHeightY = std::max(cellHeightY, 2.5f);
+            while(pos.z < _maxZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z += cellHeightZ;
+            }
+            pos.y += cellHeightY;
+        }
+        pos.y = infillOrigin.y;
+        // Q3
+        while(pos.y > _minY) {
+            _varY = pos.y - infillOrigin.y;
+            pos.z = _minZ;
+            float cellHeightY;
+            cellHeightY = std::min(te_eval(_exprY), 25.0);
+            cellHeightY = std::max(cellHeightY, 2.5f);
+            while(pos.z < _maxZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
+
+                glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z += cellHeightZ;
+            }
+            pos.y -= cellHeightY;
+        }
+        pos.x -= cellHeightX;
+    }
+}
+
+void MainWindow::variableCylindrical(Cell *cell, glm::vec3 infillOrigin)
+{
+    // TODO: check if this is the best way to get maxR
+    // This should fail if the infill origin is outside the cylinder
+    float maxR = _maxXLength;
+    if(maxR < _maxYLength) {
+        maxR = _maxYLength;
+    }
+    float r = 0;
+    while(r < maxR) {
+        float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
+        cellSizeX = std::max(cellSizeX, 2.5f);
+        float phi = 0.0;
+        while(phi < 360.0) {
+            float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+            cellSizeY = std::max(cellSizeY, 2.5f);
+            float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
+            float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
+            float z = infillOrigin.z;
+            while(z < _maxZ) {
+                float posZ = z;
+                float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                cellSizeZ = std::max(cellSizeZ, 2.5f);
+                glm::vec3 pos(posX, posY, posZ);
+                glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+                // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                insertCell(pos, size, cell);
+                z += cellSizeZ;
+            }
+            z = infillOrigin.z;
+            while(z > _minZ) {
+                float posZ = z;
+                float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                cellSizeZ = std::max(cellSizeZ, 2.5f);
+                glm::vec3 pos(posX, posY, posZ-cellSizeZ);
+                glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+                // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+                insertCell(pos, size, cell);
+                z -= cellSizeZ;
+            }
+            float radius = r;
+            float circunferece = 2.0*M_PI*radius;
+            float phiSteps = cellSizeY/circunferece;
+            phi += (phiSteps*360.0);
+        }
+        r += cellSizeX;
+    }
 }
 
 void MainWindow::on_pushButton_save_clicked()
