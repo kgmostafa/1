@@ -8,10 +8,20 @@ QT       += core gui opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-LIBS += -L$$PWD/3rd_party/cork/lib/ -lwincork
+#LIBS += -L$$PWD/3rd_party/cork/lib/ -lwincork
+INCLUDEPATH += C:/dev/libigl/include
+INCLUDEPATH += C:/dev/eigen
+INCLUDEPATH += $$PWD/3rd_party/cork
+INCLUDEPATH += C:/dev/mpir-3.0.0
 LIBS    += -lopengl32 -lglu32
 TARGET = stl_editor
 TEMPLATE = app
+
+QMAKE_CXXFLAGS += -bigobj
+
+CONFIG += c++11
+
+#INCLUDEPATH += $$PWD/../../../../dev/mpir-3.0.0/lib/Win32/Release
 #DEFINES += _USE_MATH_DEFINES
 
 # The following define makes your compiler emit warnings if you use
@@ -87,17 +97,29 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/mpir-3.0.0/lib/Win32/release/ -lmpir
-#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/mpir-3.0.0/lib/Win32/debug/ -lmpir
+win32: LIBS += -L$$PWD/../../../../dev/CGAL-4.10.2/build/lib/ -lCGAL-vc140-mt-gd-4.10.2
 
-#INCLUDEPATH += $$PWD/../../../../dev/mpir-3.0.0/lib/Win32/Release
-#DEPENDPATH += $$PWD/../../../../dev/mpir-3.0.0/lib/Win32/Release
+INCLUDEPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
+DEPENDPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
+
+win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/CGAL-vc140-mt-gd-4.10.2.lib
+else:win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/libCGAL-vc140-mt-gd-4.10.2.a
 
 
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/mpir/dll/x64/release/ -lmpir
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/mpir/dll/x64/debug/ -lmpir
 
+INCLUDEPATH += $$PWD/../../../../dev/mpir/dll/x64/Debug
+DEPENDPATH += $$PWD/../../../../dev/mpir/dll/x64/Debug
 
-#win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/mpir-3.0.0/lib/Win32/release/ -lmpir
-#else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/mpir-3.0.0/lib/Win32/debug/ -lmpir
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/mpfr/dll/x64/release/ -lmpfr
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/mpfr/dll/x64/debug/ -lmpfr
 
-#INCLUDEPATH += $$PWD/../../../../dev/mpir-3.0.0/lib/Win32/Release
-#DEPENDPATH += $$PWD/../../../../dev/mpir-3.0.0/lib/Win32/Release
+INCLUDEPATH += $$PWD/../../../../dev/mpfr/dll/x64/Debug
+DEPENDPATH += $$PWD/../../../../dev/mpfr/dll/x64/Debug
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/cork/win/dll/x64/release/ -lwincork
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/cork/win/dll/x64/debug/ -lwincork
+
+INCLUDEPATH += $$PWD/../../../../dev/cork/win/dll/x64/Release
+DEPENDPATH += $$PWD/../../../../dev/cork/win/dll/x64/Release

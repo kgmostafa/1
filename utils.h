@@ -96,6 +96,8 @@ public:
     static CorkTriMesh meshToCorkTriMesh(std::vector<Triangle> &t);
     static std::vector<Triangle> corkTriMeshToMesh(CorkTriMesh &c);
 
+//    static meshToEigen(std::vector<Triangle)
+
 private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);
 };

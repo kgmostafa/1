@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>837</width>
-    <height>756</height>
+    <height>785</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,6 +27,13 @@
        <widget class="QPushButton" name="pushButton_importBase">
         <property name="text">
          <string>Import base part</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButton_view">
+        <property name="text">
+         <string>View</string>
         </property>
        </widget>
       </item>
@@ -539,9 +546,6 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_viewer">
       <item>
-       <widget class="STLPreview" name="openGLWidget"/>
-      </item>
-      <item>
        <widget class="QGroupBox" name="groupBox_STLInfo">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -652,13 +656,6 @@
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <customwidgets>
-  <customwidget>
-   <class>STLPreview</class>
-   <extends>QOpenGLWidget</extends>
-   <header>stlpreview.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

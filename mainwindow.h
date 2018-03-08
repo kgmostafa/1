@@ -68,6 +68,8 @@ private slots:
 
     void on_pushButton_rotateBase_clicked();
 
+    void on_pushButton_view_clicked();
+
 private:
     void updateUI();
 

@@ -26,7 +26,6 @@
 #include <QtWidgets/QRadioButton>
 #include <QtWidgets/QVBoxLayout>
 #include <QtWidgets/QWidget>
-#include "stlpreview.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -37,6 +36,7 @@ public:
     QHBoxLayout *horizontalLayout_2;
     QVBoxLayout *verticalLayout;
     QPushButton *pushButton_importBase;
+    QPushButton *pushButton_view;
     QGroupBox *groupBox;
     QHBoxLayout *horizontalLayout_3;
     QPushButton *pushButton_rotateBase;
@@ -99,7 +99,6 @@ public:
     QPushButton *pushButton_process;
     QPushButton *pushButton_save;
     QVBoxLayout *verticalLayout_viewer;
-    STLPreview *openGLWidget;
     QGroupBox *groupBox_STLInfo;
     QVBoxLayout *verticalLayout_6;
     QLabel *label_nTriangles;
@@ -119,7 +118,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 756);
+        MainWindow->resize(837, 785);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -134,6 +133,11 @@ public:
         pushButton_importBase->setObjectName(QStringLiteral("pushButton_importBase"));
 
         verticalLayout->addWidget(pushButton_importBase);
+
+        pushButton_view = new QPushButton(centralWidget);
+        pushButton_view->setObjectName(QStringLiteral("pushButton_view"));
+
+        verticalLayout->addWidget(pushButton_view);
 
         groupBox = new QGroupBox(centralWidget);
         groupBox->setObjectName(QStringLiteral("groupBox"));
@@ -505,11 +509,6 @@ public:
         verticalLayout_viewer = new QVBoxLayout();
         verticalLayout_viewer->setSpacing(6);
         verticalLayout_viewer->setObjectName(QStringLiteral("verticalLayout_viewer"));
-        openGLWidget = new STLPreview(centralWidget);
-        openGLWidget->setObjectName(QStringLiteral("openGLWidget"));
-
-        verticalLayout_viewer->addWidget(openGLWidget);
-
         groupBox_STLInfo = new QGroupBox(centralWidget);
         groupBox_STLInfo->setObjectName(QStringLiteral("groupBox_STLInfo"));
         sizePolicy.setHeightForWidth(groupBox_STLInfo->sizePolicy().hasHeightForWidth());
@@ -598,6 +597,7 @@ public:
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "STL Editor", nullptr));
         pushButton_importBase->setText(QApplication::translate("MainWindow", "Import base part", nullptr));
+        pushButton_view->setText(QApplication::translate("MainWindow", "View", nullptr));
         groupBox->setTitle(QApplication::translate("MainWindow", "Pre-processing", nullptr));
         pushButton_rotateBase->setText(QApplication::translate("MainWindow", "Rotate", nullptr));
         groupBox_hollowing->setTitle(QApplication::translate("MainWindow", "Hollowing", nullptr));

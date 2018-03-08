@@ -15,6 +15,13 @@
 #include <iostream>
 #include <QMessageBox>
 #include <QInputDialog>
+//#include <igl/opengl/glfw/Viewer.h>
+#include <igl/copyleft/cork/from_cork_mesh.h>
+#include <igl/copyleft/cork/to_cork_mesh.h>
+#include <igl/copyleft/cgal/mesh_boolean.h>
+#include <igl/copyleft/cork/mesh_boolean.h>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -496,7 +503,7 @@ void MainWindow::on_pushButton_process_clicked()
                         cellHeightX = std::min(te_eval(exprX), 25.0);
                         cellHeightX = std::max(cellHeightX, 2.5f);
                     } else {
-                        cellHeightX = 2.5f;
+                        cellHeightX = 5.0f;
                     }
                     // Q1
                     while(posY < _maxY) {
@@ -507,7 +514,7 @@ void MainWindow::on_pushButton_process_clicked()
                             cellHeightY = std::min(te_eval(exprY), 25.0);
                             cellHeightY = std::max(cellHeightY, 2.5f);
                         } else {
-                            cellHeightY = 2.5f;
+                            cellHeightY = 5.0f;
                         }
                         while(posZ < _maxZ) {
                             z = posZ - infillOrigin.z;
@@ -517,7 +524,7 @@ void MainWindow::on_pushButton_process_clicked()
                                 cellHeightZ = std::min(te_eval(exprZ), 25.0);
                                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                             } else {
-                                cellHeightZ = 2.5f;
+                                cellHeightZ = 5.0f;
                             }
 
                             glm::vec3 pos(posX, posY, posZ);
@@ -538,7 +545,7 @@ void MainWindow::on_pushButton_process_clicked()
                             cellHeightY = std::min(te_eval(exprY), 25.0);
                             cellHeightY = std::max(cellHeightY, 2.5f);
                         } else {
-                            cellHeightY = 2.5f;
+                            cellHeightY = 5.0f;
                         }
                         while(posZ < _maxZ) {
                             z = posZ - infillOrigin.z;
@@ -548,7 +555,7 @@ void MainWindow::on_pushButton_process_clicked()
                                 cellHeightZ = std::min(te_eval(exprZ), 25.0);
                                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                             } else {
-                                cellHeightZ = 2.5f;
+                                cellHeightZ = 5.0f;
                             }
 
                             glm::vec3 pos(posX, posY-cellHeightY, posZ);
@@ -570,7 +577,7 @@ void MainWindow::on_pushButton_process_clicked()
                         cellHeightX = std::min(te_eval(exprX), 25.0);
                         cellHeightX = std::max(cellHeightX, 2.5f);
                     } else {
-                        cellHeightX = 2.5f;
+                        cellHeightX = 5.0f;
                     }
                     // Q2
                     while(posY < _maxY) {
@@ -581,7 +588,7 @@ void MainWindow::on_pushButton_process_clicked()
                             cellHeightY = std::min(te_eval(exprY), 25.0);
                             cellHeightY = std::max(cellHeightY, 2.5f);
                         } else {
-                            cellHeightY = 2.5f;
+                            cellHeightY = 5.0f;
                         }
                         while(posZ < _maxZ) {
                             z = posZ - infillOrigin.z;
@@ -591,7 +598,7 @@ void MainWindow::on_pushButton_process_clicked()
                                 cellHeightZ = std::min(te_eval(exprZ), 25.0);
                                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                             } else {
-                                cellHeightZ = 2.5f;
+                                cellHeightZ = 5.0f;
                             }
 
                             glm::vec3 pos(posX-cellHeightX, posY, posZ);
@@ -612,7 +619,7 @@ void MainWindow::on_pushButton_process_clicked()
                             cellHeightY = std::min(te_eval(exprY), 25.0);
                             cellHeightY = std::max(cellHeightY, 2.5f);
                         } else {
-                            cellHeightY = 2.5f;
+                            cellHeightY = 5.0f;
                         }
                         while(posZ < _maxZ) {
                             z = posZ - infillOrigin.z;
@@ -622,7 +629,7 @@ void MainWindow::on_pushButton_process_clicked()
                                 cellHeightZ = std::min(te_eval(exprZ), 25.0);
                                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                             } else {
-                                cellHeightZ = 2.5f;
+                                cellHeightZ = 5.0f;
                             }
 
                             glm::vec3 pos(posX-cellHeightX, posY-cellHeightY, posZ);
@@ -778,14 +785,35 @@ void MainWindow::on_pushButton_process_clicked()
             }
         }
         // Trimm
+        Eigen::MatrixXd vOffset;
+        Eigen::MatrixXi fOffset;
+        Eigen::MatrixXd vProcessed;
+        Eigen::MatrixXi fProcessed;
+
+        Eigen::MatrixXd vOutput;
+        Eigen::MatrixXi fOutput;
         CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
         CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-        CorkTriMesh *cork = new CorkTriMesh;
-        computeIntersection(c1, c2, cork);
-        _processed = Utils::corkTriMeshToMesh(*cork);
+
+//        _offset = _base;
+//        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
+//            it->translate(25.0, 25.0, 25.0);
+//        }
+//        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
+//        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_base);
+        igl::copyleft::cork::from_cork_mesh(c1, vOffset, fOffset);
+        igl::copyleft::cork::from_cork_mesh(c2, vProcessed, fProcessed);
+        igl::copyleft::cork::mesh_boolean(vOffset, fOffset, vProcessed, fProcessed, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
+
+        CorkTriMesh cOut;
+        igl::copyleft::cork::to_cork_mesh(vOutput, fOutput, cOut);
+//        CorkTriMesh *cork = new CorkTriMesh;
+//        computeIntersection(c1, c2, cork);
+        _processed = Utils::corkTriMeshToMesh(cOut);
     }
 
     if(skipHollow == false) {
+        // TODO: if the offset is positive, we should switch the _base normals
         Utils::switchNormal(_offset);
         if(skipInfill == false) {
             _base.insert(_base.begin(), _offset.begin(), _offset.end());
@@ -834,4 +862,13 @@ void MainWindow::on_checkBox_wireframe_stateChanged(int arg1) {
 void MainWindow::on_pushButton_rotateBase_clicked()
 {
     _rotateDialog->show();
+}
+
+void MainWindow::on_pushButton_view_clicked()
+{
+//    Eigen::MatrixXd V;
+//    Eigen::MatrixXi F;
+//    igl::viewer::Viewer viewer;
+//    viewer.data.set_mesh(V, F);
+//    viewer.launch();
 }
