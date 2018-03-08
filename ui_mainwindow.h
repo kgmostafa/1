@@ -74,6 +74,23 @@ public:
     QRadioButton *radioButton_infillCoordinateSystem_cartesian;
     QRadioButton *radioButton_infillCoordinateSystem_cylindrical;
     QRadioButton *radioButton_infillCoordinateSystem_spherical;
+    QGroupBox *groupBox_infill_region;
+    QVBoxLayout *verticalLayout_9;
+    QLabel *label_15;
+    QHBoxLayout *horizontalLayout_region_from;
+    QLabel *label_9;
+    QDoubleSpinBox *doubleSpinBox_region_fromX;
+    QLabel *label_10;
+    QDoubleSpinBox *doubleSpinBox_region_fromY;
+    QLabel *label_11;
+    QDoubleSpinBox *doubleSpinBox_region_fromZ;
+    QHBoxLayout *horizontalLayout_region_to;
+    QLabel *label_12;
+    QDoubleSpinBox *doubleSpinBox_region_toX;
+    QLabel *label_13;
+    QDoubleSpinBox *doubleSpinBox_region_toY;
+    QLabel *label_14;
+    QDoubleSpinBox *doubleSpinBox_region_toZ;
     QGroupBox *groupBox_2;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout_10;
@@ -83,6 +100,7 @@ public:
     QDoubleSpinBox *doubleSpinBox_infill_originY;
     QLabel *label_5;
     QDoubleSpinBox *doubleSpinBox_infill_originZ;
+    QCheckBox *checkBox;
     QGroupBox *groupBox_3;
     QVBoxLayout *verticalLayout_8;
     QHBoxLayout *horizontalLayout_9;
@@ -118,7 +136,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 785);
+        MainWindow->resize(837, 916);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -356,6 +374,104 @@ public:
 
         verticalLayout_3->addWidget(groupBox_infillCoordinateSystem);
 
+        groupBox_infill_region = new QGroupBox(groupBox_infill);
+        groupBox_infill_region->setObjectName(QStringLiteral("groupBox_infill_region"));
+        verticalLayout_9 = new QVBoxLayout(groupBox_infill_region);
+        verticalLayout_9->setSpacing(6);
+        verticalLayout_9->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_9->setObjectName(QStringLiteral("verticalLayout_9"));
+        label_15 = new QLabel(groupBox_infill_region);
+        label_15->setObjectName(QStringLiteral("label_15"));
+
+        verticalLayout_9->addWidget(label_15);
+
+        horizontalLayout_region_from = new QHBoxLayout();
+        horizontalLayout_region_from->setSpacing(6);
+        horizontalLayout_region_from->setObjectName(QStringLiteral("horizontalLayout_region_from"));
+        label_9 = new QLabel(groupBox_infill_region);
+        label_9->setObjectName(QStringLiteral("label_9"));
+        label_9->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_from->addWidget(label_9);
+
+        doubleSpinBox_region_fromX = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_fromX->setObjectName(QStringLiteral("doubleSpinBox_region_fromX"));
+        doubleSpinBox_region_fromX->setEnabled(true);
+
+        horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromX);
+
+        label_10 = new QLabel(groupBox_infill_region);
+        label_10->setObjectName(QStringLiteral("label_10"));
+        label_10->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_from->addWidget(label_10);
+
+        doubleSpinBox_region_fromY = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_fromY->setObjectName(QStringLiteral("doubleSpinBox_region_fromY"));
+        doubleSpinBox_region_fromY->setEnabled(true);
+
+        horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromY);
+
+        label_11 = new QLabel(groupBox_infill_region);
+        label_11->setObjectName(QStringLiteral("label_11"));
+        label_11->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_from->addWidget(label_11);
+
+        doubleSpinBox_region_fromZ = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_fromZ->setObjectName(QStringLiteral("doubleSpinBox_region_fromZ"));
+        doubleSpinBox_region_fromZ->setEnabled(true);
+
+        horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromZ);
+
+
+        verticalLayout_9->addLayout(horizontalLayout_region_from);
+
+        horizontalLayout_region_to = new QHBoxLayout();
+        horizontalLayout_region_to->setSpacing(6);
+        horizontalLayout_region_to->setObjectName(QStringLiteral("horizontalLayout_region_to"));
+        label_12 = new QLabel(groupBox_infill_region);
+        label_12->setObjectName(QStringLiteral("label_12"));
+        label_12->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_to->addWidget(label_12);
+
+        doubleSpinBox_region_toX = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_toX->setObjectName(QStringLiteral("doubleSpinBox_region_toX"));
+        doubleSpinBox_region_toX->setEnabled(true);
+
+        horizontalLayout_region_to->addWidget(doubleSpinBox_region_toX);
+
+        label_13 = new QLabel(groupBox_infill_region);
+        label_13->setObjectName(QStringLiteral("label_13"));
+        label_13->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_to->addWidget(label_13);
+
+        doubleSpinBox_region_toY = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_toY->setObjectName(QStringLiteral("doubleSpinBox_region_toY"));
+        doubleSpinBox_region_toY->setEnabled(true);
+
+        horizontalLayout_region_to->addWidget(doubleSpinBox_region_toY);
+
+        label_14 = new QLabel(groupBox_infill_region);
+        label_14->setObjectName(QStringLiteral("label_14"));
+        label_14->setAlignment(Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter);
+
+        horizontalLayout_region_to->addWidget(label_14);
+
+        doubleSpinBox_region_toZ = new QDoubleSpinBox(groupBox_infill_region);
+        doubleSpinBox_region_toZ->setObjectName(QStringLiteral("doubleSpinBox_region_toZ"));
+        doubleSpinBox_region_toZ->setEnabled(true);
+
+        horizontalLayout_region_to->addWidget(doubleSpinBox_region_toZ);
+
+
+        verticalLayout_9->addLayout(horizontalLayout_region_to);
+
+
+        verticalLayout_3->addWidget(groupBox_infill_region);
+
         groupBox_2 = new QGroupBox(groupBox_infill);
         groupBox_2->setObjectName(QStringLiteral("groupBox_2"));
         verticalLayout_7 = new QVBoxLayout(groupBox_2);
@@ -403,6 +519,11 @@ public:
 
 
         verticalLayout_7->addLayout(horizontalLayout_10);
+
+        checkBox = new QCheckBox(groupBox_2);
+        checkBox->setObjectName(QStringLiteral("checkBox"));
+
+        verticalLayout_7->addWidget(checkBox);
 
 
         verticalLayout_3->addWidget(groupBox_2);
@@ -625,10 +746,19 @@ public:
         radioButton_infillCoordinateSystem_cartesian->setText(QApplication::translate("MainWindow", "Cartesian", nullptr));
         radioButton_infillCoordinateSystem_cylindrical->setText(QApplication::translate("MainWindow", "Cylindrical", nullptr));
         radioButton_infillCoordinateSystem_spherical->setText(QApplication::translate("MainWindow", "Spherical", nullptr));
+        groupBox_infill_region->setTitle(QApplication::translate("MainWindow", "Region", nullptr));
+        label_15->setText(QApplication::translate("MainWindow", "TODO: add shapes (sphere, pyramid, etc)", nullptr));
+        label_9->setText(QApplication::translate("MainWindow", "From X:", nullptr));
+        label_10->setText(QApplication::translate("MainWindow", "Y:", nullptr));
+        label_11->setText(QApplication::translate("MainWindow", "Z:", nullptr));
+        label_12->setText(QApplication::translate("MainWindow", "To X:", nullptr));
+        label_13->setText(QApplication::translate("MainWindow", "Y:", nullptr));
+        label_14->setText(QApplication::translate("MainWindow", "Z:", nullptr));
         groupBox_2->setTitle(QApplication::translate("MainWindow", "Origin", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "X:", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "Y:", nullptr));
         label_5->setText(QApplication::translate("MainWindow", "Z:", nullptr));
+        checkBox->setText(QApplication::translate("MainWindow", "Relative to selected region", nullptr));
         groupBox_3->setTitle(QApplication::translate("MainWindow", "Cell size", nullptr));
         label_6->setText(QApplication::translate("MainWindow", "X =", nullptr));
         lineEdit_cellSizeX->setText(QApplication::translate("MainWindow", "1.0*x", nullptr));

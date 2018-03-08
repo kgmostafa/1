@@ -113,6 +113,12 @@ void MainWindow::on_pushButton_importBase_clicked()
     ui->doubleSpinBox_infill_originX->setValue(_baseCentroid.x);
     ui->doubleSpinBox_infill_originY->setValue(_baseCentroid.y);
     ui->doubleSpinBox_infill_originZ->setValue(_baseCentroid.z);
+    ui->doubleSpinBox_region_fromX->setValue(_minX);
+    ui->doubleSpinBox_region_fromY->setValue(_minY);
+    ui->doubleSpinBox_region_fromZ->setValue(_minZ);
+    ui->doubleSpinBox_region_toX->setValue(_maxX);
+    ui->doubleSpinBox_region_toY->setValue(_maxY);
+    ui->doubleSpinBox_region_toZ->setValue(_maxZ);
     updateUI();
 }
 
@@ -194,7 +200,8 @@ void MainWindow::rotateBasePart(float angle, int axis)
     }
 }
 
-void MainWindow::on_pushButton_loadCell_clicked() {
+void MainWindow::on_pushButton_loadCell_clicked()
+{
     // Gets the file name
     QString fileName = QFileDialog::getOpenFileName(this,
         tr("Open"), "", tr("STL Files (*.stl);;All files (*)"));
