@@ -41,6 +41,8 @@ ui_*.h
 *.jsc
 Makefile*
 *build-*
+*.ilk
+*.pdb
 
 # Qt unit tests
 target_wrapper.*
