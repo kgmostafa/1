@@ -1,4 +1,3 @@
-#include <iostream>
 #include <limits>
 #include <float.h>
 #include <glm/common.hpp>

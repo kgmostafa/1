@@ -88,7 +88,6 @@ void Cell::resize(float x, float y, float z)
     float factorX = x/_maxXLength;
     float factorY = y/_maxYLength;
     float factorZ = z/_maxZLength;
-    std::cout << factorX << "," << factorY << "," << factorZ << std::endl;
     scale(factorX, factorY, factorZ);
     calculateBounds();
 }

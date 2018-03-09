@@ -16,12 +16,7 @@
 #include <QMessageBox>
 #include <QInputDialog>
 //#include <igl/opengl/glfw/Viewer.h>
-#include <igl/copyleft/cork/from_cork_mesh.h>
-#include <igl/copyleft/cork/to_cork_mesh.h>
-#include <igl/copyleft/cgal/mesh_boolean.h>
-#include <igl/copyleft/cork/mesh_boolean.h>
-#include <Eigen/Dense>
-#include <Eigen/Sparse>
+
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -349,19 +344,12 @@ void MainWindow::on_pushButton_process_clicked()
         regionTo.z = ui->doubleSpinBox_region_toZ->value();
 
         Cube bound;
-        std::cout << glm::to_string(regionTo-regionFrom) << std::endl;
         bound.resize(regionTo-regionFrom);
         bound.place(regionFrom);
-
-        std::cout << "old\n";
-        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
-            std::cout << it->toString().toStdString() << std::endl;
-        }
-        _offset = bound.getFacets();
-        std::cout << "new\n";
-        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
-            std::cout << it->toString().toStdString() << std::endl;
-        }
+        std::vector<Triangle> boundIn = bound.getFacets();
+        std::vector<Triangle> boundOut;
+        Utils::meshBooleanIntersect(_offset, boundIn, boundOut);
+        _offset = boundOut;
 
         // TODO: handle number of variables per axis
         te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
@@ -530,28 +518,11 @@ void MainWindow::on_pushButton_process_clicked()
 //                }
 //            }
 //        }
+
         // Trimm
-        Eigen::MatrixXd vOffset;
-        Eigen::MatrixXi fOffset;
-        Eigen::MatrixXd vProcessed;
-        Eigen::MatrixXi fProcessed;
-
-        Eigen::MatrixXd vOutput;
-        Eigen::MatrixXi fOutput;
-        CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
-        CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-        std::cout << c1.n_triangles << ", " << c1.n_vertices << std::endl;
-
-        std::cout << c2.n_triangles << ", " << c2.n_vertices << std::endl;
-
-        igl::copyleft::cork::from_cork_mesh(c1, vOffset, fOffset);
-        igl::copyleft::cork::from_cork_mesh(c2, vProcessed, fProcessed);
-        igl::copyleft::cgal::mesh_boolean(vOffset, fOffset, vProcessed, fProcessed, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
-
-        CorkTriMesh cOut;
-        igl::copyleft::cork::to_cork_mesh(vOutput, fOutput, cOut);
-
-        _processed = Utils::corkTriMeshToMesh(cOut);
+        std::vector<Triangle> temp;
+        Utils::meshBooleanIntersect(_offset, _processed, temp);
+        _processed = temp;
     }
 
     if(skipHollow == false) {

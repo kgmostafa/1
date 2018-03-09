@@ -86,6 +86,9 @@ public:
     QDoubleSpinBox *doubleSpinBox_region_toY;
     QLabel *label_14;
     QDoubleSpinBox *doubleSpinBox_region_toZ;
+    QHBoxLayout *horizontalLayout;
+    QRadioButton *radioButton_2;
+    QRadioButton *radioButton;
     QGroupBox *groupBox_2;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout_10;
@@ -131,7 +134,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 865);
+        MainWindow->resize(837, 890);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -361,6 +364,7 @@ public:
         doubleSpinBox_region_fromX = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_fromX->setObjectName(QStringLiteral("doubleSpinBox_region_fromX"));
         doubleSpinBox_region_fromX->setEnabled(true);
+        doubleSpinBox_region_fromX->setMinimum(-100);
 
         horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromX);
 
@@ -373,6 +377,7 @@ public:
         doubleSpinBox_region_fromY = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_fromY->setObjectName(QStringLiteral("doubleSpinBox_region_fromY"));
         doubleSpinBox_region_fromY->setEnabled(true);
+        doubleSpinBox_region_fromY->setMinimum(-100);
 
         horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromY);
 
@@ -385,6 +390,7 @@ public:
         doubleSpinBox_region_fromZ = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_fromZ->setObjectName(QStringLiteral("doubleSpinBox_region_fromZ"));
         doubleSpinBox_region_fromZ->setEnabled(true);
+        doubleSpinBox_region_fromZ->setMinimum(-100);
 
         horizontalLayout_region_from->addWidget(doubleSpinBox_region_fromZ);
 
@@ -403,6 +409,7 @@ public:
         doubleSpinBox_region_toX = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_toX->setObjectName(QStringLiteral("doubleSpinBox_region_toX"));
         doubleSpinBox_region_toX->setEnabled(true);
+        doubleSpinBox_region_toX->setMinimum(-100);
 
         horizontalLayout_region_to->addWidget(doubleSpinBox_region_toX);
 
@@ -415,6 +422,7 @@ public:
         doubleSpinBox_region_toY = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_toY->setObjectName(QStringLiteral("doubleSpinBox_region_toY"));
         doubleSpinBox_region_toY->setEnabled(true);
+        doubleSpinBox_region_toY->setMinimum(-100);
 
         horizontalLayout_region_to->addWidget(doubleSpinBox_region_toY);
 
@@ -427,11 +435,28 @@ public:
         doubleSpinBox_region_toZ = new QDoubleSpinBox(groupBox_infill_region);
         doubleSpinBox_region_toZ->setObjectName(QStringLiteral("doubleSpinBox_region_toZ"));
         doubleSpinBox_region_toZ->setEnabled(true);
+        doubleSpinBox_region_toZ->setMinimum(-100);
 
         horizontalLayout_region_to->addWidget(doubleSpinBox_region_toZ);
 
 
         verticalLayout_9->addLayout(horizontalLayout_region_to);
+
+        horizontalLayout = new QHBoxLayout();
+        horizontalLayout->setSpacing(6);
+        horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
+        radioButton_2 = new QRadioButton(groupBox_infill_region);
+        radioButton_2->setObjectName(QStringLiteral("radioButton_2"));
+
+        horizontalLayout->addWidget(radioButton_2);
+
+        radioButton = new QRadioButton(groupBox_infill_region);
+        radioButton->setObjectName(QStringLiteral("radioButton"));
+
+        horizontalLayout->addWidget(radioButton);
+
+
+        verticalLayout_9->addLayout(horizontalLayout);
 
 
         verticalLayout_3->addWidget(groupBox_infill_region);
@@ -714,6 +739,8 @@ public:
         label_12->setText(QApplication::translate("MainWindow", "To X:", nullptr));
         label_13->setText(QApplication::translate("MainWindow", "Y:", nullptr));
         label_14->setText(QApplication::translate("MainWindow", "Z:", nullptr));
+        radioButton_2->setText(QApplication::translate("MainWindow", "Trimm cells on region boundaries", nullptr));
+        radioButton->setText(QApplication::translate("MainWindow", "Trimm cells on base boundaries", nullptr));
         groupBox_2->setTitle(QApplication::translate("MainWindow", "Origin", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "X:", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "Y:", nullptr));

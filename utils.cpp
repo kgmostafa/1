@@ -8,6 +8,12 @@
 #include "glm/ext.hpp"
 #include "cell.h"
 #include "triangle.h"
+#include <igl/copyleft/cork/from_cork_mesh.h>
+#include <igl/copyleft/cork/to_cork_mesh.h>
+#include <igl/copyleft/cgal/mesh_boolean.h>
+#include <igl/copyleft/cork/mesh_boolean.h>
+#include <Eigen/Dense>
+#include <Eigen/Sparse>
 
 Utils::Utils() {
 
@@ -831,6 +837,30 @@ std::vector<Triangle> Utils::corkTriMeshToMesh(CorkTriMesh &c)
     }
 
     return getTriangleList(vertices, facets);
+}
+
+// TODO: handle and return errors
+int Utils::meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out)
+{
+    Eigen::MatrixXd vInputA;
+    Eigen::MatrixXi fInputA;
+    Eigen::MatrixXd vInputB;
+    Eigen::MatrixXi fInputB;
+    Eigen::MatrixXd vOutput;
+    Eigen::MatrixXi fOutput;
+
+    CorkTriMesh corkA = Utils::meshToCorkTriMesh(inA);
+    CorkTriMesh corkB = Utils::meshToCorkTriMesh(inB);
+    CorkTriMesh corkOut;
+
+    igl::copyleft::cork::from_cork_mesh(corkA, vInputA, fInputA);
+    igl::copyleft::cork::from_cork_mesh(corkB, vInputB, fInputB);
+    igl::copyleft::cgal::mesh_boolean(vInputA, fInputA, vInputB, fInputB, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
+    igl::copyleft::cork::to_cork_mesh(vOutput, fOutput, corkOut);
+
+    out = Utils::corkTriMeshToMesh(corkOut);
+
+    return 0;
 }
 
 // TODO: Check this function result

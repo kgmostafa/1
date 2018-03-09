@@ -22,11 +22,7 @@ bool Cube::init() {
         return false;
     }
 
-//    std::vector<Triangle> square[6];
-//    for(int i = 0; i < 6; i++) {
-//        square[i] = Utils::createSquare(_edgeLength);
-//    }
-
+    // Cube vertices
     Vertex v0(0.0f, 0.0f, 0.0f);
     Vertex v1(_edgeLength, 0.0f, 0.0f);
     Vertex v2(0.0f, _edgeLength, 0.0f);
