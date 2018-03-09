@@ -95,7 +95,7 @@ public:
     QDoubleSpinBox *doubleSpinBox_infill_originY;
     QLabel *label_5;
     QDoubleSpinBox *doubleSpinBox_infill_originZ;
-    QCheckBox *checkBox;
+    QCheckBox *checkBox_infill_relativeToRegion;
     QGroupBox *groupBox_3;
     QVBoxLayout *verticalLayout_8;
     QHBoxLayout *horizontalLayout_9;
@@ -484,10 +484,10 @@ public:
 
         verticalLayout_7->addLayout(horizontalLayout_10);
 
-        checkBox = new QCheckBox(groupBox_2);
-        checkBox->setObjectName(QStringLiteral("checkBox"));
+        checkBox_infill_relativeToRegion = new QCheckBox(groupBox_2);
+        checkBox_infill_relativeToRegion->setObjectName(QStringLiteral("checkBox_infill_relativeToRegion"));
 
-        verticalLayout_7->addWidget(checkBox);
+        verticalLayout_7->addWidget(checkBox_infill_relativeToRegion);
 
 
         verticalLayout_3->addWidget(groupBox_2);
@@ -718,7 +718,7 @@ public:
         label_2->setText(QApplication::translate("MainWindow", "X:", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "Y:", nullptr));
         label_5->setText(QApplication::translate("MainWindow", "Z:", nullptr));
-        checkBox->setText(QApplication::translate("MainWindow", "Relative to selected region", nullptr));
+        checkBox_infill_relativeToRegion->setText(QApplication::translate("MainWindow", "Relative to selected region", nullptr));
         groupBox_3->setTitle(QApplication::translate("MainWindow", "Cell size", nullptr));
         label_6->setText(QApplication::translate("MainWindow", "X =", nullptr));
         lineEdit_cellSizeX->setText(QApplication::translate("MainWindow", "1.0*x", nullptr));

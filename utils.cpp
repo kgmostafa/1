@@ -64,10 +64,10 @@ float Utils::distance(Vertex v1, Vertex v2) {
 std::vector<Triangle> Utils::createSquare(float edgeLength) {
     std::vector<Triangle> t;
 
-    Vertex v0(0.0, 0.0, 0.0);
-    Vertex v1(edgeLength, 0.0, 0.0);
-    Vertex v2(0.0, edgeLength, 0.0);
-    Vertex v3(edgeLength, edgeLength, 0.0);
+    Vertex v0(0.0f, 0.0f, 0.0f);
+    Vertex v1(edgeLength, 0.0f, 0.0f);
+    Vertex v2(0.0f, edgeLength, 0.0f);
+    Vertex v3(edgeLength, edgeLength, 0.0f);
 
     Triangle f0(v0, v2, v1);
     Triangle f1(v1, v2, v3);

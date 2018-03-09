@@ -476,7 +476,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QCheckBox" name="checkBox">
+             <widget class="QCheckBox" name="checkBox_infill_relativeToRegion">
               <property name="text">
                <string>Relative to selected region</string>
               </property>

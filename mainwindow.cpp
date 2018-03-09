@@ -180,8 +180,8 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     glm::vec3 cellCenter = pos + (size/2.0);
 
     // Check if is inside the mesh or if is overlaping the surfaces
-    if(Utils::isInsideMesh(_base, cellCenter, false) ||
-       Utils::getTrianglesFromBox(_base, pos, size).size() > 0) {
+    if(Utils::isInsideMesh(_offset, cellCenter, false) ||
+       Utils::getTrianglesFromBox(_offset, pos, size).size() > 0) {
         c->rotateX(rotation.x);
         c->rotateY(rotation.y);
         c->rotateZ(rotation.z);
@@ -228,7 +228,7 @@ void MainWindow::on_radioButton_cellType_custom_toggled(bool checked)
 void MainWindow::on_pushButton_process_clicked()
 {
     // TODO: change infill custom origin min/max values (QDoubleSpinBox)
-    bool customOrigin = true;
+    bool relativeToRegion = ui->checkBox_infill_relativeToRegion->isChecked();
     bool variableInfill = ui->checkBox_variableInfill->isChecked();
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
@@ -333,10 +333,34 @@ void MainWindow::on_pushButton_process_clicked()
         }
 
         glm::vec3 infillOrigin;
-        if(customOrigin) {
-            infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
-            infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
-            infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
+        infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
+        infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
+        infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
+
+        // TODO: add check to see if regionFrom < regionTo
+        glm::vec3 regionFrom;
+        regionFrom.x = ui->doubleSpinBox_region_fromX->value();
+        regionFrom.y = ui->doubleSpinBox_region_fromY->value();
+        regionFrom.z = ui->doubleSpinBox_region_fromZ->value();
+
+        glm::vec3 regionTo;
+        regionTo.x = ui->doubleSpinBox_region_toX->value();
+        regionTo.y = ui->doubleSpinBox_region_toY->value();
+        regionTo.z = ui->doubleSpinBox_region_toZ->value();
+
+        Cube bound;
+        std::cout << glm::to_string(regionTo-regionFrom) << std::endl;
+        bound.resize(regionTo-regionFrom);
+        bound.place(regionFrom);
+
+        std::cout << "old\n";
+        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
+            std::cout << it->toString().toStdString() << std::endl;
+        }
+        _offset = bound.getFacets();
+        std::cout << "new\n";
+        for(std::vector<Triangle>::iterator it = _offset.begin(); it != _offset.end(); ++it) {
+            std::cout << it->toString().toStdString() << std::endl;
         }
 
         // TODO: handle number of variables per axis
@@ -408,7 +432,6 @@ void MainWindow::on_pushButton_process_clicked()
                 }
             } break;
         }
-
 
 //            } else if(coordSystem == spherical) {
 //                std::cout << "TODO\n";
@@ -517,6 +540,9 @@ void MainWindow::on_pushButton_process_clicked()
         Eigen::MatrixXi fOutput;
         CorkTriMesh c1 = Utils::meshToCorkTriMesh(_offset);
         CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
+        std::cout << c1.n_triangles << ", " << c1.n_vertices << std::endl;
+
+        std::cout << c2.n_triangles << ", " << c2.n_vertices << std::endl;
 
         igl::copyleft::cork::from_cork_mesh(c1, vOffset, fOffset);
         igl::copyleft::cork::from_cork_mesh(c2, vProcessed, fProcessed);
