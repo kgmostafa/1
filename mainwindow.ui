@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>837</width>
-    <height>890</height>
+    <height>921</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -146,6 +146,32 @@
          <string>Infill</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_13">
+           <item>
+            <widget class="QComboBox" name="comboBox_infill">
+             <item>
+              <property name="text">
+               <string>Infill #1</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButton_infill_add">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="text">
+              <string>Add</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
          <item>
           <widget class="QGroupBox" name="groupBox_cellType">
            <property name="title">

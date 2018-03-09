@@ -15,11 +15,26 @@ namespace Ui {
 class MainWindow;
 }
 
+enum CoordinateSystem { cartesian, cylindrical, spherical };
+
+struct Infill {
+    int cellType;
+    CoordinateSystem coord;
+    glm::vec3 regionFrom;
+    glm::vec3 regionTo;
+    glm::vec3 origin;
+    bool relativeOrigin;
+    bool variableInfill;
+    QString exprX;
+    QString exprY;
+    QString exprZ;
+};
+
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
 
-    enum CoordinateSystem { cartesian, cylindrical, spherical };
+
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
@@ -71,6 +86,10 @@ private slots:
 
     void on_pushButton_view_clicked();
 
+    void on_pushButton_infill_add_clicked();
+
+    void on_comboBox_infill_currentIndexChanged(int index);
+
 private:
     void updateUI();
 
@@ -101,12 +120,16 @@ private:
 
     ImportDialog *_importDialog;
     RotateDialog *_rotateDialog;
-    void simpleCartesian(Cell *cell, glm::vec3 cellSize);
-    void simpleCylindrical(Cell *cell, glm::vec3 cellSize);
-    void simpleSpherical(Cell *cell, glm::vec3 cellSize);
+    void simpleCartesian(Cell *cell, Infill infill);
+    void simpleCylindrical(Cell *cell, Infill infill);
+    void simpleSpherical(Cell *cell, Infill infill);
 
-    void variableCartesian(Cell *cell, glm::vec3 infillOrigin);
-    void variableCylindrical(Cell *cell, glm::vec3 infillOrigin);
+    void variableCartesian(Cell *cell, Infill infill);
+    void variableCylindrical(Cell *cell, Infill infill);
+
+    int _infillIndex;
+    int _infillCount;
+    std::vector<Infill> _infills;
 
     te_expr *_exprX;
     te_expr *_exprY;

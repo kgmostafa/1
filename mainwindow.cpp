@@ -49,9 +49,9 @@ MainWindow::MainWindow(QWidget *parent) :
     _stlHeader = "";
     _stlUnit = millimetre;
 
-    _exprX = NULL;
-    _exprY = NULL;
-    _exprZ = NULL;
+    _infillIndex = 1;
+    _infillCount = 1;
+    _infills.push_back(Infill());
 
     _importDialog = new ImportDialog(this);
     connect(_importDialog, &ImportDialog::import, this, &MainWindow::importBasePart);
@@ -224,7 +224,7 @@ void MainWindow::on_pushButton_process_clicked()
 {
     // TODO: change infill custom origin min/max values (QDoubleSpinBox)
     bool relativeToRegion = ui->checkBox_infill_relativeToRegion->isChecked();
-    bool variableInfill = ui->checkBox_variableInfill->isChecked();
+
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
@@ -288,138 +288,91 @@ void MainWindow::on_pushButton_process_clicked()
     }
 
     if(skipInfill == false) {
-        int cellType = 0; // None
-        if(ui->radioButton_cellType_pyramid->isChecked())
-            cellType = 1; // Pyramid
-        else if(ui->radioButton_cellType_cube->isChecked())
-            cellType = 2; // Cube
-        else if(ui->radioButton_cellType_icosphere->isChecked())
-            cellType = 3; // Icosphere
-        else if(ui->radioButton_cellType_custom->isChecked()) {
-            if(_cellLoaded == false) {
-                QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
-                return;
+        for(std::vector<Infill>::iterator it = _infills.begin(); it != _infills.end(); ++it) {
+
+            int cellType = it->cellType;
+            Cell *cell = NULL;
+            if(cellType == 1) {
+                cell = new Pyramid();
+            } else if(cellType == 2) {
+                cell = new Cube();
+            } else if(cellType == 3) {
+                cell = new Icosphere();
+            } else if(cellType == 4) {
+                cell = _cell;
+            } else {    // Default: Pyramid
+                cell = new Pyramid();
             }
-            cellType = 4; // Custom
-        }
 
-        CoordinateSystem coordSystem;
-        if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
-            coordSystem = cartesian;    // Cartesian coordinate system
-        } else if(ui->radioButton_infillCoordinateSystem_cylindrical->isChecked()) {
-            coordSystem = cylindrical;  // Cylindrical coordinate system
-        } else if(ui->radioButton_infillCoordinateSystem_spherical->isChecked()) {
-            coordSystem = spherical;    // Spherical coordinate system
-        } else {
-            coordSystem = cartesian;    // Default: Cartesian coordinate system
-        }
+            // TODO: handle number of variables per axis
+            te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
+            if(!it->variableInfill) {
+                bool valid = false;
+                ui->lineEdit_cellSizeX->text().toFloat(&valid);
+                if(!valid) {
+                    // TODO: show error dialog
+                }
+                ui->lineEdit_cellSizeY->text().toFloat(&valid);
+                if(!valid) {
 
-        Cell *cell = NULL;
-        if(cellType == 1) {
-            cell = new Pyramid();
-        } else if(cellType == 2) {
-            cell = new Cube();
-        } else if(cellType == 3) {
-            cell = new Icosphere();
-        } else if(cellType == 4) {
-            cell = _cell;
-        } else {    // Default: Pyramid
-            cell = new Pyramid();
-        }
+                }
+                ui->lineEdit_cellSizeZ->text().toFloat(&valid);
+                if(!valid) {
 
-        glm::vec3 infillOrigin;
-        infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
-        infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
-        infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
-
-        // TODO: add check to see if regionFrom < regionTo
-        glm::vec3 regionFrom;
-        regionFrom.x = ui->doubleSpinBox_region_fromX->value();
-        regionFrom.y = ui->doubleSpinBox_region_fromY->value();
-        regionFrom.z = ui->doubleSpinBox_region_fromZ->value();
-
-        glm::vec3 regionTo;
-        regionTo.x = ui->doubleSpinBox_region_toX->value();
-        regionTo.y = ui->doubleSpinBox_region_toY->value();
-        regionTo.z = ui->doubleSpinBox_region_toZ->value();
-
-        Cube bound;
-        bound.resize(regionTo-regionFrom);
-        bound.place(regionFrom);
-        std::vector<Triangle> boundIn = bound.getFacets();
-        std::vector<Triangle> boundOut;
-        Utils::meshBooleanIntersect(_offset, boundIn, boundOut);
-        _offset = boundOut;
-
-        // TODO: handle number of variables per axis
-        te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
-        glm::vec3 cellSize(0.0f, 0.0f, 0.0f);
-        if(variableInfill) {
+                }
+            }
             int errX;
-            QByteArray xBA = ui->lineEdit_cellSizeX->text().toLatin1();
-            const char *xString = xBA.data();
+            const char *xString = ui->lineEdit_cellSizeX->text().toLatin1().data();
             _exprX = te_compile(xString, vars, 3, &errX);
 
             int errY;
-            QByteArray yBA = ui->lineEdit_cellSizeY->text().toLatin1();
-            const char *yString = yBA.data();
+            const char *yString = ui->lineEdit_cellSizeY->text().toLatin1().data();
             _exprY = te_compile(yString, vars, 3, &errY);
 
             int errZ;
-            QByteArray zBA = ui->lineEdit_cellSizeZ->text().toLatin1();
-            const char *zString = zBA.data();
+            const char *zString = ui->lineEdit_cellSizeZ->text().toLatin1().data();
             _exprZ = te_compile(zString, vars, 3, &errZ);
 
             if(_exprX && _exprY && _exprZ) {
             } else {
-                // TODO: stop processing here if parse fails (_expr can be NULL).
                 printf("Parse error at x: %d\n", errX);
                 printf("Parse error at y: %d\n", errY);
                 printf("Parse error at z: %d\n", errZ);
             }
-        } else {
-            bool valid = false;
-            cellSize.x = ui->lineEdit_cellSizeX->text().toFloat(&valid);
-            if(!valid) {
-                // TODO: show error dialog
-                cellSize.x = 5.0f;
+
+
+            Cube bound;
+            bound.resize(it->regionTo-it->regionFrom);
+            bound.place(it->regionFrom);
+            std::vector<Triangle> boundIn = bound.getFacets();
+            std::vector<Triangle> boundOut;
+            Utils::meshBooleanIntersect(_offset, boundIn, boundOut);
+            _offset = boundOut;
+
+
+            switch(it->coord) {
+                case cartesian: {
+                    if(it->variableInfill) {
+                        variableCartesian(cell, *it);
+                    } else {
+                        simpleCartesian(cell, *it);
+                    }
+                } break;
+                case cylindrical: {
+                    if(it->variableInfill) {
+                        variableCylindrical(cell, *it);
+                    } else {
+                        simpleCylindrical(cell, *it);
+                    }
+                } break;
+                case spherical: {
+                    if(it->variableInfill) {
+                        std::cerr << "TODO: variable infill with spherical coordinate system\n";
+                    } else {
+                        simpleSpherical(cell, *it);
+                    }
+                } break;
             }
-            cellSize.y = ui->lineEdit_cellSizeY->text().toFloat(&valid);
-            if(!valid) {
-
-                cellSize.y = 5.0f;
-            }
-            cellSize.z = ui->lineEdit_cellSizeZ->text().toFloat(&valid);
-            if(!valid) {
-
-                cellSize.z = 5.0f;
-            }
-
-        }
-
-        switch(coordSystem) {
-            case cartesian: {
-                if(variableInfill) {
-                    variableCartesian(cell, infillOrigin);
-                } else {
-                    simpleCartesian(cell, cellSize);
-                }
-            } break;
-            case cylindrical: {
-                if(variableInfill) {
-                    variableCylindrical(cell, infillOrigin);
-                } else {
-                    simpleCylindrical(cell, cellSize);
-                }
-            } break;
-            case spherical: {
-                if(variableInfill) {
-                    std::cerr << "TODO: variable infill with spherical coordinate system\n";
-                } else {
-                    simpleSpherical(cell, cellSize);
-                }
-            } break;
-        }
 
 //            } else if(coordSystem == spherical) {
 //                std::cout << "TODO\n";
@@ -549,10 +502,11 @@ void MainWindow::on_pushButton_process_clicked()
     // Updates the UI
     updateUI();
 }
+}
 
-void MainWindow::simpleCartesian(Cell *cell, glm::vec3 cellSize)
+void MainWindow::simpleCartesian(Cell *cell, Infill infill)
 {
-    std::cout << glm::to_string(cellSize) << std::endl;
+    glm::vec3 cellSize(te_eval(_exprX), te_eval(_exprY), te_eval(_exprZ));
     int zSteps = (int)ceil(_maxZLength/cellSize.z);
     glm::vec2 centroid;
     glm::vec3 pos(_minX, _minY, _minZ);
@@ -582,8 +536,9 @@ void MainWindow::simpleCartesian(Cell *cell, glm::vec3 cellSize)
     }
 }
 
-void MainWindow::simpleCylindrical(Cell *cell, glm::vec3 cellSize)
+void MainWindow::simpleCylindrical(Cell *cell, Infill infill)
 {
+    glm::vec3 cellSize(te_eval(_exprX), te_eval(_exprY), te_eval(_exprZ));
     int zSteps = (int)ceil(_maxZLength/cellSize.z);
     glm::vec2 centroid;
     glm::vec3 pos(_minX, _minY, _minZ);
@@ -627,8 +582,9 @@ void MainWindow::simpleCylindrical(Cell *cell, glm::vec3 cellSize)
     }
 }
 
-void MainWindow::simpleSpherical(Cell *cell, glm::vec3 cellSize)
+void MainWindow::simpleSpherical(Cell *cell, Infill infill)
 {
+    glm::vec3 cellSize(te_eval(_exprX), te_eval(_exprY), te_eval(_exprZ));
     glm::vec3 pos = _baseCentroid - (cellSize/2.0f);
     float radiusStep = std::min(cellSize.x, cellSize.y);
     int rSteps = (int)ceil(_maxLength/radiusStep);
@@ -665,8 +621,10 @@ void MainWindow::simpleSpherical(Cell *cell, glm::vec3 cellSize)
     }
 }
 
-void MainWindow::variableCartesian(Cell *cell, glm::vec3 infillOrigin)
+void MainWindow::variableCartesian(Cell *cell, Infill infill)
 {
+    glm::vec3 infillOrigin = infill.origin;
+
     glm::vec3 pos(0.0f, 0.0f, 0.0f);
     pos.x = infillOrigin.x;
     while(pos.x < _maxX) {
@@ -776,10 +734,11 @@ void MainWindow::variableCartesian(Cell *cell, glm::vec3 infillOrigin)
     }
 }
 
-void MainWindow::variableCylindrical(Cell *cell, glm::vec3 infillOrigin)
+void MainWindow::variableCylindrical(Cell *cell, Infill infill)
 {
     // TODO: check if this is the best way to get maxR
     // This should fail if the infill origin is outside the cylinder
+    glm::vec3 infillOrigin = infill.origin;
     float maxR = _maxXLength;
     if(maxR < _maxYLength) {
         maxR = _maxYLength;
@@ -859,4 +818,131 @@ void MainWindow::on_pushButton_view_clicked()
 //    igl::viewer::Viewer viewer;
 //    viewer.data.set_mesh(V, F);
 //    viewer.launch();
+}
+
+void MainWindow::on_pushButton_infill_add_clicked()
+{
+    _infills.push_back(Infill());
+    _infillCount++;
+    ui->comboBox_infill->addItem("Infill #" + QString::number(_infillCount));
+
+    // UPDATE UI (reset fields?)
+}
+
+void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
+{
+    // Save last infill configs
+    bool variableInfill = ui->checkBox_variableInfill->isChecked();
+    bool relativeOrigin = ui->checkBox_infill_relativeToRegion->isChecked();
+
+    int cellType = 0; // None
+    if(ui->radioButton_cellType_pyramid->isChecked())
+        cellType = 1; // Pyramid
+    else if(ui->radioButton_cellType_cube->isChecked())
+        cellType = 2; // Cube
+    else if(ui->radioButton_cellType_icosphere->isChecked())
+        cellType = 3; // Icosphere
+    else if(ui->radioButton_cellType_custom->isChecked()) {
+        if(_cellLoaded == false) {
+            QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
+            return;
+        }
+        cellType = 4; // Custom
+    }
+
+    CoordinateSystem coordSystem;
+    if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
+        coordSystem = cartesian;    // Cartesian coordinate system
+    } else if(ui->radioButton_infillCoordinateSystem_cylindrical->isChecked()) {
+        coordSystem = cylindrical;  // Cylindrical coordinate system
+    } else if(ui->radioButton_infillCoordinateSystem_spherical->isChecked()) {
+        coordSystem = spherical;    // Spherical coordinate system
+    } else {
+        coordSystem = cartesian;    // Default: Cartesian coordinate system
+    }
+
+    glm::vec3 infillOrigin;
+    infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
+    infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
+    infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
+
+    // TODO: add check to see if regionFrom < regionTo
+    glm::vec3 regionFrom;
+    regionFrom.x = ui->doubleSpinBox_region_fromX->value();
+    regionFrom.y = ui->doubleSpinBox_region_fromY->value();
+    regionFrom.z = ui->doubleSpinBox_region_fromZ->value();
+
+    glm::vec3 regionTo;
+    regionTo.x = ui->doubleSpinBox_region_toX->value();
+    regionTo.y = ui->doubleSpinBox_region_toY->value();
+    regionTo.z = ui->doubleSpinBox_region_toZ->value();
+
+    QString exprX = ui->lineEdit_cellSizeX->text();
+    QString exprY = ui->lineEdit_cellSizeY->text();
+    QString exprZ = ui->lineEdit_cellSizeZ->text();
+
+
+    _infills.at(_infillIndex-1).cellType = cellType;
+    _infills.at(_infillIndex-1).coord = coordSystem;
+    _infills.at(_infillIndex-1).origin = infillOrigin;
+    _infills.at(_infillIndex-1).regionFrom = regionFrom;
+    _infills.at(_infillIndex-1).regionTo = regionTo;
+    _infills.at(_infillIndex-1).variableInfill = variableInfill;
+    _infills.at(_infillIndex-1).relativeOrigin = relativeOrigin;
+    _infills.at(_infillIndex-1).exprX = exprX;
+    _infills.at(_infillIndex-1).exprY = exprY;
+    _infills.at(_infillIndex-1).exprZ = exprZ;
+
+     // Load new infill configs
+    cellType = _infills.at(index).cellType;
+    if(cellType == 1) {
+        ui->radioButton_cellType_pyramid->setChecked(true);
+    } else if(cellType == 2) {
+        ui->radioButton_cellType_cube->setChecked(true);
+    } else if(cellType == 3) {
+        ui->radioButton_cellType_icosphere->setChecked(true);
+    } else if(cellType == 4) {
+        // TODO: store custom cell on _infills
+        ui->radioButton_cellType_custom->setChecked(true);
+    } else {    // Default: Pyramid
+        ui->radioButton_cellType_pyramid->setChecked(true);
+    }
+
+    coordSystem = _infills.at(index).coord;
+    switch(coordSystem) {
+        case cartesian: {
+            ui->radioButton_infillCoordinateSystem_cartesian->setChecked(true);
+        } break;
+        case cylindrical: {
+            ui->radioButton_infillCoordinateSystem_cylindrical->setChecked(true);
+        } break;
+        case spherical: {
+            ui->radioButton_infillCoordinateSystem_spherical->setChecked(true);
+        } break;
+    }
+
+    infillOrigin = _infills.at(index).origin;
+    ui->doubleSpinBox_infill_originX->setValue(infillOrigin.x);
+    ui->doubleSpinBox_infill_originY->setValue(infillOrigin.y);
+    ui->doubleSpinBox_infill_originZ->setValue(infillOrigin.z);
+
+    regionFrom = _infills.at(index).regionFrom;
+    ui->doubleSpinBox_region_fromX->setValue(regionFrom.x);
+    ui->doubleSpinBox_region_fromY->setValue(regionFrom.y);
+    ui->doubleSpinBox_region_fromZ->setValue(regionFrom.z);
+
+    regionTo = _infills.at(index).regionTo;
+    ui->doubleSpinBox_region_toX->setValue(regionTo.x);
+    ui->doubleSpinBox_region_toY->setValue(regionTo.y);
+    ui->doubleSpinBox_region_toZ->setValue(regionTo.z);
+
+    ui->checkBox_infill_relativeToRegion->setChecked(_infills.at(index).relativeOrigin);
+    ui->checkBox_variableInfill->setChecked(_infills.at(index).variableInfill);
+
+    ui->lineEdit_cellSizeX->setText(_infills.at(index).exprX);
+    ui->lineEdit_cellSizeY->setText(_infills.at(index).exprY);
+    ui->lineEdit_cellSizeZ->setText(_infills.at(index).exprZ);
+
+    _infillIndex = index+1;
+
 }

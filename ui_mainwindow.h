@@ -15,6 +15,7 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QButtonGroup>
 #include <QtWidgets/QCheckBox>
+#include <QtWidgets/QComboBox>
 #include <QtWidgets/QDoubleSpinBox>
 #include <QtWidgets/QGroupBox>
 #include <QtWidgets/QHBoxLayout>
@@ -50,6 +51,9 @@ public:
     QCheckBox *checkBox_skipHollowing;
     QGroupBox *groupBox_infill;
     QVBoxLayout *verticalLayout_3;
+    QHBoxLayout *horizontalLayout_13;
+    QComboBox *comboBox_infill;
+    QPushButton *pushButton_infill_add;
     QGroupBox *groupBox_cellType;
     QHBoxLayout *horizontalLayout_4;
     QHBoxLayout *horizontalLayout_6;
@@ -134,7 +138,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 890);
+        MainWindow->resize(837, 921);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -237,6 +241,25 @@ public:
         verticalLayout_3->setSpacing(6);
         verticalLayout_3->setContentsMargins(11, 11, 11, 11);
         verticalLayout_3->setObjectName(QStringLiteral("verticalLayout_3"));
+        horizontalLayout_13 = new QHBoxLayout();
+        horizontalLayout_13->setSpacing(6);
+        horizontalLayout_13->setObjectName(QStringLiteral("horizontalLayout_13"));
+        comboBox_infill = new QComboBox(groupBox_infill);
+        comboBox_infill->addItem(QString());
+        comboBox_infill->setObjectName(QStringLiteral("comboBox_infill"));
+
+        horizontalLayout_13->addWidget(comboBox_infill);
+
+        pushButton_infill_add = new QPushButton(groupBox_infill);
+        pushButton_infill_add->setObjectName(QStringLiteral("pushButton_infill_add"));
+        sizePolicy2.setHeightForWidth(pushButton_infill_add->sizePolicy().hasHeightForWidth());
+        pushButton_infill_add->setSizePolicy(sizePolicy2);
+
+        horizontalLayout_13->addWidget(pushButton_infill_add);
+
+
+        verticalLayout_3->addLayout(horizontalLayout_13);
+
         groupBox_cellType = new QGroupBox(groupBox_infill);
         groupBox_cellType->setObjectName(QStringLiteral("groupBox_cellType"));
         horizontalLayout_4 = new QHBoxLayout(groupBox_cellType);
@@ -717,6 +740,9 @@ public:
         checkBox_shell->setText(QApplication::translate("MainWindow", "External offset (shell)", nullptr));
         checkBox_skipHollowing->setText(QApplication::translate("MainWindow", "Skip hollowing", nullptr));
         groupBox_infill->setTitle(QApplication::translate("MainWindow", "Infill", nullptr));
+        comboBox_infill->setItemText(0, QApplication::translate("MainWindow", "Infill #1", nullptr));
+
+        pushButton_infill_add->setText(QApplication::translate("MainWindow", "Add", nullptr));
         groupBox_cellType->setTitle(QApplication::translate("MainWindow", "Cell type", nullptr));
         radioButton_cellType_pyramid->setText(QApplication::translate("MainWindow", "Pyramid", nullptr));
         radioButton_cellType_cube->setText(QApplication::translate("MainWindow", "Cube", nullptr));
