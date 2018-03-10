@@ -126,6 +126,7 @@ private:
 
     void variableCartesian(Cell *cell, Infill infill);
     void variableCylindrical(Cell *cell, Infill infill);
+    void variableSpherical(Cell *cell, Infill infill);
 
     int _infillIndex;
     int _infillCount;

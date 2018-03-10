@@ -224,7 +224,6 @@ void MainWindow::on_pushButton_process_clicked()
 {
     // TODO: change infill custom origin min/max values (QDoubleSpinBox)
     bool relativeToRegion = ui->checkBox_infill_relativeToRegion->isChecked();
-
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
@@ -242,47 +241,10 @@ void MainWindow::on_pushButton_process_clicked()
         if(ui->checkBox_shell->isChecked() == false) {
             offset *= -1.0;
         }
-
-//        _processed.insert(_processed.end(), _base.begin(), _base.end());
         v_aux = Utils::getVertexList(_base, f_aux);
         Utils::offsetVertices(v_aux, f_aux, offset);
         t_aux = Utils::getTriangleList(v_aux, f_aux);
         _offset = t_aux;
-//        Utils::switchNormal(t_aux);
-//        _processed.insert(_processed.end(), t_aux.begin(), t_aux.end());
-
-//        std::vector<std::pair<glm::vec3, glm::vec3>> intseg = Utils::getIntersectionSegments(_processed, 36.0);
-////        std::cout << "intersect segments size: " << intseg.size() << std::endl;
-////        for(int i = 0; i < intseg.size(); i++) {
-////            std::cout << intseg[i].first.x << ", " << intseg[i].first.y << ", " << intseg[i].second.x << ", " << intseg[i].second.y << std::endl;
-////        }
-//        std::vector<std::vector<glm::vec3>> cont = Utils::getContours(intseg, 0.00001f);
-
-//        std::vector<std::vector<glm::vec2>> cont2D = Utils::convertContourTo2D(cont);
-//        std::vector<std::vector<glm::vec2>> contours = Utils::splitLoopsFromContours2D(cont2D);
-//        std::cout << "contours size: " << contours.size() << std::endl;
-
-//        std::vector<std::vector<glm::vec2>> contoursBase;
-//        contoursBase.push_back(contours[0]);
-//        std::vector<std::vector<glm::vec2>> contoursOffset;
-//        contoursOffset.insert(contoursOffset.begin(), contours.begin()+1, contours.end());
-//        Utils::removeLoops2D(_processed, 36.0, contoursBase, contoursOffset, offset/2.0, 0.0001f);
-
-//        bool loops = Utils::checkLoops(cont);
-//        if(loops) {
-//            std::cout << "Loops detected!\n";
-//        } else {
-//            std::cout << "Loops not detected\n";
-//        }
-
-//        return;
-
-        //        for(int i = 0; i < conn.size(); i++) {
-        //            std::cout << "conn[" << i << "] size: " << conn[i].size() << std::endl;
-        //            for(int j = 0; j < conn[i].size(); j++) {
-        //                std::cout << "conn[" << i << "][" << j << "]: " << glm::to_string(conn[i].at(j)) << std::endl;
-        //            }
-        //        }
     } else {
         _offset = _base;
     }
@@ -373,104 +335,6 @@ void MainWindow::on_pushButton_process_clicked()
                     }
                 } break;
             }
-
-//            } else if(coordSystem == spherical) {
-//                std::cout << "TODO\n";
-//                // This should fail if the infill origin is outside the cylinder
-//                float maxR = _maxXLength;
-//                if(maxR < _maxYLength) {
-//                    maxR = _maxYLength;
-//                }
-//                if(maxR < _maxZLength) {
-//                    maxR = _maxZLength;
-//                }
-//                float r = 0;
-//                while(r < maxR) {
-//                    float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
-//                    cellSizeX = std::max(cellSizeX, 2.5f);
-//                    float theta = 0.0;
-//                    float circunferece = 2.0*M_PI*r;
-//                    while(theta < 360.0) {
-
-//                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
-//                        cellSizeY = std::max(cellSizeY, 2.5f);
-//                        float phi = 0.0;
-//                        while(phi < 180.0) {
-//                            circunferece = 2.0*M_PI*(r*sin(degreesToRadians(phi)));
-//                            float cellSizeZ = std::min(fabsf(r)/4.0f, 25.0f);
-//                            cellSizeZ = std::max(cellSizeZ, 2.5f);
-//                            float posX = _baseCentroid.x - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*cos(degreesToRadians(theta));
-//                            float posY = _baseCentroid.y - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*sin(degreesToRadians(theta));
-//                            float posZ = _baseCentroid.z - (cellThickness/2.0) + r*cos(degreesToRadians(phi));
-//                            glm::vec3 pos(posX, posY, posZ);
-//                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
-//                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
-//                            insertCell(pos, size, c);
-//                            float phiSteps = cellSizeY/circunferece;
-//                            phi += (phiSteps*180.0);
-//                        }
-//                        float phiSteps = cellSizeY/circunferece;
-//                        phi += (phiSteps*180.0);
-//                    }
-//                    for(int phi = 0; phi <= phiSteps; phi++) {
-//                        float phiAngle = ((float)phi/(float)phiSteps)*180.0;
-//                        circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
-//                        int thetaSteps = (int)ceil(circunferece/cellThickness);
-//                        for(int theta = 0; theta < thetaSteps; theta++) {
-//                            float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
-
-//                            glm::vec3 pos(posX, posY, posZ);
-//                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
-//                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
-//                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
-//                                c->place(posX, posY, posZ);
-//                                std::vector<Triangle> t = c->getFacets();
-//                                _processed.insert(_processed.end(), t.begin(), t.end());
-//                            }
-//                        }
-//                    }
-//                    while(phi < 360.0) {
-//                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
-//                        cellSizeY = std::max(cellSizeY, 2.5f);
-//                        float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
-//                        float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
-//                        float z = infillOrigin.z;
-//                        while(z < _maxZ) {
-//                            float posZ = z;
-//                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
-//                            cellSizeZ = std::max(cellSizeZ, 2.5f);
-//                            glm::vec3 pos(posX, posY, posZ);
-//                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
-////                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
-//                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
-//                            // Approach taken: rotated with the cylindrical orientation
-//                            //                            insertCell(pos, size, rotation, c);
-//                            insertCell(pos, size, c);
-//                            z += cellSizeZ;
-//                        }
-//                        z = infillOrigin.z;
-//                        while(z > _minZ) {
-//                            float posZ = z;
-//                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
-//                            cellSizeZ = std::max(cellSizeZ, 2.5f);
-//                            glm::vec3 pos(posX, posY, posZ-cellSizeZ);
-//                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
-////                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
-//                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
-//                            // Approach taken: rotated with the cylindrical orientation
-////                            insertCell(pos, size, rotation, c);
-//                            insertCell(pos, size, c);
-//                            z -= cellSizeZ;
-//                        }
-//                        float radius = r;
-//                        float circunferece = 2.0*M_PI*radius;
-//                        float phiSteps = cellSizeY/circunferece;
-//                        phi += (phiSteps*360.0);
-//                    }
-//                    r += cellSizeX;
-//                }
-//            }
-//        }
 
         // Trimm
         std::vector<Triangle> temp;
@@ -784,6 +648,107 @@ void MainWindow::variableCylindrical(Cell *cell, Infill infill)
     }
 }
 
+void MainWindow::variableSpherical(Cell *cell, Infill infill)
+{
+    //            } else if(coordSystem == spherical) {
+    //                std::cout << "TODO\n";
+    //                // This should fail if the infill origin is outside the cylinder
+    //                float maxR = _maxXLength;
+    //                if(maxR < _maxYLength) {
+    //                    maxR = _maxYLength;
+    //                }
+    //                if(maxR < _maxZLength) {
+    //                    maxR = _maxZLength;
+    //                }
+    //                float r = 0;
+    //                while(r < maxR) {
+    //                    float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
+    //                    cellSizeX = std::max(cellSizeX, 2.5f);
+    //                    float theta = 0.0;
+    //                    float circunferece = 2.0*M_PI*r;
+    //                    while(theta < 360.0) {
+
+    //                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+    //                        cellSizeY = std::max(cellSizeY, 2.5f);
+    //                        float phi = 0.0;
+    //                        while(phi < 180.0) {
+    //                            circunferece = 2.0*M_PI*(r*sin(degreesToRadians(phi)));
+    //                            float cellSizeZ = std::min(fabsf(r)/4.0f, 25.0f);
+    //                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+    //                            float posX = _baseCentroid.x - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*cos(degreesToRadians(theta));
+    //                            float posY = _baseCentroid.y - (cellThickness/2.0) + r*sin(degreesToRadians(phi))*sin(degreesToRadians(theta));
+    //                            float posZ = _baseCentroid.z - (cellThickness/2.0) + r*cos(degreesToRadians(phi));
+    //                            glm::vec3 pos(posX, posY, posZ);
+    //                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+    //                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+    //                            insertCell(pos, size, c);
+    //                            float phiSteps = cellSizeY/circunferece;
+    //                            phi += (phiSteps*180.0);
+    //                        }
+    //                        float phiSteps = cellSizeY/circunferece;
+    //                        phi += (phiSteps*180.0);
+    //                    }
+    //                    for(int phi = 0; phi <= phiSteps; phi++) {
+    //                        float phiAngle = ((float)phi/(float)phiSteps)*180.0;
+    //                        circunferece = 2.0*M_PI*(radius*sin(degreesToRadians(phiAngle)));
+    //                        int thetaSteps = (int)ceil(circunferece/cellThickness);
+    //                        for(int theta = 0; theta < thetaSteps; theta++) {
+    //                            float thetaAngle = ((float)theta/(float)thetaSteps)*360.0;
+
+    //                            glm::vec3 pos(posX, posY, posZ);
+    //                            glm::vec3 cellCenter = glm::vec3(posX+(cellThickness/2.0), posY+(cellThickness/2.0), posZ+(cellThickness/2.0));
+    //                            if(Utils::isInsideMesh(_base, cellCenter, false) ||
+    //                               Utils::getTrianglesFromBox(_base, pos, cellThickness).size() > 0) {
+    //                                c->place(posX, posY, posZ);
+    //                                std::vector<Triangle> t = c->getFacets();
+    //                                _processed.insert(_processed.end(), t.begin(), t.end());
+    //                            }
+    //                        }
+    //                    }
+    //                    while(phi < 360.0) {
+    //                        float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+    //                        cellSizeY = std::max(cellSizeY, 2.5f);
+    //                        float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
+    //                        float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
+    //                        float z = infillOrigin.z;
+    //                        while(z < _maxZ) {
+    //                            float posZ = z;
+    //                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+    //                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+    //                            glm::vec3 pos(posX, posY, posZ);
+    //                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+    ////                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
+    //                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+    //                            // Approach taken: rotated with the cylindrical orientation
+    //                            //                            insertCell(pos, size, rotation, c);
+    //                            insertCell(pos, size, c);
+    //                            z += cellSizeZ;
+    //                        }
+    //                        z = infillOrigin.z;
+    //                        while(z > _minZ) {
+    //                            float posZ = z;
+    //                            float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+    //                            cellSizeZ = std::max(cellSizeZ, 2.5f);
+    //                            glm::vec3 pos(posX, posY, posZ-cellSizeZ);
+    //                            glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
+    ////                            glm::vec3 rotation(0.0, 0.0, degreesToRadians(dPhi));
+    //                            // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
+    //                            // Approach taken: rotated with the cylindrical orientation
+    ////                            insertCell(pos, size, rotation, c);
+    //                            insertCell(pos, size, c);
+    //                            z -= cellSizeZ;
+    //                        }
+    //                        float radius = r;
+    //                        float circunferece = 2.0*M_PI*radius;
+    //                        float phiSteps = cellSizeY/circunferece;
+    //                        phi += (phiSteps*360.0);
+    //                    }
+    //                    r += cellSizeX;
+    //                }
+    //            }
+    //        }
+}
+
 void MainWindow::on_pushButton_save_clicked()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
@@ -944,5 +909,4 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
     ui->lineEdit_cellSizeZ->setText(_infills.at(index).exprZ);
 
     _infillIndex = index+1;
-
 }
