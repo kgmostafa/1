@@ -7,11 +7,11 @@
 #include "math.h"
 #include "glm/ext.hpp"
 #include "cell.h"
+#include "cube.h"
 #include "triangle.h"
 #include <igl/copyleft/cork/from_cork_mesh.h>
 #include <igl/copyleft/cork/to_cork_mesh.h>
-#include <igl/copyleft/cgal/mesh_boolean.h>
-#include <igl/copyleft/cork/mesh_boolean.h>
+
 #include <Eigen/Dense>
 #include <Eigen/Sparse>
 
@@ -839,8 +839,48 @@ std::vector<Triangle> Utils::corkTriMeshToMesh(CorkTriMesh &c)
     return getTriangleList(vertices, facets);
 }
 
-// TODO: handle and return errors
+bool Utils::infillRegionsOverlap(std::vector<Infill> &infills)
+{
+    if(infills.size() < 2) {
+        return false;
+    }
+
+    std::vector<Triangle> regions;
+
+    Cube region0;
+    region0.resize(infills.front().regionTo - infills.front().regionFrom);
+    region0.place(infills.front().regionFrom);
+    regions = region0.getFacets();
+
+    for(std::vector<Infill>::iterator it = infills.begin() + 1; it != infills.end(); ++it) {
+        Cube bound;
+        bound.resize(it->regionTo - it->regionFrom);
+        bound.place(it->regionFrom);
+        std::vector<Triangle> boundIn = bound.getFacets();
+        std::vector<Triangle> boundOut;
+        Utils::meshBooleanIntersect(regions, boundIn, boundOut);
+        if(boundOut.size() > 0) {
+            return true;
+        }
+        Utils::meshBooleanUnion(regions, boundIn, boundOut);
+        regions = boundOut;
+    }
+
+    return false;
+}
+
 int Utils::meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out)
+{
+    return meshBoolean(inA, inB, out, igl::MESH_BOOLEAN_TYPE_INTERSECT);
+}
+
+int Utils::meshBooleanUnion(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out)
+{
+    return meshBoolean(inA, inB, out, igl::MESH_BOOLEAN_TYPE_UNION);
+}
+
+// TODO: handle and return errors
+int Utils::meshBoolean(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out, igl::MeshBooleanType type)
 {
     Eigen::MatrixXd vInputA;
     Eigen::MatrixXi fInputA;
@@ -855,7 +895,7 @@ int Utils::meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle
 
     igl::copyleft::cork::from_cork_mesh(corkA, vInputA, fInputA);
     igl::copyleft::cork::from_cork_mesh(corkB, vInputB, fInputB);
-    igl::copyleft::cgal::mesh_boolean(vInputA, fInputA, vInputB, fInputB, igl::MESH_BOOLEAN_TYPE_INTERSECT, vOutput, fOutput);
+    igl::copyleft::cgal::mesh_boolean(vInputA, fInputA, vInputB, fInputB, type, vOutput, fOutput);
     igl::copyleft::cork::to_cork_mesh(vOutput, fOutput, corkOut);
 
     out = Utils::corkTriMeshToMesh(corkOut);

@@ -8,6 +8,10 @@
 #include "triangle.h"
 #include "vertex.h"
 
+#include <igl/copyleft/cgal/mesh_boolean.h>
+#include <igl/copyleft/cork/mesh_boolean.h>
+
+
 extern "C"{
 #include "3rd_party/cork/cork.h"
 }
@@ -18,6 +22,20 @@ struct Facet {
 };
 
 enum Unit { micrometre, millimetre, centimetre, metre, inch, foot };
+enum CoordinateSystem { cartesian, cylindrical, spherical };
+
+struct Infill {
+    int cellType;
+    CoordinateSystem coord;
+    glm::vec3 regionFrom;
+    glm::vec3 regionTo;
+    glm::vec3 origin;
+    bool relativeOrigin;
+    bool variableInfill;
+    QString exprX;
+    QString exprY;
+    QString exprZ;
+};
 
 #define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
 #define radiansToDegrees(angleRadians) ((angleRadians) * 180.0 / M_PI)
@@ -96,8 +114,12 @@ public:
     static CorkTriMesh meshToCorkTriMesh(std::vector<Triangle> &t);
     static std::vector<Triangle> corkTriMeshToMesh(CorkTriMesh &c);
 
+    static bool infillRegionsOverlap(std::vector<Infill> &infills);
+
     // Boolean operations
     static int meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out);
+    static int meshBooleanUnion(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out);
+    static int meshBoolean(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out, igl::MeshBooleanType type);
 
 private:
     static bool planeBoxOverlap(glm::vec3 normal, glm::vec3 vert, glm::vec3 maxbox);

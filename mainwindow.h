@@ -15,21 +15,6 @@ namespace Ui {
 class MainWindow;
 }
 
-enum CoordinateSystem { cartesian, cylindrical, spherical };
-
-struct Infill {
-    int cellType;
-    CoordinateSystem coord;
-    glm::vec3 regionFrom;
-    glm::vec3 regionTo;
-    glm::vec3 origin;
-    bool relativeOrigin;
-    bool variableInfill;
-    QString exprX;
-    QString exprY;
-    QString exprZ;
-};
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -95,6 +80,8 @@ private:
 
     void insertCell(glm::vec3 pos, glm::vec3 size, Cell *c);
     void insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, Cell *c);
+
+    void saveCurrentInfill();
 
     Ui::MainWindow *ui;
 

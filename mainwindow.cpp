@@ -187,6 +187,71 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     }
 }
 
+void MainWindow::saveCurrentInfill()
+{
+    // Save last infill configs
+    bool variableInfill = ui->checkBox_variableInfill->isChecked();
+    bool relativeOrigin = ui->checkBox_infill_relativeToRegion->isChecked();
+
+    int cellType = 0; // None
+    if(ui->radioButton_cellType_pyramid->isChecked())
+        cellType = 1; // Pyramid
+    else if(ui->radioButton_cellType_cube->isChecked())
+        cellType = 2; // Cube
+    else if(ui->radioButton_cellType_icosphere->isChecked())
+        cellType = 3; // Icosphere
+    else if(ui->radioButton_cellType_custom->isChecked()) {
+        if(_cellLoaded == false) {
+            QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
+            return;
+        }
+        cellType = 4; // Custom
+    }
+
+    CoordinateSystem coordSystem;
+    if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
+        coordSystem = cartesian;    // Cartesian coordinate system
+    } else if(ui->radioButton_infillCoordinateSystem_cylindrical->isChecked()) {
+        coordSystem = cylindrical;  // Cylindrical coordinate system
+    } else if(ui->radioButton_infillCoordinateSystem_spherical->isChecked()) {
+        coordSystem = spherical;    // Spherical coordinate system
+    } else {
+        coordSystem = cartesian;    // Default: Cartesian coordinate system
+    }
+
+    glm::vec3 infillOrigin;
+    infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
+    infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
+    infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
+
+    // TODO: add check to see if regionFrom < regionTo
+    glm::vec3 regionFrom;
+    regionFrom.x = ui->doubleSpinBox_region_fromX->value();
+    regionFrom.y = ui->doubleSpinBox_region_fromY->value();
+    regionFrom.z = ui->doubleSpinBox_region_fromZ->value();
+
+    glm::vec3 regionTo;
+    regionTo.x = ui->doubleSpinBox_region_toX->value();
+    regionTo.y = ui->doubleSpinBox_region_toY->value();
+    regionTo.z = ui->doubleSpinBox_region_toZ->value();
+
+    QString exprX = ui->lineEdit_cellSizeX->text();
+    QString exprY = ui->lineEdit_cellSizeY->text();
+    QString exprZ = ui->lineEdit_cellSizeZ->text();
+
+
+    _infills.at(_infillIndex-1).cellType = cellType;
+    _infills.at(_infillIndex-1).coord = coordSystem;
+    _infills.at(_infillIndex-1).origin = infillOrigin;
+    _infills.at(_infillIndex-1).regionFrom = regionFrom;
+    _infills.at(_infillIndex-1).regionTo = regionTo;
+    _infills.at(_infillIndex-1).variableInfill = variableInfill;
+    _infills.at(_infillIndex-1).relativeOrigin = relativeOrigin;
+    _infills.at(_infillIndex-1).exprX = exprX;
+    _infills.at(_infillIndex-1).exprY = exprY;
+    _infills.at(_infillIndex-1).exprZ = exprZ;
+}
+
 void MainWindow::rotateBasePart(float angle, int axis)
 {
     angle = degreesToRadians(angle);
@@ -250,6 +315,12 @@ void MainWindow::on_pushButton_process_clicked()
     }
 
     if(skipInfill == false) {
+        // Save actual infill config
+        saveCurrentInfill();
+
+        // Check if the regions overlap
+        std::cout << "infill overlap: " << Utils::infillRegionsOverlap(_infills) << std::endl;
+
         for(std::vector<Infill>::iterator it = _infills.begin(); it != _infills.end(); ++it) {
 
             int cellType = it->cellType;
@@ -797,69 +868,10 @@ void MainWindow::on_pushButton_infill_add_clicked()
 void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
 {
     // Save last infill configs
-    bool variableInfill = ui->checkBox_variableInfill->isChecked();
-    bool relativeOrigin = ui->checkBox_infill_relativeToRegion->isChecked();
-
-    int cellType = 0; // None
-    if(ui->radioButton_cellType_pyramid->isChecked())
-        cellType = 1; // Pyramid
-    else if(ui->radioButton_cellType_cube->isChecked())
-        cellType = 2; // Cube
-    else if(ui->radioButton_cellType_icosphere->isChecked())
-        cellType = 3; // Icosphere
-    else if(ui->radioButton_cellType_custom->isChecked()) {
-        if(_cellLoaded == false) {
-            QMessageBox::information(this, tr("Info"), "You need to load the custom cell first.");
-            return;
-        }
-        cellType = 4; // Custom
-    }
-
-    CoordinateSystem coordSystem;
-    if(ui->radioButton_infillCoordinateSystem_cartesian->isChecked()) {
-        coordSystem = cartesian;    // Cartesian coordinate system
-    } else if(ui->radioButton_infillCoordinateSystem_cylindrical->isChecked()) {
-        coordSystem = cylindrical;  // Cylindrical coordinate system
-    } else if(ui->radioButton_infillCoordinateSystem_spherical->isChecked()) {
-        coordSystem = spherical;    // Spherical coordinate system
-    } else {
-        coordSystem = cartesian;    // Default: Cartesian coordinate system
-    }
-
-    glm::vec3 infillOrigin;
-    infillOrigin.x = ui->doubleSpinBox_infill_originX->value();
-    infillOrigin.y = ui->doubleSpinBox_infill_originY->value();
-    infillOrigin.z = ui->doubleSpinBox_infill_originZ->value();
-
-    // TODO: add check to see if regionFrom < regionTo
-    glm::vec3 regionFrom;
-    regionFrom.x = ui->doubleSpinBox_region_fromX->value();
-    regionFrom.y = ui->doubleSpinBox_region_fromY->value();
-    regionFrom.z = ui->doubleSpinBox_region_fromZ->value();
-
-    glm::vec3 regionTo;
-    regionTo.x = ui->doubleSpinBox_region_toX->value();
-    regionTo.y = ui->doubleSpinBox_region_toY->value();
-    regionTo.z = ui->doubleSpinBox_region_toZ->value();
-
-    QString exprX = ui->lineEdit_cellSizeX->text();
-    QString exprY = ui->lineEdit_cellSizeY->text();
-    QString exprZ = ui->lineEdit_cellSizeZ->text();
-
-
-    _infills.at(_infillIndex-1).cellType = cellType;
-    _infills.at(_infillIndex-1).coord = coordSystem;
-    _infills.at(_infillIndex-1).origin = infillOrigin;
-    _infills.at(_infillIndex-1).regionFrom = regionFrom;
-    _infills.at(_infillIndex-1).regionTo = regionTo;
-    _infills.at(_infillIndex-1).variableInfill = variableInfill;
-    _infills.at(_infillIndex-1).relativeOrigin = relativeOrigin;
-    _infills.at(_infillIndex-1).exprX = exprX;
-    _infills.at(_infillIndex-1).exprY = exprY;
-    _infills.at(_infillIndex-1).exprZ = exprZ;
+    saveCurrentInfill();
 
      // Load new infill configs
-    cellType = _infills.at(index).cellType;
+    int cellType = _infills.at(index).cellType;
     if(cellType == 1) {
         ui->radioButton_cellType_pyramid->setChecked(true);
     } else if(cellType == 2) {
@@ -873,7 +885,7 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
         ui->radioButton_cellType_pyramid->setChecked(true);
     }
 
-    coordSystem = _infills.at(index).coord;
+    CoordinateSystem coordSystem = _infills.at(index).coord;
     switch(coordSystem) {
         case cartesian: {
             ui->radioButton_infillCoordinateSystem_cartesian->setChecked(true);
@@ -886,17 +898,17 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
         } break;
     }
 
-    infillOrigin = _infills.at(index).origin;
+    glm::vec3 infillOrigin = _infills.at(index).origin;
     ui->doubleSpinBox_infill_originX->setValue(infillOrigin.x);
     ui->doubleSpinBox_infill_originY->setValue(infillOrigin.y);
     ui->doubleSpinBox_infill_originZ->setValue(infillOrigin.z);
 
-    regionFrom = _infills.at(index).regionFrom;
+    glm::vec3 regionFrom = _infills.at(index).regionFrom;
     ui->doubleSpinBox_region_fromX->setValue(regionFrom.x);
     ui->doubleSpinBox_region_fromY->setValue(regionFrom.y);
     ui->doubleSpinBox_region_fromZ->setValue(regionFrom.z);
 
-    regionTo = _infills.at(index).regionTo;
+    glm::vec3 regionTo = _infills.at(index).regionTo;
     ui->doubleSpinBox_region_toX->setValue(regionTo.x);
     ui->doubleSpinBox_region_toY->setValue(regionTo.y);
     ui->doubleSpinBox_region_toZ->setValue(regionTo.z);
