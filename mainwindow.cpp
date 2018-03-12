@@ -42,6 +42,10 @@ MainWindow::MainWindow(QWidget *parent) :
     _baseImported = false;
     _baseProcessed = false;
     _customCell = false;
+    _toolLoaded = false;
+
+    _tool = NULL;
+    _cell = NULL;
 
     _baseVolume = 0.0;
     _baseCentroid = glm::vec3(0.0, 0.0, 0.0);
@@ -163,6 +167,9 @@ void MainWindow::updateUI()
     ui->pushButton_loadCell->setEnabled(_customCell);
     ui->pushButton_process->setEnabled(_baseImported && !_baseProcessed);
     ui->pushButton_save->setEnabled(_baseProcessed);
+    ui->lineEdit_surfaceProjection_posX->setEnabled(_toolLoaded);
+    ui->lineEdit_surfaceProjection_posY->setEnabled(_toolLoaded);
+    ui->lineEdit_surfaceProjection_posZ->setEnabled(_toolLoaded);
 }
 
 void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, Cell *c)
@@ -190,7 +197,6 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
 void MainWindow::saveCurrentInfill()
 {
     // Save last infill configs
-    bool variableInfill = ui->checkBox_variableInfill->isChecked();
     bool relativeOrigin = ui->checkBox_infill_relativeToRegion->isChecked();
     bool trimmRegion = ui->checkBox_infill_region_trimmRegion->isChecked();
 
@@ -247,7 +253,6 @@ void MainWindow::saveCurrentInfill()
     _infills.at(_infillIndex-1).regionFrom = regionFrom;
     _infills.at(_infillIndex-1).regionTo = regionTo;
     _infills.at(_infillIndex-1).trimmRegion = trimmRegion;
-    _infills.at(_infillIndex-1).variableInfill = variableInfill;
     _infills.at(_infillIndex-1).relativeOrigin = relativeOrigin;
     _infills.at(_infillIndex-1).exprX = exprX;
     _infills.at(_infillIndex-1).exprY = exprY;
@@ -312,6 +317,80 @@ void MainWindow::on_pushButton_process_clicked()
         Utils::offsetVertices(v_aux, f_aux, offset);
         t_aux = Utils::getTriangleList(v_aux, f_aux);
         _offset = t_aux;
+
+        std::vector<Triangle> hollow = _base;
+        if(_toolLoaded) {
+            te_variable vars[] = {{"ix", &_surfProjVarX}, {"iy", &_surfProjVarY}, {"iz", &_surfProjVarZ}};
+            int errX;
+            QByteArray exprX = ui->lineEdit_surfaceProjection_posX->text().toLower().toLatin1();
+            const char *xString = exprX.data();
+            _surfProjPosX = te_compile(xString, vars, 3, &errX);
+
+            int errY;
+            QByteArray exprY = ui->lineEdit_surfaceProjection_posY->text().toLower().toLatin1();
+            const char *yString = exprY.data();
+            _surfProjPosY = te_compile(yString, vars, 3, &errY);
+
+            int errZ;
+            QByteArray exprZ = ui->lineEdit_surfaceProjection_posZ->text().toLower().toLatin1();
+            const char *zString = exprZ.data();
+            _surfProjPosZ = te_compile(zString, vars, 3, &errZ);
+
+            if(_surfProjPosX && _surfProjPosY && _surfProjPosZ) {
+            } else {
+                printf("Parse error at x: %d\n", errX);
+                printf("Parse error at y: %d\n", errY);
+                printf("Parse error at z: %d\n", errZ);
+            }
+
+            _surfProjVarX = 1;
+            _surfProjVarY = 1;
+            _surfProjVarZ = 1;
+
+            double posX = te_eval(_surfProjPosX);
+            double posY = te_eval(_surfProjPosY);
+            double posZ = te_eval(_surfProjPosZ);
+
+            Utils::switchNormal(_offset);
+            hollow.insert(hollow.end(), _offset.begin(), _offset.end());
+            Utils::switchNormal(_offset);
+            std::vector<Triangle> tool;
+
+            // NOTE 1: this iterator is relative to the boundaries of the base part
+            // NOTE 2: the projection position will be the center of the tool boundary
+            // Iterate though YZ plane
+            while(posY < _maxY - _minY) {
+                while(posZ < _maxZ - _minZ) {
+                    posX = _minX + te_eval(_surfProjPosX);
+                    posY = _minY + te_eval(_surfProjPosY);
+                    posZ = _minZ + te_eval(_surfProjPosZ);
+
+                    glm::vec3 pos = glm::vec3(posX, posY, posZ);
+
+                    std::cout << glm::to_string(pos) << std::endl;
+                    glm::vec3 bounds = glm::vec3(_tool->_maxXLength, 0.0f, _tool->_maxZLength);
+                    _tool->place(pos - (bounds/2.0f));
+
+                    std::vector<Triangle> aux = _tool->getFacets();
+                    tool.insert(tool.end(), aux.begin(), aux.end());
+
+                    _surfProjVarZ += 1.0;
+                    posZ = te_eval(_surfProjPosZ);
+                }
+                _surfProjVarY += 1.0;
+                posY = te_eval(_surfProjPosY);
+                _surfProjVarZ = 1.0;
+                posZ = te_eval(_surfProjPosZ);
+            }
+
+            std::cout << "finished, trimming\n";
+            // Trimm
+            std::vector<Triangle> temp;
+            Utils::meshBoolean(hollow, tool, temp, igl::MESH_BOOLEAN_TYPE_MINUS);
+            hollow = temp;
+        }
+        _base.clear();
+        _offset = hollow;
     } else {
         _offset = _base;
     }
@@ -349,21 +428,21 @@ void MainWindow::on_pushButton_process_clicked()
 
             // TODO: handle number of variables per axis
             te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
-            if(!it->variableInfill) {
-                bool valid = false;
-                it->exprX.toFloat(&valid);
-                if(!valid) {
-                    // TODO: show error dialog
-                }
-                it->exprY.toFloat(&valid);
-                if(!valid) {
+//            if(!it->variableInfill) {
+//                bool valid = false;
+//                it->exprX.toFloat(&valid);
+//                if(!valid) {
+//                    // TODO: show error dialog
+//                }
+//                it->exprY.toFloat(&valid);
+//                if(!valid) {
 
-                }
-                it->exprZ.toFloat(&valid);
-                if(!valid) {
+//                }
+//                it->exprZ.toFloat(&valid);
+//                if(!valid) {
 
-                }
-            }
+//                }
+//            }
             int errX;
             QByteArray exprX = it->exprX.toLatin1();
             const char *xString = exprX.data();
@@ -397,25 +476,25 @@ void MainWindow::on_pushButton_process_clicked()
 
             switch(it->coord) {
                 case cartesian: {
-                    if(it->variableInfill) {
+//                    if(it->variableInfill) {
                         variableCartesian(cell, *it);
-                    } else {
-                        simpleCartesian(cell, *it);
-                    }
+//                    } else {
+//                        simpleCartesian(cell, *it);
+//                    }
                 } break;
                 case cylindrical: {
-                    if(it->variableInfill) {
+//                    if(it->variableInfill) {
                         variableCylindrical(cell, *it);
-                    } else {
-                        simpleCylindrical(cell, *it);
-                    }
+//                    } else {
+//                        simpleCylindrical(cell, *it);
+//                    }
                 } break;
                 case spherical: {
-                    if(it->variableInfill) {
-                        std::cerr << "TODO: variable infill with spherical coordinate system\n";
-                    } else {
+//                    if(it->variableInfill) {
+//                        std::cerr << "TODO: variable infill with spherical coordinate system\n";
+//                    } else {
                         simpleSpherical(cell, *it);
-                    }
+//                    }
                 } break;
             }
 
@@ -922,7 +1001,6 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
 
     ui->checkBox_infill_region_trimmRegion->setChecked(_infills.at(index).trimmRegion);
 
-
     glm::vec3 infillOrigin = _infills.at(index).origin;
     ui->doubleSpinBox_infill_originX->setValue(infillOrigin.x);
     ui->doubleSpinBox_infill_originY->setValue(infillOrigin.y);
@@ -939,11 +1017,26 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
     ui->doubleSpinBox_region_toZ->setValue(regionTo.z);
 
     ui->checkBox_infill_relativeToRegion->setChecked(_infills.at(index).relativeOrigin);
-    ui->checkBox_variableInfill->setChecked(_infills.at(index).variableInfill);
 
     ui->lineEdit_cellSizeX->setText(_infills.at(index).exprX);
     ui->lineEdit_cellSizeY->setText(_infills.at(index).exprY);
     ui->lineEdit_cellSizeZ->setText(_infills.at(index).exprZ);
 
     _infillIndex = index+1;
+}
+
+void MainWindow::on_pushButton_surfaceProjection_loadTool_clicked()
+{
+    // Gets the file name
+    QString fileName = QFileDialog::getOpenFileName(this,
+        tr("Open"), "", tr("STL Files (*.stl);;All files (*)"));
+    if (fileName.isEmpty())
+        return;
+
+    // Create to CustomCell object
+    _tool = new CustomCell(fileName);
+    _toolLoaded = _tool->isInitialized();
+
+    // Updates the UI
+    updateUI();
 }

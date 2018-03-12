@@ -27,6 +27,7 @@ public:
     std::vector<Triangle> _base;
     std::vector<Triangle> _offset;
     std::vector<Triangle> _processed;
+    Cell *_tool;
     Cell *_cell;
 
     quint32 _nTrianglesBase;
@@ -75,6 +76,8 @@ private slots:
 
     void on_comboBox_infill_currentIndexChanged(int index);
 
+    void on_pushButton_surfaceProjection_loadTool_clicked();
+
 private:
     void updateUI();
 
@@ -104,6 +107,7 @@ private:
     bool _baseImported;
     bool _baseProcessed;
     bool _customCell;
+    bool _toolLoaded;
 
     ImportDialog *_importDialog;
     RotateDialog *_rotateDialog;
@@ -119,12 +123,21 @@ private:
     int _infillCount;
     std::vector<Infill> _infills;
 
+    // Variable infill equations and variables
     te_expr *_exprX;
     te_expr *_exprY;
     te_expr *_exprZ;
     double _varX;
     double _varY;
     double _varZ;
+
+    // Surface projection position equations and variables
+    te_expr *_surfProjPosX;
+    te_expr *_surfProjPosY;
+    te_expr *_surfProjPosZ;
+    double _surfProjVarX;
+    double _surfProjVarY;
+    double _surfProjVarZ;
 };
 
 #endif // MAINWINDOW_H
