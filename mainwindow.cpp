@@ -192,6 +192,7 @@ void MainWindow::saveCurrentInfill()
     // Save last infill configs
     bool variableInfill = ui->checkBox_variableInfill->isChecked();
     bool relativeOrigin = ui->checkBox_infill_relativeToRegion->isChecked();
+    bool trimmRegion = ui->checkBox_infill_region_trimmRegion->isChecked();
 
     int cellType = 0; // None
     if(ui->radioButton_cellType_pyramid->isChecked())
@@ -245,6 +246,7 @@ void MainWindow::saveCurrentInfill()
     _infills.at(_infillIndex-1).origin = infillOrigin;
     _infills.at(_infillIndex-1).regionFrom = regionFrom;
     _infills.at(_infillIndex-1).regionTo = regionTo;
+    _infills.at(_infillIndex-1).trimmRegion = trimmRegion;
     _infills.at(_infillIndex-1).variableInfill = variableInfill;
     _infills.at(_infillIndex-1).relativeOrigin = relativeOrigin;
     _infills.at(_infillIndex-1).exprX = exprX;
@@ -319,7 +321,15 @@ void MainWindow::on_pushButton_process_clicked()
         saveCurrentInfill();
 
         // Check if the regions overlap
-        std::cout << "infill overlap: " << Utils::infillRegionsOverlap(_infills) << std::endl;
+        if(Utils::infillRegionsOverlap(_infills)) {
+            QMessageBox msgBox;
+            msgBox.setText(tr("Warning: The regions overlap."));
+            msgBox.exec();
+            return;
+        }
+
+        std::vector<Triangle> originalOffset = _offset;
+        std::vector<Triangle> tmpProcessed;
 
         for(std::vector<Infill>::iterator it = _infills.begin(); it != _infills.end(); ++it) {
 
@@ -341,29 +351,32 @@ void MainWindow::on_pushButton_process_clicked()
             te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
             if(!it->variableInfill) {
                 bool valid = false;
-                ui->lineEdit_cellSizeX->text().toFloat(&valid);
+                it->exprX.toFloat(&valid);
                 if(!valid) {
                     // TODO: show error dialog
                 }
-                ui->lineEdit_cellSizeY->text().toFloat(&valid);
+                it->exprY.toFloat(&valid);
                 if(!valid) {
 
                 }
-                ui->lineEdit_cellSizeZ->text().toFloat(&valid);
+                it->exprZ.toFloat(&valid);
                 if(!valid) {
 
                 }
             }
             int errX;
-            const char *xString = ui->lineEdit_cellSizeX->text().toLatin1().data();
+            QByteArray exprX = it->exprX.toLatin1();
+            const char *xString = exprX.data();
             _exprX = te_compile(xString, vars, 3, &errX);
 
             int errY;
-            const char *yString = ui->lineEdit_cellSizeY->text().toLatin1().data();
+            QByteArray exprY = it->exprY.toLatin1();
+            const char *yString = exprY.data();
             _exprY = te_compile(yString, vars, 3, &errY);
 
             int errZ;
-            const char *zString = ui->lineEdit_cellSizeZ->text().toLatin1().data();
+            QByteArray exprZ = it->exprZ.toLatin1();
+            const char *zString = exprZ.data();
             _exprZ = te_compile(zString, vars, 3, &errZ);
 
             if(_exprX && _exprY && _exprZ) {
@@ -379,9 +392,8 @@ void MainWindow::on_pushButton_process_clicked()
             bound.place(it->regionFrom);
             std::vector<Triangle> boundIn = bound.getFacets();
             std::vector<Triangle> boundOut;
-            Utils::meshBooleanIntersect(_offset, boundIn, boundOut);
+            Utils::meshBooleanIntersect(originalOffset, boundIn, boundOut);
             _offset = boundOut;
-
 
             switch(it->coord) {
                 case cartesian: {
@@ -407,9 +419,20 @@ void MainWindow::on_pushButton_process_clicked()
                 } break;
             }
 
+
+            if(it->trimmRegion) {
+                std::vector<Triangle> temp;
+                Utils::meshBooleanIntersect(_offset, _processed, temp);
+                _processed = temp;
+            }
+
+            tmpProcessed.insert(tmpProcessed.end(), _processed.begin(), _processed.end());
+            _processed.clear();
+        }
+
         // Trimm
         std::vector<Triangle> temp;
-        Utils::meshBooleanIntersect(_offset, _processed, temp);
+        Utils::meshBooleanIntersect(originalOffset, tmpProcessed, temp);
         _processed = temp;
     }
 
@@ -436,7 +459,6 @@ void MainWindow::on_pushButton_process_clicked()
 
     // Updates the UI
     updateUI();
-}
 }
 
 void MainWindow::simpleCartesian(Cell *cell, Infill infill)
@@ -572,7 +594,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
         // Q1
         while(pos.y < _maxY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = _minZ;
+            pos.z = infillOrigin.z;
             float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
@@ -593,7 +615,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
         // Q4
         while(pos.y > _minY) {
             _varY= pos.y - infillOrigin.y;
-            pos.z = _minZ;
+            pos.z = infillOrigin.z;
             float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
@@ -624,7 +646,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
         // Q2
         while(pos.y < _maxY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = _minZ;
+            pos.z = infillOrigin.z;
             float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
@@ -646,7 +668,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
         // Q3
         while(pos.y > _minY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = _minZ;
+            pos.z = infillOrigin.z;
             float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
@@ -897,6 +919,9 @@ void MainWindow::on_comboBox_infill_currentIndexChanged(int index)
             ui->radioButton_infillCoordinateSystem_spherical->setChecked(true);
         } break;
     }
+
+    ui->checkBox_infill_region_trimmRegion->setChecked(_infills.at(index).trimmRegion);
+
 
     glm::vec3 infillOrigin = _infills.at(index).origin;
     ui->doubleSpinBox_infill_originX->setValue(infillOrigin.x);

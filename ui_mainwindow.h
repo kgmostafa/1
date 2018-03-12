@@ -91,8 +91,8 @@ public:
     QLabel *label_14;
     QDoubleSpinBox *doubleSpinBox_region_toZ;
     QHBoxLayout *horizontalLayout;
-    QRadioButton *radioButton_2;
-    QRadioButton *radioButton;
+    QRadioButton *radioButton_infill_region_trimmRegion;
+    QRadioButton *radioButton_infill_region_trimmBase;
     QGroupBox *groupBox_2;
     QVBoxLayout *verticalLayout_7;
     QHBoxLayout *horizontalLayout_10;
@@ -468,15 +468,16 @@ public:
         horizontalLayout = new QHBoxLayout();
         horizontalLayout->setSpacing(6);
         horizontalLayout->setObjectName(QStringLiteral("horizontalLayout"));
-        radioButton_2 = new QRadioButton(groupBox_infill_region);
-        radioButton_2->setObjectName(QStringLiteral("radioButton_2"));
+        radioButton_infill_region_trimmRegion = new QRadioButton(groupBox_infill_region);
+        radioButton_infill_region_trimmRegion->setObjectName(QStringLiteral("radioButton_infill_region_trimmRegion"));
+        radioButton_infill_region_trimmRegion->setChecked(true);
 
-        horizontalLayout->addWidget(radioButton_2);
+        horizontalLayout->addWidget(radioButton_infill_region_trimmRegion);
 
-        radioButton = new QRadioButton(groupBox_infill_region);
-        radioButton->setObjectName(QStringLiteral("radioButton"));
+        radioButton_infill_region_trimmBase = new QRadioButton(groupBox_infill_region);
+        radioButton_infill_region_trimmBase->setObjectName(QStringLiteral("radioButton_infill_region_trimmBase"));
 
-        horizontalLayout->addWidget(radioButton);
+        horizontalLayout->addWidget(radioButton_infill_region_trimmBase);
 
 
         verticalLayout_9->addLayout(horizontalLayout);
@@ -765,8 +766,8 @@ public:
         label_12->setText(QApplication::translate("MainWindow", "To X:", nullptr));
         label_13->setText(QApplication::translate("MainWindow", "Y:", nullptr));
         label_14->setText(QApplication::translate("MainWindow", "Z:", nullptr));
-        radioButton_2->setText(QApplication::translate("MainWindow", "Trimm cells on region boundaries", nullptr));
-        radioButton->setText(QApplication::translate("MainWindow", "Trimm cells on base boundaries", nullptr));
+        radioButton_infill_region_trimmRegion->setText(QApplication::translate("MainWindow", "Trimm cells on region boundaries", nullptr));
+        radioButton_infill_region_trimmBase->setText(QApplication::translate("MainWindow", "Trimm cells on base boundaries", nullptr));
         groupBox_2->setTitle(QApplication::translate("MainWindow", "Origin", nullptr));
         label_2->setText(QApplication::translate("MainWindow", "X:", nullptr));
         label_3->setText(QApplication::translate("MainWindow", "Y:", nullptr));

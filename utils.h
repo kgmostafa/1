@@ -30,6 +30,7 @@ struct Infill {
     glm::vec3 regionFrom;
     glm::vec3 regionTo;
     glm::vec3 origin;
+    bool trimmRegion;
     bool relativeOrigin;
     bool variableInfill;
     QString exprX;
