@@ -7,6 +7,7 @@
 class CustomCell : public Cell {
 public:
     CustomCell(QString fn);
+    CustomCell(std::vector<Triangle> facets);
 
 private:
     bool init();

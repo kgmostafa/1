@@ -157,7 +157,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>10 * ix</string>
+                 <string>((iz%2)*5) + (10 * ix) - 5.0</string>
                 </property>
                </widget>
               </item>
@@ -189,7 +189,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>10 * iy</string>
+                 <string>(((iz+1)%2)*5) + 10 * iy - 5.0</string>
                 </property>
                </widget>
               </item>
@@ -221,7 +221,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>10 * iz</string>
+                 <string>(10 * iz) - 5.0</string>
                 </property>
                </widget>
               </item>

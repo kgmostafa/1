@@ -3,6 +3,7 @@
 #include <glm/common.hpp>
 #include <glm/gtx/transform.hpp>
 #include <glm/ext.hpp>
+#include <iostream>
 
 #include "triangle.h"
 
@@ -76,6 +77,7 @@ void Triangle::rotateZ(float angle) {
 void Triangle::rotate(float angle, glm::vec3 normal) {
     // translate to origin?
     glm::mat4 rotMatrix(1.0);
+    std::cout << "angle: " << angle << std::endl;
     rotMatrix = glm::rotate(rotMatrix, angle, normal);
 
     for(int i = 0; i < 3; i++) {

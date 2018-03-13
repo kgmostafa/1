@@ -299,6 +299,7 @@ void MainWindow::on_pushButton_process_clicked()
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
+    std::vector<Triangle> backupTool = _tool->getFacets();
     if(skipHollow == false) {
         std::vector<Vertex> v_aux;
         std::vector<Facet> f_aux;
@@ -359,29 +360,91 @@ void MainWindow::on_pushButton_process_clicked()
             // NOTE 1: this iterator is relative to the boundaries of the base part
             // NOTE 2: the projection position will be the center of the tool boundary
             // Iterate though YZ plane
-            while(posY < _maxY - _minY) {
-                while(posZ < _maxZ - _minZ) {
+            while(posZ < _maxZ - _minZ) {
+                while(posY < _maxY - _minY) {
                     posX = _minX + te_eval(_surfProjPosX);
                     posY = _minY + te_eval(_surfProjPosY);
                     posZ = _minZ + te_eval(_surfProjPosZ);
 
                     glm::vec3 pos = glm::vec3(posX, posY, posZ);
-
-                    std::cout << glm::to_string(pos) << std::endl;
-                    glm::vec3 bounds = glm::vec3(_tool->_maxXLength, 0.0f, _tool->_maxZLength);
+                    glm::vec3 bounds = glm::vec3(_tool->_maxXLength, _tool->_maxYLength, _tool->_maxZLength);
                     _tool->place(pos - (bounds/2.0f));
 
                     std::vector<Triangle> aux = _tool->getFacets();
                     tool.insert(tool.end(), aux.begin(), aux.end());
 
-                    _surfProjVarZ += 1.0;
-                    posZ = te_eval(_surfProjPosZ);
+                    _surfProjVarY += 1.0;
+                    posY = te_eval(_surfProjPosY);
                 }
-                _surfProjVarY += 1.0;
+                _surfProjVarY = 1.0;
                 posY = te_eval(_surfProjPosY);
-                _surfProjVarZ = 1.0;
+                _surfProjVarZ += 1.0;
                 posZ = te_eval(_surfProjPosZ);
             }
+
+            Utils::rotateZ(backupTool, degreesToRadians(90.0));
+            _surfProjVarX = 1;
+            _surfProjVarY = 1;
+            _surfProjVarZ = 1;
+            posX = te_eval(_surfProjPosX);
+            posY = te_eval(_surfProjPosY);
+            posZ = te_eval(_surfProjPosZ);
+            _tool = new CustomCell(backupTool);
+            // Iterate though XZ plane
+
+            while(posZ < _maxZ - _minZ) {
+                while(posX < _maxX - _minX) {
+                    posX = _minX + te_eval(_surfProjPosX);
+                    posY = _minY + te_eval(_surfProjPosY);
+                    posZ = _minZ + te_eval(_surfProjPosZ);
+
+                    glm::vec3 pos = glm::vec3(posX, posY, posZ);
+                    glm::vec3 bounds = glm::vec3(_tool->_maxXLength, _tool->_maxYLength, _tool->_maxZLength);
+                    _tool->place(pos - (bounds/2.0f));
+
+                    std::vector<Triangle> aux = _tool->getFacets();
+                    tool.insert(tool.end(), aux.begin(), aux.end());
+
+                    _surfProjVarX += 1.0;
+                    posX = te_eval(_surfProjPosX);
+                }
+                _surfProjVarX = 1.0;
+                posX = te_eval(_surfProjPosX);
+                _surfProjVarZ += 1.0;
+                posZ = te_eval(_surfProjPosZ);
+            }
+
+            Utils::rotateX(backupTool, degreesToRadians(90.0));
+            _surfProjVarX = 1;
+            _surfProjVarY = 1;
+            _surfProjVarZ = 1;
+            posX = te_eval(_surfProjPosX);
+            posY = te_eval(_surfProjPosY);
+            posZ = te_eval(_surfProjPosZ);
+            _tool = new CustomCell(backupTool);
+            // Iterate though XY plane
+            while(posX < _maxX - _minX) {
+                while(posY < _maxY - _minY) {
+                    posX = _minX + te_eval(_surfProjPosX);
+                    posY = _minY + te_eval(_surfProjPosY);
+                    posZ = _minZ + te_eval(_surfProjPosZ);
+
+                    glm::vec3 pos = glm::vec3(posX, posY, posZ);
+                    glm::vec3 bounds = glm::vec3(_tool->_maxXLength, _tool->_maxYLength, _tool->_maxZLength);
+                    _tool->place(pos - (bounds/2.0f));
+
+                    std::vector<Triangle> aux = _tool->getFacets();
+                    tool.insert(tool.end(), aux.begin(), aux.end());
+
+                    _surfProjVarY += 1.0;
+                    posY = te_eval(_surfProjPosY);
+                }
+                _surfProjVarX += 1.0;
+                posX = te_eval(_surfProjPosX);
+                _surfProjVarY = 1.0;
+                posY = te_eval(_surfProjPosY);
+            }
+
 
             std::cout << "finished, trimming\n";
             // Trimm
@@ -513,6 +576,7 @@ void MainWindow::on_pushButton_process_clicked()
         std::vector<Triangle> temp;
         Utils::meshBooleanIntersect(originalOffset, tmpProcessed, temp);
         _processed = temp;
+
     }
 
     if(skipHollow == false) {
@@ -529,8 +593,19 @@ void MainWindow::on_pushButton_process_clicked()
 //            _processed = Utils::corkTriMeshToMesh(*cork);
             _processed.insert(_processed.begin(), _base.begin(), _base.end());
         } else {
+
             _processed.insert(_processed.begin(), _base.begin(), _base.end());
             _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
+//            std::vector<Triangle> tempo = _tool->getFacets();
+//            for(std::vector<Triangle>::iterator it = tempo.begin(); it != tempo.end(); ++it) {
+//                std::cout << it->toString().toStdString() << std::endl;
+//            }
+//            Utils::rotateZ(backupTool, degreesToRadians(90.0));
+//            std::cout << "rotated\n";
+//            for(std::vector<Triangle>::iterator it = backupTool.begin(); it != backupTool.end(); ++it) {
+//                std::cout << it->toString().toStdString() << std::endl;
+//            }
+//            _processed = backupTool;
         }
     }
 
@@ -1036,6 +1111,11 @@ void MainWindow::on_pushButton_surfaceProjection_loadTool_clicked()
     // Create to CustomCell object
     _tool = new CustomCell(fileName);
     _toolLoaded = _tool->isInitialized();
+
+    std::vector<Triangle> tempo = _tool->getFacets();
+    for(std::vector<Triangle>::iterator it = tempo.begin(); it != tempo.end(); ++it) {
+        std::cout << it->toString().toStdString() << std::endl;
+    }
 
     // Updates the UI
     updateUI();

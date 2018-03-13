@@ -808,11 +808,11 @@ public:
         groupBox_surfaceProjection->setTitle(QApplication::translate("MainWindow", "Surface projection", nullptr));
         pushButton_surfaceProjection_loadTool->setText(QApplication::translate("MainWindow", "Load tool", nullptr));
         label_surfaceProjection_posX->setText(QApplication::translate("MainWindow", "Position X:", nullptr));
-        lineEdit_surfaceProjection_posX->setText(QApplication::translate("MainWindow", "10 * ix", nullptr));
+        lineEdit_surfaceProjection_posX->setText(QApplication::translate("MainWindow", "((iz%2)*5) + (10 * ix) - 5.0", nullptr));
         label_surfaceProjection_posY->setText(QApplication::translate("MainWindow", "Y:", nullptr));
-        lineEdit_surfaceProjection_posY->setText(QApplication::translate("MainWindow", "10 * iy", nullptr));
+        lineEdit_surfaceProjection_posY->setText(QApplication::translate("MainWindow", "(((iz+1)%2)*5) + 10 * iy - 5.0", nullptr));
         label_surfaceProjection_posZ->setText(QApplication::translate("MainWindow", "Z:", nullptr));
-        lineEdit_surfaceProjection_posZ->setText(QApplication::translate("MainWindow", "10 * iz", nullptr));
+        lineEdit_surfaceProjection_posZ->setText(QApplication::translate("MainWindow", "(10 * iz) - 5.0", nullptr));
         checkBox_shell->setText(QApplication::translate("MainWindow", "External offset (shell)", nullptr));
         checkBox_skipHollowing->setText(QApplication::translate("MainWindow", "Skip hollowing", nullptr));
         groupBox_infill->setTitle(QApplication::translate("MainWindow", "Infill", nullptr));

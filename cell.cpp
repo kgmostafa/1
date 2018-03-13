@@ -178,4 +178,12 @@ void Cell::calculateBounds()
     _maxXLength = _max.x - _min.x;
     _maxYLength = _max.y - _min.y;
     _maxZLength = _max.z - _min.z;
+
+    _maxLength = _maxXLength;
+    if(_maxYLength > _maxLength) {
+        _maxLength = _maxYLength;
+    }
+    if(_maxZLength > _maxLength) {
+        _maxLength = _maxZLength;
+    }
 }

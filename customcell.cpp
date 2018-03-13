@@ -1,8 +1,19 @@
 #include "customcell.h"
-
+#include <iostream>
 CustomCell::CustomCell(QString fn) :
-    Cell(), _stl(fn) {
+    Cell(), _stl(fn)
+{
     _initialized = init();
+}
+
+CustomCell::CustomCell(std::vector<Triangle> facets) :
+    Cell(), _stl("")
+{
+    _facets = facets;
+
+    calculateBounds();
+
+    _initialized = true;
 }
 
 bool CustomCell::init() {
@@ -17,6 +28,8 @@ bool CustomCell::init() {
     _maxYLength = _stl.getMaxYLength();
     _maxZLength = _stl.getMaxZLength();
     _maxLength = _stl.getMaxLength();
+
+    std::cout << "_minX: " << _stl.getMinX() << std::endl;
 
     // Calculate the boundaries
     calculateBounds();
