@@ -149,6 +149,10 @@ static double ncr(double n, double r) {
 }
 static double npr(double n, double r) {return ncr(n, r) * fac(r);}
 
+// https://social.msdn.microsoft.com/Forums/vstudio/en-US/d4d8caa7-73aa-45d8-aa50-f02fff58730f/c2099-initializer-is-not-a-constant-using-floor-in-c-file?forum=vclanguage
+#pragma function (floor)
+#pragma function (ceil)
+
 static const te_variable functions[] = {
     /* must be in alphabetical order */
     {"abs", fabs,     TE_FUNCTION1 | TE_FLAG_PURE, 0},

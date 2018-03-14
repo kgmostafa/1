@@ -27,6 +27,7 @@ public:
     std::vector<Triangle> _base;
     std::vector<Triangle> _offset;
     std::vector<Triangle> _processed;
+    std::vector<Triangle> _shell;
     Cell *_tool;
     Cell *_cell;
 
@@ -138,6 +139,8 @@ private:
     double _surfProjVarX;
     double _surfProjVarY;
     double _surfProjVarZ;
+
+    int _iteration;
 };
 
 #endif // MAINWINDOW_H

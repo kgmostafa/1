@@ -36,6 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     _minZ = 0.0;
     _maxZ = 0.0;
 
+    _iteration = 0;
+
     _wireframe = true;
     _basePart = true;
     _cellLoaded = false;
@@ -184,6 +186,9 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_offset, cellCenter, false) ||
        Utils::getTrianglesFromBox(_offset, pos, size).size() > 0) {
+//        if(_iteration > 300) {
+//            return;
+//        }
         c->rotateX(rotation.x);
         c->rotateY(rotation.y);
         c->rotateZ(rotation.z);
@@ -191,6 +196,7 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
         c->place(pos);
         std::vector<Triangle> t = c->getFacets();
         _processed.insert(_processed.end(), t.begin(), t.end());
+        _iteration++;
     }
 }
 
@@ -299,7 +305,14 @@ void MainWindow::on_pushButton_process_clicked()
     bool skipHollow = ui->checkBox_skipHollowing->isChecked();
     bool skipInfill = ui->checkBox_skipInfilling->isChecked();
 
-    std::vector<Triangle> backupTool = _tool->getFacets();
+//    //////////////////////////////////////////
+//    /// REMOVE AFTER TEST
+//    std::vector<Triangle> _base2 = _base;
+//    Utils::translate(_base2, 20.0f, 20.0f, 20.0f);
+//    ///
+//    ////////////////////////////////////////////
+
+    std::vector<Triangle> backupTool;
     if(skipHollow == false) {
         std::vector<Vertex> v_aux;
         std::vector<Facet> f_aux;
@@ -321,6 +334,7 @@ void MainWindow::on_pushButton_process_clicked()
 
         std::vector<Triangle> hollow = _base;
         if(_toolLoaded) {
+            backupTool = _tool->getFacets();
             te_variable vars[] = {{"ix", &_surfProjVarX}, {"iy", &_surfProjVarY}, {"iz", &_surfProjVarZ}};
             int errX;
             QByteArray exprX = ui->lineEdit_surfaceProjection_posX->text().toLower().toLatin1();
@@ -450,10 +464,9 @@ void MainWindow::on_pushButton_process_clicked()
             // Trimm
             std::vector<Triangle> temp;
             Utils::meshBoolean(hollow, tool, temp, igl::MESH_BOOLEAN_TYPE_MINUS);
-            hollow = temp;
+//            _base.clear();
+            _shell = temp;
         }
-        _base.clear();
-        _offset = hollow;
     } else {
         _offset = _base;
     }
@@ -529,13 +542,13 @@ void MainWindow::on_pushButton_process_clicked()
             }
 
 
-            Cube bound;
-            bound.resize(it->regionTo-it->regionFrom);
-            bound.place(it->regionFrom);
-            std::vector<Triangle> boundIn = bound.getFacets();
-            std::vector<Triangle> boundOut;
-            Utils::meshBooleanIntersect(originalOffset, boundIn, boundOut);
-            _offset = boundOut;
+//            Cube bound;
+//            bound.resize(it->regionTo-it->regionFrom);
+//            bound.place(it->regionFrom);
+//            std::vector<Triangle> boundIn = bound.getFacets();
+//            std::vector<Triangle> boundOut;
+//            Utils::meshBooleanIntersect(originalOffset, boundIn, boundOut);
+//            _offset = boundOut;
 
             switch(it->coord) {
                 case cartesian: {
@@ -561,12 +574,13 @@ void MainWindow::on_pushButton_process_clicked()
                 } break;
             }
 
-
-            if(it->trimmRegion) {
-                std::vector<Triangle> temp;
-                Utils::meshBooleanIntersect(_offset, _processed, temp);
-                _processed = temp;
-            }
+///////////////////////////////////
+            /// Adicionar novamente (removido apenas para teste)
+//            if(it->trimmRegion) {
+//                std::vector<Triangle> temp;
+//                Utils::meshBooleanIntersect(_offset, _processed, temp);
+//                _processed = temp;
+//            }
 
             tmpProcessed.insert(tmpProcessed.end(), _processed.begin(), _processed.end());
             _processed.clear();
@@ -583,19 +597,13 @@ void MainWindow::on_pushButton_process_clicked()
         // TODO: if the offset is positive, we should switch the _base normals
         Utils::switchNormal(_offset);
         if(skipInfill == false) {
-            _base.insert(_base.begin(), _offset.begin(), _offset.end());
-
-            // Trimm
-//            CorkTriMesh c1 = Utils::meshToCorkTriMesh(_base);
-//            CorkTriMesh c2 = Utils::meshToCorkTriMesh(_processed);
-//            CorkTriMesh *cork = new CorkTriMesh;
-//            computeIntersection(c1, c2, cork);
-//            _processed = Utils::corkTriMeshToMesh(*cork);
-            _processed.insert(_processed.begin(), _base.begin(), _base.end());
+            std::vector<Triangle> temp;
+            Utils::meshBooleanUnion(_shell, _processed, temp);
+            _processed = temp;
         } else {
-
-            _processed.insert(_processed.begin(), _base.begin(), _base.end());
-            _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
+            _processed = _shell;
+//            _processed.insert(_processed.begin(), _base.begin(), _base.end());
+//            _processed.insert(_processed.begin(), _offset.begin(), _offset.end());
 //            std::vector<Triangle> tempo = _tool->getFacets();
 //            for(std::vector<Triangle>::iterator it = tempo.begin(); it != tempo.end(); ++it) {
 //                std::cout << it->toString().toStdString() << std::endl;
@@ -608,6 +616,18 @@ void MainWindow::on_pushButton_process_clicked()
 //            _processed = backupTool;
         }
     }
+
+//    //////////////////////////////////////////
+//    /// REMOVE AFTER TEST
+//    // Trimm
+//    std::vector<Triangle> temp;
+//    std::cout << "_base.size(): " << _base.size() << std::endl;
+//    std::cout << "_base2.size(): " << _base2.size() << std::endl;
+//    Utils::meshBoolean(_base, _base2, temp, igl::MESH_BOOLEAN_TYPE_);
+//    _processed = temp;
+//    ///
+//    ////////////////////////////////////////////
+
 
     _baseProcessed = true;
 
@@ -736,6 +756,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
 {
     glm::vec3 infillOrigin = infill.origin;
 
+
     glm::vec3 pos(0.0f, 0.0f, 0.0f);
     pos.x = infillOrigin.x;
     while(pos.x < _maxX) {
@@ -757,11 +778,24 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(pos, size, cell);
 
                 pos.z += cellHeightZ;
+            }
+            pos.z = infillOrigin.z;
+            while(pos.z > _minZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                glm::vec3 posAux(pos.x, pos.y, pos.z-cellHeightZ);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z -= cellHeightZ;
             }
             pos.y += cellHeightY;
         }
@@ -778,13 +812,26 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
 
                 glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
                 pos.z += cellHeightZ;
+            }
+            pos.z = infillOrigin.z;
+            while(pos.z > _minZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z-cellHeightZ);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z -= cellHeightZ;
             }
             pos.y -= cellHeightY;
         }
@@ -809,12 +856,25 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
                 pos.z += cellHeightZ;
+            }
+            pos.z = infillOrigin.z;
+            while(pos.z > _minZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z-cellHeightZ);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z -= cellHeightZ;
             }
             pos.y += cellHeightY;
         }
@@ -831,13 +891,26 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 2.5f);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
 
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
                 pos.z += cellHeightZ;
+            }
+            pos.z = infillOrigin.z;
+            while(pos.z > _minZ) {
+                _varZ = pos.z - infillOrigin.z;
+                // Limit cell height
+                float cellHeightZ;
+                cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z-cellHeightZ);
+                glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
+                insertCell(posAux, size, cell);
+
+                pos.z -= cellHeightZ;
             }
             pos.y -= cellHeightY;
         }
@@ -856,18 +929,18 @@ void MainWindow::variableCylindrical(Cell *cell, Infill infill)
     }
     float r = 0;
     while(r < maxR) {
-        float cellSizeX = std::min(fabsf(r)/4.0f, 25.0f);
+        float cellSizeX = std::min(te_eval(_exprX), 25.0);
         cellSizeX = std::max(cellSizeX, 2.5f);
         float phi = 0.0;
         while(phi < 360.0) {
-            float cellSizeY = 2.5f;//std::min(r + r*(float)cos(degreesToRadians(phi))/2.0f, 25.0f);
+            float cellSizeY = std::min(te_eval(_exprY), 25.0);
             cellSizeY = std::max(cellSizeY, 2.5f);
             float posX = infillOrigin.x + r*cos(degreesToRadians(phi));
             float posY = infillOrigin.y + r*sin(degreesToRadians(phi));
             float z = infillOrigin.z;
             while(z < _maxZ) {
                 float posZ = z;
-                float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                float cellSizeZ = std::min(te_eval(_exprZ), 25.0);
                 cellSizeZ = std::max(cellSizeZ, 2.5f);
                 glm::vec3 pos(posX, posY, posZ);
                 glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
@@ -878,7 +951,7 @@ void MainWindow::variableCylindrical(Cell *cell, Infill infill)
             z = infillOrigin.z;
             while(z > _minZ) {
                 float posZ = z;
-                float cellSizeZ = std::min(r*fabsf(cos(degreesToRadians(phi)))/4.0f, 25.0f);
+                float cellSizeZ = std::min(te_eval(_exprZ), 25.0);
                 cellSizeZ = std::max(cellSizeZ, 2.5f);
                 glm::vec3 pos(posX, posY, posZ-cellSizeZ);
                 glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
