@@ -186,7 +186,7 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_offset, cellCenter, false) ||
        Utils::getTrianglesFromBox(_offset, pos, size).size() > 0) {
-//        if(_iteration > 300) {
+//        if(_iteration > 19) {
 //            return;
 //        }
         c->rotateX(rotation.x);
@@ -196,7 +196,7 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
         c->place(pos);
         std::vector<Triangle> t = c->getFacets();
         _processed.insert(_processed.end(), t.begin(), t.end());
-        _iteration++;
+//        _iteration++;
     }
 }
 
@@ -542,13 +542,13 @@ void MainWindow::on_pushButton_process_clicked()
             }
 
 
-//            Cube bound;
-//            bound.resize(it->regionTo-it->regionFrom);
-//            bound.place(it->regionFrom);
-//            std::vector<Triangle> boundIn = bound.getFacets();
-//            std::vector<Triangle> boundOut;
-//            Utils::meshBooleanIntersect(originalOffset, boundIn, boundOut);
-//            _offset = boundOut;
+            Cube bound;
+            bound.resize(it->regionTo-it->regionFrom);
+            bound.place(it->regionFrom);
+            std::vector<Triangle> boundIn = bound.getFacets();
+            std::vector<Triangle> boundOut;
+            Utils::meshBooleanIntersect(originalOffset, boundIn, boundOut);
+            _offset = boundOut;
 
             switch(it->coord) {
                 case cartesian: {
@@ -574,13 +574,11 @@ void MainWindow::on_pushButton_process_clicked()
                 } break;
             }
 
-///////////////////////////////////
-            /// Adicionar novamente (removido apenas para teste)
-//            if(it->trimmRegion) {
-//                std::vector<Triangle> temp;
-//                Utils::meshBooleanIntersect(_offset, _processed, temp);
-//                _processed = temp;
-//            }
+            if(it->trimmRegion) {
+                std::vector<Triangle> temp;
+                Utils::meshBooleanIntersect(_offset, _processed, temp);
+                _processed = temp;
+            }
 
             tmpProcessed.insert(tmpProcessed.end(), _processed.begin(), _processed.end());
             _processed.clear();
@@ -755,6 +753,7 @@ void MainWindow::simpleSpherical(Cell *cell, Infill infill)
 void MainWindow::variableCartesian(Cell *cell, Infill infill)
 {
     glm::vec3 infillOrigin = infill.origin;
+    std::cout << glm::to_string(infillOrigin) << std::endl;
 
 
     glm::vec3 pos(0.0f, 0.0f, 0.0f);
@@ -778,7 +777,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(pos, size, cell);
 
@@ -790,7 +789,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x, pos.y, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
@@ -812,7 +811,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
 
                 glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
@@ -826,7 +825,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
@@ -856,7 +855,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
@@ -869,7 +868,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
@@ -891,7 +890,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
 
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
@@ -905,7 +904,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 // Limit cell height
                 float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
-                cellHeightZ = std::max(cellHeightZ, 6.5f);
+                cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
