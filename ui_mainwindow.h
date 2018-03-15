@@ -146,7 +146,7 @@ public:
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 921);
+        MainWindow->resize(837, 988);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -304,7 +304,7 @@ public:
 
         checkBox_skipHollowing = new QCheckBox(groupBox_hollowing);
         checkBox_skipHollowing->setObjectName(QStringLiteral("checkBox_skipHollowing"));
-        checkBox_skipHollowing->setChecked(false);
+        checkBox_skipHollowing->setChecked(true);
 
         verticalLayout_2->addWidget(checkBox_skipHollowing);
 
@@ -685,7 +685,7 @@ public:
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
-        checkBox_skipInfilling->setChecked(true);
+        checkBox_skipInfilling->setChecked(false);
 
         verticalLayout_3->addWidget(checkBox_skipInfilling);
 

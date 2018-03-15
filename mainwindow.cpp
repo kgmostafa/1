@@ -504,21 +504,6 @@ void MainWindow::on_pushButton_process_clicked()
 
             // TODO: handle number of variables per axis
             te_variable vars[] = {{"x", &_varX}, {"y", &_varY}, {"z", &_varZ}};
-//            if(!it->variableInfill) {
-//                bool valid = false;
-//                it->exprX.toFloat(&valid);
-//                if(!valid) {
-//                    // TODO: show error dialog
-//                }
-//                it->exprY.toFloat(&valid);
-//                if(!valid) {
-
-//                }
-//                it->exprZ.toFloat(&valid);
-//                if(!valid) {
-
-//                }
-//            }
             int errX;
             QByteArray exprX = it->exprX.toLatin1();
             const char *xString = exprX.data();
@@ -540,7 +525,6 @@ void MainWindow::on_pushButton_process_clicked()
                 printf("Parse error at y: %d\n", errY);
                 printf("Parse error at z: %d\n", errZ);
             }
-
 
             Cube bound;
             bound.resize(it->regionTo-it->regionFrom);
@@ -755,35 +739,53 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
     glm::vec3 infillOrigin = infill.origin;
     std::cout << glm::to_string(infillOrigin) << std::endl;
 
+    const float overlapFactor = 0.05f; // 5% of overlap
 
     glm::vec3 pos(0.0f, 0.0f, 0.0f);
     pos.x = infillOrigin.x;
+    _varX = pos.x - infillOrigin.x;
+    float cellHeightX;
+    cellHeightX = std::min(te_eval(_exprX), 25.0);
+    cellHeightX = std::max(cellHeightX, 2.5f);
+    pos.x -= (overlapFactor/2.0f)*cellHeightX;
     while(pos.x < _maxX) {
         _varX = pos.x - infillOrigin.x;
         pos.y = infillOrigin.y;
-        float cellHeightX;
         cellHeightX = std::min(te_eval(_exprX), 25.0);
         cellHeightX = std::max(cellHeightX, 2.5f);
+        float cellHeightY;
+        _varY = pos.y - infillOrigin.y;
+        cellHeightY = std::min(te_eval(_exprY), 25.0);
+        cellHeightY = std::max(cellHeightY, 2.5f);
+        pos.y -= (overlapFactor/2.0f)*cellHeightY;
 
         // Q1
         while(pos.y < _maxY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = infillOrigin.z;
-            float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
+            float cellHeightZ;
+            pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z < _maxZ) {
+
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(pos, size, cell);
 
-                pos.z += cellHeightZ;
+                pos.z += (1.0f-overlapFactor)*cellHeightZ;
             }
             pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z > _minZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
@@ -794,18 +796,28 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z -= cellHeightZ;
+                pos.z -= (1.0f-overlapFactor)*cellHeightZ;
             }
-            pos.y += cellHeightY;
+            pos.y += (1.0f-overlapFactor)*cellHeightY;
         }
         pos.y = infillOrigin.y;
+        _varY = pos.y - infillOrigin.y;
+        cellHeightY = std::min(te_eval(_exprY), 25.0);
+        cellHeightY = std::max(cellHeightY, 2.5f);
+        pos.y += (overlapFactor/2.0f)*cellHeightY;
         // Q4
+
         while(pos.y > _minY) {
             _varY= pos.y - infillOrigin.y;
-            pos.z = infillOrigin.z;
-            float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
+
+            float cellHeightZ;
+            pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z < _maxZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
@@ -817,78 +829,106 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z += cellHeightZ;
+                pos.z += (1.0f-overlapFactor)*cellHeightZ;
             }
             pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z += (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z > _minZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x, pos.y-cellHeightY, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z -= cellHeightZ;
+                pos.z -= (1.0f-overlapFactor)*cellHeightZ;
             }
-            pos.y -= cellHeightY;
+            pos.y -= (1.0f-overlapFactor)*cellHeightY;
         }
-        pos.x += cellHeightX;
+        pos.x += (1.0f-overlapFactor)*cellHeightX;
     }
     pos.x = infillOrigin.x;
+    _varX = pos.x - infillOrigin.x;
+    cellHeightX = std::min(te_eval(_exprX), 25.0);
+    cellHeightX = std::max(cellHeightX, 2.5f);
+    pos.x += (overlapFactor/2.0f)*cellHeightX;
     while(pos.x > _minX) {
         _varX = pos.x - infillOrigin.x;
         pos.y = infillOrigin.y;
-        float cellHeightX;
         cellHeightX = std::min(te_eval(_exprX), 25.0);
         cellHeightX = std::max(cellHeightX, 2.5f);
+        float cellHeightY;
+        _varY = pos.y - infillOrigin.y;
+        cellHeightY = std::min(te_eval(_exprY), 25.0);
+        cellHeightY = std::max(cellHeightY, 2.5f);
+        pos.y -= (overlapFactor/2.0f)*cellHeightY;
         // Q2
         while(pos.y < _maxY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = infillOrigin.z;
-            float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
+
+            float cellHeightZ;
+            pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z < _maxZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z += cellHeightZ;
+                pos.z += (1.0f-overlapFactor)*cellHeightZ;
             }
             pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z += (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z > _minZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z -= cellHeightZ;
+                pos.z -= (1.0f-overlapFactor)*cellHeightZ;
             }
-            pos.y += cellHeightY;
+            pos.y += (1.0f-overlapFactor)*cellHeightY;
         }
         pos.y = infillOrigin.y;
         // Q3
+
+        _varY = pos.y - infillOrigin.y;
+        cellHeightY = std::min(te_eval(_exprY), 25.0);
+        cellHeightY = std::max(cellHeightY, 2.5f);
+        pos.y += (overlapFactor/2.0f)*cellHeightY;
+
         while(pos.y > _minY) {
             _varY = pos.y - infillOrigin.y;
-            pos.z = infillOrigin.z;
             float cellHeightY;
             cellHeightY = std::min(te_eval(_exprY), 25.0);
             cellHeightY = std::max(cellHeightY, 2.5f);
+            float cellHeightZ;
+            pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z < _maxZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
 
@@ -896,29 +936,33 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z += cellHeightZ;
+                pos.z += (1.0f-overlapFactor)*cellHeightZ;
             }
             pos.z = infillOrigin.z;
+            _varZ = pos.z - infillOrigin.z;
+            cellHeightZ = std::min(te_eval(_exprZ), 25.0);
+            cellHeightZ = std::max(cellHeightZ, 2.5f);
+            pos.z += (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z > _minZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
-                float cellHeightZ;
                 cellHeightZ = std::min(te_eval(_exprZ), 25.0);
                 cellHeightZ = std::max(cellHeightZ, 2.5f);
                 glm::vec3 posAux(pos.x-cellHeightX, pos.y-cellHeightY, pos.z-cellHeightZ);
                 glm::vec3 size(cellHeightX, cellHeightY, cellHeightZ);
                 insertCell(posAux, size, cell);
 
-                pos.z -= cellHeightZ;
+                pos.z -= (1.0f-overlapFactor)*cellHeightZ;
             }
-            pos.y -= cellHeightY;
+            pos.y -= (1.0f-overlapFactor)*cellHeightY;
         }
-        pos.x -= cellHeightX;
+        pos.x -= (1.0f-overlapFactor)*cellHeightX;
     }
 }
 
 void MainWindow::variableCylindrical(Cell *cell, Infill infill)
 {
+    const float overlapFactor = 0.05f; // 5% of overlap
     // TODO: check if this is the best way to get maxR
     // This should fail if the infill origin is outside the cylinder
     glm::vec3 infillOrigin = infill.origin;
@@ -945,7 +989,7 @@ void MainWindow::variableCylindrical(Cell *cell, Infill infill)
                 glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
                 // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
                 insertCell(pos, size, cell);
-                z += cellSizeZ;
+                z += (1.0f-overlapFactor)*cellSizeZ;
             }
             z = infillOrigin.z;
             while(z > _minZ) {
@@ -956,14 +1000,14 @@ void MainWindow::variableCylindrical(Cell *cell, Infill infill)
                 glm::vec3 size(cellSizeX, cellSizeY, cellSizeZ);
                 // Two approaches: cells are rotated with the cylindical orientation or cells are rotate with the cartesian orientation
                 insertCell(pos, size, cell);
-                z -= cellSizeZ;
+                z -= (1.0f-overlapFactor)*cellSizeZ;
             }
             float radius = r;
             float circunferece = 2.0*M_PI*radius;
             float phiSteps = cellSizeY/circunferece;
-            phi += (phiSteps*360.0);
+            phi += (1.0f-overlapFactor)*(phiSteps*360.0);
         }
-        r += cellSizeX;
+        r += (1.0f-overlapFactor)*cellSizeX;
     }
 }
 
