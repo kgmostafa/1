@@ -38,8 +38,8 @@ struct Infill {
     QString exprZ;
 };
 
-#define degreesToRadians(angleDegrees) ((angleDegrees) * M_PI / 180.0)
-#define radiansToDegrees(angleRadians) ((angleRadians) * 180.0 / M_PI)
+#define degreesToRadians(angleDegrees) ((angleDegrees) * (float)M_PI / 180.0f)
+#define radiansToDegrees(angleRadians) ((angleRadians) * 180.0f / (float)M_PI)
 #define EPSILON std::numeric_limits<float>::epsilon()
 
 class Utils
@@ -120,6 +120,7 @@ public:
     // Boolean operations
     static int meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out);
     static int meshBooleanUnion(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out);
+    static int meshBooleanDiff(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out);
     static int meshBoolean(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out, igl::MeshBooleanType type);
 
 private:

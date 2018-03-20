@@ -123,6 +123,7 @@ public:
     QHBoxLayout *horizontalLayout_12;
     QLabel *label_8;
     QLineEdit *lineEdit_cellSizeZ;
+    QCheckBox *checkBox_infill_allowRegionOverlapping;
     QCheckBox *checkBox_skipInfilling;
     QPushButton *pushButton_process;
     QPushButton *pushButton_save;
@@ -576,6 +577,7 @@ public:
         doubleSpinBox_infill_originX = new QDoubleSpinBox(groupBox_2);
         doubleSpinBox_infill_originX->setObjectName(QStringLiteral("doubleSpinBox_infill_originX"));
         doubleSpinBox_infill_originX->setEnabled(true);
+        doubleSpinBox_infill_originX->setMinimum(-100);
 
         horizontalLayout_10->addWidget(doubleSpinBox_infill_originX);
 
@@ -588,6 +590,7 @@ public:
         doubleSpinBox_infill_originY = new QDoubleSpinBox(groupBox_2);
         doubleSpinBox_infill_originY->setObjectName(QStringLiteral("doubleSpinBox_infill_originY"));
         doubleSpinBox_infill_originY->setEnabled(true);
+        doubleSpinBox_infill_originY->setMinimum(-100);
 
         horizontalLayout_10->addWidget(doubleSpinBox_infill_originY);
 
@@ -600,6 +603,7 @@ public:
         doubleSpinBox_infill_originZ = new QDoubleSpinBox(groupBox_2);
         doubleSpinBox_infill_originZ->setObjectName(QStringLiteral("doubleSpinBox_infill_originZ"));
         doubleSpinBox_infill_originZ->setEnabled(true);
+        doubleSpinBox_infill_originZ->setMinimum(-100);
 
         horizontalLayout_10->addWidget(doubleSpinBox_infill_originZ);
 
@@ -682,6 +686,11 @@ public:
 
 
         verticalLayout_3->addWidget(groupBox_3);
+
+        checkBox_infill_allowRegionOverlapping = new QCheckBox(groupBox_infill);
+        checkBox_infill_allowRegionOverlapping->setObjectName(QStringLiteral("checkBox_infill_allowRegionOverlapping"));
+
+        verticalLayout_3->addWidget(checkBox_infill_allowRegionOverlapping);
 
         checkBox_skipInfilling = new QCheckBox(groupBox_infill);
         checkBox_skipInfilling->setObjectName(QStringLiteral("checkBox_skipInfilling"));
@@ -854,6 +863,7 @@ public:
         lineEdit_cellSizeY->setText(QApplication::translate("MainWindow", "1.0*x + 1.0*y", nullptr));
         label_8->setText(QApplication::translate("MainWindow", "Z =", nullptr));
         lineEdit_cellSizeZ->setText(QApplication::translate("MainWindow", "1.0*x + 1.0*y + 1.0*z", nullptr));
+        checkBox_infill_allowRegionOverlapping->setText(QApplication::translate("MainWindow", "Allow region overlapping (Higher infill # has higher priority)", nullptr));
         checkBox_skipInfilling->setText(QApplication::translate("MainWindow", "Skip infilling", nullptr));
         pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
         pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));

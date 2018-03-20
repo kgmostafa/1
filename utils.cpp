@@ -819,7 +819,7 @@ std::vector<Triangle> Utils::corkTriMeshToMesh(CorkTriMesh &c)
     std::vector<Facet> facets;
     std::vector<Vertex> vertices;
 
-    int i;
+    unsigned int i;
     for(i = 0; i < c.n_vertices; i++) {
         float x = c.vertices[i*3];
         float y = c.vertices[i*3 + 1];
@@ -877,6 +877,11 @@ int Utils::meshBooleanIntersect(std::vector<Triangle> &inA, std::vector<Triangle
 int Utils::meshBooleanUnion(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out)
 {
     return meshBoolean(inA, inB, out, igl::MESH_BOOLEAN_TYPE_UNION);
+}
+
+int Utils::meshBooleanDiff(std::vector<Triangle> &inA, std::vector<Triangle> &inB, std::vector<Triangle> &out)
+{
+    return meshBoolean(inA, inB, out, igl::MESH_BOOLEAN_TYPE_MINUS);
 }
 
 // TODO: handle and return errors

@@ -611,6 +611,9 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
+                </property>
                </widget>
               </item>
               <item>
@@ -628,6 +631,9 @@
                 <property name="enabled">
                  <bool>true</bool>
                 </property>
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
+                </property>
                </widget>
               </item>
               <item>
@@ -644,6 +650,9 @@
                <widget class="QDoubleSpinBox" name="doubleSpinBox_infill_originZ">
                 <property name="enabled">
                  <bool>true</bool>
+                </property>
+                <property name="minimum">
+                 <double>-100.000000000000000</double>
                 </property>
                </widget>
               </item>
@@ -756,6 +765,13 @@
              </layout>
             </item>
            </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBox_infill_allowRegionOverlapping">
+           <property name="text">
+            <string>Allow region overlapping (Higher infill # has higher priority)</string>
+           </property>
           </widget>
          </item>
          <item>
