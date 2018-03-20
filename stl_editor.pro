@@ -97,13 +97,15 @@ HEADERS += \
 FORMS += \
         mainwindow.ui
 
-win32: LIBS += -L$$PWD/../../../../dev/CGAL-4.10.2/build/lib/ -lCGAL-vc140-mt-gd-4.10.2
 
-INCLUDEPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
-DEPENDPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
 
-win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/CGAL-vc140-mt-gd-4.10.2.lib
-else:win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/libCGAL-vc140-mt-gd-4.10.2.a
+#win32: LIBS += -L$$PWD/../../../../dev/CGAL-4.10.2/build/lib/ -lCGAL-vc140-mt-gd-4.10.2
+
+#INCLUDEPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
+#DEPENDPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
+
+#win32:!win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/CGAL-vc140-mt-gd-4.10.2.lib
+#else:win32-g++: PRE_TARGETDEPS += $$PWD/../../../../dev/CGAL-4.10.2/build/lib/libCGAL-vc140-mt-gd-4.10.2.a
 
 
 win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/mpir/dll/x64/release/ -lmpir
@@ -123,3 +125,9 @@ else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/cork/wi
 
 INCLUDEPATH += $$PWD/../../../../dev/cork/win/dll/x64/Release
 DEPENDPATH += $$PWD/../../../../dev/cork/win/dll/x64/Release
+
+win32:CONFIG(release, debug|release): LIBS += -L$$PWD/../../../../dev/CGAL-4.10.2/build/lib/ -lCGAL-vc140-mt-4.10.2
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$PWD/../../../../dev/CGAL-4.10.2/build/lib/ -lCGAL-vc140-mt-gd-4.10.2
+
+INCLUDEPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include
+DEPENDPATH += $$PWD/../../../../dev/CGAL-4.10.2/build/include

@@ -59,6 +59,22 @@ public:
     QLineEdit *lineEdit_surfaceProjection_posZ;
     QCheckBox *checkBox_shell;
     QCheckBox *checkBox_skipHollowing;
+    QGroupBox *groupBox_STLInfo;
+    QVBoxLayout *verticalLayout_6;
+    QLabel *label_nTriangles;
+    QLabel *labelWidthX;
+    QLabel *labelWidthY;
+    QLabel *labelHeightZ;
+    QLabel *label_baseOrigin;
+    QLabel *label_baseCentroid;
+    QLabel *label_baseVolume;
+    QGroupBox *groupBox_viewerOptions;
+    QVBoxLayout *verticalLayout_5;
+    QCheckBox *checkBox_basePart;
+    QCheckBox *checkBox_wireframe;
+    QPushButton *pushButton_process;
+    QPushButton *pushButton_save;
+    QVBoxLayout *verticalLayout_viewer;
     QGroupBox *groupBox_infill;
     QVBoxLayout *verticalLayout_3;
     QHBoxLayout *horizontalLayout_13;
@@ -125,29 +141,13 @@ public:
     QLineEdit *lineEdit_cellSizeZ;
     QCheckBox *checkBox_infill_allowRegionOverlapping;
     QCheckBox *checkBox_skipInfilling;
-    QPushButton *pushButton_process;
-    QPushButton *pushButton_save;
-    QVBoxLayout *verticalLayout_viewer;
-    QGroupBox *groupBox_STLInfo;
-    QVBoxLayout *verticalLayout_6;
-    QLabel *label_nTriangles;
-    QLabel *labelWidthX;
-    QLabel *labelWidthY;
-    QLabel *labelHeightZ;
-    QLabel *label_baseOrigin;
-    QLabel *label_baseCentroid;
-    QLabel *label_baseVolume;
-    QGroupBox *groupBox_viewerOptions;
-    QVBoxLayout *verticalLayout_5;
-    QCheckBox *checkBox_basePart;
-    QCheckBox *checkBox_wireframe;
 
     void setupUi(QMainWindow *MainWindow)
     {
         if (MainWindow->objectName().isEmpty())
             MainWindow->setObjectName(QStringLiteral("MainWindow"));
         MainWindow->setWindowModality(Qt::WindowModal);
-        MainWindow->resize(837, 988);
+        MainWindow->resize(949, 636);
         MainWindow->setLocale(QLocale(QLocale::English, QLocale::Canada));
         centralWidget = new QWidget(MainWindow);
         centralWidget->setObjectName(QStringLiteral("centralWidget"));
@@ -312,6 +312,98 @@ public:
 
         verticalLayout->addWidget(groupBox_hollowing);
 
+        groupBox_STLInfo = new QGroupBox(centralWidget);
+        groupBox_STLInfo->setObjectName(QStringLiteral("groupBox_STLInfo"));
+        sizePolicy.setHeightForWidth(groupBox_STLInfo->sizePolicy().hasHeightForWidth());
+        groupBox_STLInfo->setSizePolicy(sizePolicy);
+        verticalLayout_6 = new QVBoxLayout(groupBox_STLInfo);
+        verticalLayout_6->setSpacing(6);
+        verticalLayout_6->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
+        label_nTriangles = new QLabel(groupBox_STLInfo);
+        label_nTriangles->setObjectName(QStringLiteral("label_nTriangles"));
+        QSizePolicy sizePolicy4(QSizePolicy::Preferred, QSizePolicy::Minimum);
+        sizePolicy4.setHorizontalStretch(0);
+        sizePolicy4.setVerticalStretch(0);
+        sizePolicy4.setHeightForWidth(label_nTriangles->sizePolicy().hasHeightForWidth());
+        label_nTriangles->setSizePolicy(sizePolicy4);
+
+        verticalLayout_6->addWidget(label_nTriangles);
+
+        labelWidthX = new QLabel(groupBox_STLInfo);
+        labelWidthX->setObjectName(QStringLiteral("labelWidthX"));
+
+        verticalLayout_6->addWidget(labelWidthX);
+
+        labelWidthY = new QLabel(groupBox_STLInfo);
+        labelWidthY->setObjectName(QStringLiteral("labelWidthY"));
+
+        verticalLayout_6->addWidget(labelWidthY);
+
+        labelHeightZ = new QLabel(groupBox_STLInfo);
+        labelHeightZ->setObjectName(QStringLiteral("labelHeightZ"));
+
+        verticalLayout_6->addWidget(labelHeightZ);
+
+        label_baseOrigin = new QLabel(groupBox_STLInfo);
+        label_baseOrigin->setObjectName(QStringLiteral("label_baseOrigin"));
+
+        verticalLayout_6->addWidget(label_baseOrigin);
+
+        label_baseCentroid = new QLabel(groupBox_STLInfo);
+        label_baseCentroid->setObjectName(QStringLiteral("label_baseCentroid"));
+
+        verticalLayout_6->addWidget(label_baseCentroid);
+
+        label_baseVolume = new QLabel(groupBox_STLInfo);
+        label_baseVolume->setObjectName(QStringLiteral("label_baseVolume"));
+
+        verticalLayout_6->addWidget(label_baseVolume);
+
+
+        verticalLayout->addWidget(groupBox_STLInfo);
+
+        groupBox_viewerOptions = new QGroupBox(centralWidget);
+        groupBox_viewerOptions->setObjectName(QStringLiteral("groupBox_viewerOptions"));
+        sizePolicy.setHeightForWidth(groupBox_viewerOptions->sizePolicy().hasHeightForWidth());
+        groupBox_viewerOptions->setSizePolicy(sizePolicy);
+        verticalLayout_5 = new QVBoxLayout(groupBox_viewerOptions);
+        verticalLayout_5->setSpacing(6);
+        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
+        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
+        checkBox_basePart = new QCheckBox(groupBox_viewerOptions);
+        checkBox_basePart->setObjectName(QStringLiteral("checkBox_basePart"));
+        checkBox_basePart->setChecked(true);
+
+        verticalLayout_5->addWidget(checkBox_basePart);
+
+        checkBox_wireframe = new QCheckBox(groupBox_viewerOptions);
+        checkBox_wireframe->setObjectName(QStringLiteral("checkBox_wireframe"));
+        checkBox_wireframe->setChecked(true);
+
+        verticalLayout_5->addWidget(checkBox_wireframe);
+
+
+        verticalLayout->addWidget(groupBox_viewerOptions);
+
+        pushButton_process = new QPushButton(centralWidget);
+        pushButton_process->setObjectName(QStringLiteral("pushButton_process"));
+        pushButton_process->setEnabled(false);
+
+        verticalLayout->addWidget(pushButton_process);
+
+        pushButton_save = new QPushButton(centralWidget);
+        pushButton_save->setObjectName(QStringLiteral("pushButton_save"));
+        pushButton_save->setEnabled(false);
+
+        verticalLayout->addWidget(pushButton_save);
+
+
+        horizontalLayout_2->addLayout(verticalLayout);
+
+        verticalLayout_viewer = new QVBoxLayout();
+        verticalLayout_viewer->setSpacing(6);
+        verticalLayout_viewer->setObjectName(QStringLiteral("verticalLayout_viewer"));
         groupBox_infill = new QGroupBox(centralWidget);
         groupBox_infill->setObjectName(QStringLiteral("groupBox_infill"));
         sizePolicy.setHeightForWidth(groupBox_infill->sizePolicy().hasHeightForWidth());
@@ -699,99 +791,7 @@ public:
         verticalLayout_3->addWidget(checkBox_skipInfilling);
 
 
-        verticalLayout->addWidget(groupBox_infill);
-
-        pushButton_process = new QPushButton(centralWidget);
-        pushButton_process->setObjectName(QStringLiteral("pushButton_process"));
-        pushButton_process->setEnabled(false);
-
-        verticalLayout->addWidget(pushButton_process);
-
-        pushButton_save = new QPushButton(centralWidget);
-        pushButton_save->setObjectName(QStringLiteral("pushButton_save"));
-        pushButton_save->setEnabled(false);
-
-        verticalLayout->addWidget(pushButton_save);
-
-
-        horizontalLayout_2->addLayout(verticalLayout);
-
-        verticalLayout_viewer = new QVBoxLayout();
-        verticalLayout_viewer->setSpacing(6);
-        verticalLayout_viewer->setObjectName(QStringLiteral("verticalLayout_viewer"));
-        groupBox_STLInfo = new QGroupBox(centralWidget);
-        groupBox_STLInfo->setObjectName(QStringLiteral("groupBox_STLInfo"));
-        sizePolicy.setHeightForWidth(groupBox_STLInfo->sizePolicy().hasHeightForWidth());
-        groupBox_STLInfo->setSizePolicy(sizePolicy);
-        verticalLayout_6 = new QVBoxLayout(groupBox_STLInfo);
-        verticalLayout_6->setSpacing(6);
-        verticalLayout_6->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_6->setObjectName(QStringLiteral("verticalLayout_6"));
-        label_nTriangles = new QLabel(groupBox_STLInfo);
-        label_nTriangles->setObjectName(QStringLiteral("label_nTriangles"));
-        QSizePolicy sizePolicy4(QSizePolicy::Preferred, QSizePolicy::Minimum);
-        sizePolicy4.setHorizontalStretch(0);
-        sizePolicy4.setVerticalStretch(0);
-        sizePolicy4.setHeightForWidth(label_nTriangles->sizePolicy().hasHeightForWidth());
-        label_nTriangles->setSizePolicy(sizePolicy4);
-
-        verticalLayout_6->addWidget(label_nTriangles);
-
-        labelWidthX = new QLabel(groupBox_STLInfo);
-        labelWidthX->setObjectName(QStringLiteral("labelWidthX"));
-
-        verticalLayout_6->addWidget(labelWidthX);
-
-        labelWidthY = new QLabel(groupBox_STLInfo);
-        labelWidthY->setObjectName(QStringLiteral("labelWidthY"));
-
-        verticalLayout_6->addWidget(labelWidthY);
-
-        labelHeightZ = new QLabel(groupBox_STLInfo);
-        labelHeightZ->setObjectName(QStringLiteral("labelHeightZ"));
-
-        verticalLayout_6->addWidget(labelHeightZ);
-
-        label_baseOrigin = new QLabel(groupBox_STLInfo);
-        label_baseOrigin->setObjectName(QStringLiteral("label_baseOrigin"));
-
-        verticalLayout_6->addWidget(label_baseOrigin);
-
-        label_baseCentroid = new QLabel(groupBox_STLInfo);
-        label_baseCentroid->setObjectName(QStringLiteral("label_baseCentroid"));
-
-        verticalLayout_6->addWidget(label_baseCentroid);
-
-        label_baseVolume = new QLabel(groupBox_STLInfo);
-        label_baseVolume->setObjectName(QStringLiteral("label_baseVolume"));
-
-        verticalLayout_6->addWidget(label_baseVolume);
-
-
-        verticalLayout_viewer->addWidget(groupBox_STLInfo);
-
-        groupBox_viewerOptions = new QGroupBox(centralWidget);
-        groupBox_viewerOptions->setObjectName(QStringLiteral("groupBox_viewerOptions"));
-        sizePolicy.setHeightForWidth(groupBox_viewerOptions->sizePolicy().hasHeightForWidth());
-        groupBox_viewerOptions->setSizePolicy(sizePolicy);
-        verticalLayout_5 = new QVBoxLayout(groupBox_viewerOptions);
-        verticalLayout_5->setSpacing(6);
-        verticalLayout_5->setContentsMargins(11, 11, 11, 11);
-        verticalLayout_5->setObjectName(QStringLiteral("verticalLayout_5"));
-        checkBox_basePart = new QCheckBox(groupBox_viewerOptions);
-        checkBox_basePart->setObjectName(QStringLiteral("checkBox_basePart"));
-        checkBox_basePart->setChecked(true);
-
-        verticalLayout_5->addWidget(checkBox_basePart);
-
-        checkBox_wireframe = new QCheckBox(groupBox_viewerOptions);
-        checkBox_wireframe->setObjectName(QStringLiteral("checkBox_wireframe"));
-        checkBox_wireframe->setChecked(true);
-
-        verticalLayout_5->addWidget(checkBox_wireframe);
-
-
-        verticalLayout_viewer->addWidget(groupBox_viewerOptions);
+        verticalLayout_viewer->addWidget(groupBox_infill);
 
 
         horizontalLayout_2->addLayout(verticalLayout_viewer);
@@ -824,6 +824,19 @@ public:
         lineEdit_surfaceProjection_posZ->setText(QApplication::translate("MainWindow", "(10 * iz) - 5.0", nullptr));
         checkBox_shell->setText(QApplication::translate("MainWindow", "External offset (shell)", nullptr));
         checkBox_skipHollowing->setText(QApplication::translate("MainWindow", "Skip hollowing", nullptr));
+        groupBox_STLInfo->setTitle(QApplication::translate("MainWindow", "STL info", nullptr));
+        label_nTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
+        labelWidthX->setText(QApplication::translate("MainWindow", "Width in X: -", nullptr));
+        labelWidthY->setText(QApplication::translate("MainWindow", "Width in Y: -", nullptr));
+        labelHeightZ->setText(QApplication::translate("MainWindow", "Height in Z: -", nullptr));
+        label_baseOrigin->setText(QApplication::translate("MainWindow", "Origin: -", nullptr));
+        label_baseCentroid->setText(QApplication::translate("MainWindow", "Centroid: -", nullptr));
+        label_baseVolume->setText(QApplication::translate("MainWindow", "Volume: -", nullptr));
+        groupBox_viewerOptions->setTitle(QApplication::translate("MainWindow", "Viewer options", nullptr));
+        checkBox_basePart->setText(QApplication::translate("MainWindow", "Show base part", nullptr));
+        checkBox_wireframe->setText(QApplication::translate("MainWindow", "Wireframe", nullptr));
+        pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
+        pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));
         groupBox_infill->setTitle(QApplication::translate("MainWindow", "Infill", nullptr));
         comboBox_infill->setItemText(0, QApplication::translate("MainWindow", "Infill #1", nullptr));
 
@@ -865,19 +878,6 @@ public:
         lineEdit_cellSizeZ->setText(QApplication::translate("MainWindow", "1.0*x + 1.0*y + 1.0*z", nullptr));
         checkBox_infill_allowRegionOverlapping->setText(QApplication::translate("MainWindow", "Allow region overlapping (Higher infill # has higher priority)", nullptr));
         checkBox_skipInfilling->setText(QApplication::translate("MainWindow", "Skip infilling", nullptr));
-        pushButton_process->setText(QApplication::translate("MainWindow", "Process", nullptr));
-        pushButton_save->setText(QApplication::translate("MainWindow", "Save", nullptr));
-        groupBox_STLInfo->setTitle(QApplication::translate("MainWindow", "STL info", nullptr));
-        label_nTriangles->setText(QApplication::translate("MainWindow", "Number of triangles: 0", nullptr));
-        labelWidthX->setText(QApplication::translate("MainWindow", "Width in X: -", nullptr));
-        labelWidthY->setText(QApplication::translate("MainWindow", "Width in Y: -", nullptr));
-        labelHeightZ->setText(QApplication::translate("MainWindow", "Height in Z: -", nullptr));
-        label_baseOrigin->setText(QApplication::translate("MainWindow", "Origin: -", nullptr));
-        label_baseCentroid->setText(QApplication::translate("MainWindow", "Centroid: -", nullptr));
-        label_baseVolume->setText(QApplication::translate("MainWindow", "Volume: -", nullptr));
-        groupBox_viewerOptions->setTitle(QApplication::translate("MainWindow", "Viewer options", nullptr));
-        checkBox_basePart->setText(QApplication::translate("MainWindow", "Show base part", nullptr));
-        checkBox_wireframe->setText(QApplication::translate("MainWindow", "Wireframe", nullptr));
     } // retranslateUi
 
 };

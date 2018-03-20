@@ -488,7 +488,11 @@ void MainWindow::on_pushButton_process_clicked()
 
         glm::vec3 tmpMin(_minX, _minY, _minZ);
         glm::vec3 tmpMax(_maxX, _maxY, _maxZ);
-
+        //////////////////////////////////////////
+        /// REMOVE AFTER TEST
+//        int i = 1;
+        ///
+        ////////////////////////////////////////////
         for(std::vector<Infill>::iterator it = _infills.begin(); it != _infills.end(); ++it) {
             Cube bound;
             bound.resize(it->regionTo-it->regionFrom);
@@ -549,6 +553,13 @@ void MainWindow::on_pushButton_process_clicked()
                 printf("Parse error at z: %d\n", errZ);
             }
 
+//////////////////////////////////////////
+/// REMOVE AFTER TEST
+//            if(i > 1)
+//                continue;
+//            i++;
+///
+////////////////////////////////////////////
             switch(it->coord) {
                 case cartesian: {
 //                    if(it->variableInfill) {
@@ -803,7 +814,7 @@ void MainWindow::variableCartesian(Cell *cell, Infill infill)
             _varZ = pos.z - infillOrigin.z;
             cellHeightZ = std::min((float)te_eval(_exprZ), maxSize);
             cellHeightZ = std::max(cellHeightZ, minSize);
-            pos.z -= (overlapFactor/2.0f)*cellHeightZ;
+            pos.z += (overlapFactor/2.0f)*cellHeightZ;
             while(pos.z > _minZ) {
                 _varZ = pos.z - infillOrigin.z;
                 // Limit cell height
