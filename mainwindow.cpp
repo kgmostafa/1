@@ -186,9 +186,9 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
     // Check if is inside the mesh or if is overlaping the surfaces
     if(Utils::isInsideMesh(_offset, cellCenter, false) ||
        Utils::getTrianglesFromBox(_offset, pos, size).size() > 0) {
-//        if(_iteration > 19) {
-//            return;
-//        }
+        if(_iteration > 100) {
+            return;
+        }
         c->rotateX(rotation.x);
         c->rotateY(rotation.y);
         c->rotateZ(rotation.z);
@@ -196,7 +196,7 @@ void MainWindow::insertCell(glm::vec3 pos, glm::vec3 size, glm::vec3 rotation, C
         c->place(pos);
         std::vector<Triangle> t = c->getFacets();
         _processed.insert(_processed.end(), t.begin(), t.end());
-//        _iteration++;
+        _iteration++;
     }
 }
 
@@ -483,6 +483,7 @@ void MainWindow::on_pushButton_process_clicked()
             }
         }
 
+        std::vector<Triangle> filledVolume;
         std::vector<Triangle> originalOffset = _offset;
         std::vector<Triangle> tmpProcessed;
 
@@ -509,11 +510,15 @@ void MainWindow::on_pushButton_process_clicked()
             _maxY = it->regionTo.y;
             _maxZ = it->regionTo.z;
 
-            if(allowRegionOverlapping) {
-                std::vector<Triangle> temp;
-                Utils::meshBooleanDiff(tmpProcessed, _offset, temp);
-                tmpProcessed = temp;
-            }
+//            if(allowRegionOverlapping) {
+//                std::vector<Triangle> tempFilledVolume;
+//                std::vector<Triangle> temp;
+//                Utils::meshBooleanDiff(filledVolume, _offset, tempFilledVolume);
+//                Utils::meshBooleanIntersect(tempFilledVolume, tmpProcessed, temp);
+//                tmpProcessed = temp;
+//                Utils::meshBooleanUnion(filledVolume, _offset, tempFilledVolume);
+//                filledVolume = tempFilledVolume;
+//            }
 
             int cellType = it->cellType;
             Cell *cell = NULL;
@@ -590,6 +595,9 @@ void MainWindow::on_pushButton_process_clicked()
                 _processed = temp;
             }
 
+//            std::vector<Triangle> temp;
+//            Utils::meshBooleanUnion(tmpProcessed, _processed, temp);
+//            tmpProcessed = temp;
             tmpProcessed.insert(tmpProcessed.end(), _processed.begin(), _processed.end());
             _processed.clear();
         }
@@ -597,7 +605,8 @@ void MainWindow::on_pushButton_process_clicked()
         // Trimm
         std::vector<Triangle> temp;
         Utils::meshBooleanIntersect(originalOffset, tmpProcessed, temp);
-        _processed = temp;
+//        _processed = temp;
+        _processed = tmpProcessed;
 
     }
 
